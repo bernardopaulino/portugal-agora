@@ -34,6 +34,8 @@ Projeto **sem fins lucrativos**: sem publicidade, sem donativos, sem monetizaç�
 
 A página `/fontes` explica cada fonte e como classificamos incêndios, sismos e qualidade do ar. O nível principal segue sempre a escala oficial do IPMA.
 
+A página `/privacidade` descreve o que (não) é recolhido e `/sobre` explica o projeto.
+
 ## Stack
 
 Next.js 16 (App Router, Cache Components, Turbopack), React 19, TypeScript, Tailwind CSS 4, shadcn/ui, Zod 4, SWR, MapLibre GL 6, Upstash Redis, Vitest, Playwright + axe-core. Alojamento na Vercel (região `cdg1`, Paris).
@@ -94,7 +96,7 @@ cp .env.example .env.local   # preencher CONTACT_EMAIL (e FOGOS_API_KEY quando e
 npm run dev                  # http://localhost:3000
 ```
 
-Sem `FOGOS_API_KEY` a secção de incêndios mostra "indisponível" e remete para o fogos.pt. Sem Redis, os snapshots ficam em memória.
+Sem `FOGOS_API_KEY` a secção de incêndios mostra "indisponível" e remete para o fogos.pt. Sem Redis, os snapshots ficam em memória. O Redis aceita `KV_REST_API_URL`/`KV_REST_API_TOKEN` (criadas pela integração da Vercel) ou, em alternativa, `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`.
 
 | Comando                             | O que faz                                       |
 | ----------------------------------- | ----------------------------------------------- |
