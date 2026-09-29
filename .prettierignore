@@ -1,0 +1,15 @@
+.next
+node_modules
+coverage
+package-lock.json
+next-env.d.ts
+data/*.geojson
+tests/fixtures
+AGENTS.md
+CLAUDE.md
+public/geo
+data/dico.json
+tests/fixtures
+public/maplibre
+test-results
+playwright-report
