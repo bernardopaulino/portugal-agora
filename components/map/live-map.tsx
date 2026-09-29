@@ -118,6 +118,9 @@ export default function LiveMap({
   const mapRef = useRef<MapLibreMap | null>(null);
   const onSelectRef = useRef(onSelect);
   const [styleVersion, setStyleVersion] = useState(0);
+  // Falso entre um setStyle() e o "style.load" seguinte: nesse intervalo o
+  // estilo não está pronto (getStyle() devolve undefined, addLayer falha).
+  const styleReady = useRef(false);
   const [districtGeo, setDistrictGeo] = useState<Collection | null>(null);
   const [concelhoGeo, setConcelhoGeo] = useState<Collection | null>(null);
   const theme = useResolvedTheme();
@@ -162,6 +165,7 @@ export default function LiveMap({
     map.touchZoomRotate.disableRotation();
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
     map.on("style.load", () => {
+      styleReady.current = true;
       applyPortugueseLabels(map);
       setStyleVersion((v) => v + 1);
     });
@@ -211,6 +215,7 @@ export default function LiveMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || styleVersion === 0) return;
+    styleReady.current = false;
     map.setStyle(STYLE[theme]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme]);
@@ -298,7 +303,7 @@ export default function LiveMap({
   // (Re)criar fontes e camadas sempre que o estilo carrega.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || styleVersion === 0) return;
+    if (!map || !styleReady.current) return;
     const firstLabel = map.getStyle().layers.find((l) => l.type === "symbol")?.id;
     const levelColor = [
       "match",
@@ -466,7 +471,7 @@ export default function LiveMap({
   // Atualizar dados.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || styleVersion === 0) return;
+    if (!map || !styleReady.current) return;
     const set = (id: string, fc: Collection) =>
       (map.getSource(id) as GeoJSONSource | undefined)?.setData(fc);
     set("districts", data.districtsFc);
@@ -479,7 +484,7 @@ export default function LiveMap({
   // Visibilidade das camadas.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || styleVersion === 0) return;
+    if (!map || !styleReady.current) return;
     for (const [layer, ids] of Object.entries(layerIds) as [LayerId, string[]][]) {
       for (const id of ids) {
         if (map.getLayer(id))
@@ -491,7 +496,8 @@ export default function LiveMap({
   // Seleção: realçar e enquadrar.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || styleVersion === 0) return;
+    // A camada só existe depois de o efeito de camadas correr para este estilo.
+    if (!map || !styleReady.current || !map.getLayer("selected-district")) return;
     const selected = map.getSource("selected") as GeoJSONSource | undefined;
     if (!selection) {
       map.setFilter("selected-district", ["==", ["get", "slug"], ""]);

@@ -57,8 +57,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="pt-PT" className={atkinson.variable} suppressHydrationWarning>
       <head>
-        {/* Define o tema antes da primeira pintura (evita o "flash"). */}
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* Define o tema antes da primeira pintura (evita o "flash").
+            suppressHydrationWarning: há extensões do browser que alteram
+            este <script> (ex.: acrescentam um src) antes de o React carregar. */}
+        <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="flex min-h-dvh flex-col">
         <a
