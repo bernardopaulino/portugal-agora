@@ -21,13 +21,18 @@ export function HomeLink({ children }: { children: ReactNode }) {
   );
 }
 
-/** PT | EN: leva à mesma página no outro idioma. */
+/**
+ * PT | EN: leva à mesma página no outro idioma. É um <a> e não um <Link>:
+ * cada idioma tem o seu layout raiz (app/[lang]), e mudar de layout raiz
+ * exige carregar a página de novo. Com o proxy a esconder o /pt, o router
+ * do Next não dá por isso e tentaria trocar o layout raiz no browser.
+ */
 export function LanguageSwitch() {
   const { locale, t } = useI18n();
   const current = useCurrentPath();
   const other: Locale = locale === "pt" ? "en" : "pt";
   return (
-    <Link
+    <a
       href={localePath(other, current)}
       hrefLang={other === "pt" ? "pt-PT" : "en"}
       lang={other === "pt" ? "pt-PT" : "en"}
@@ -36,7 +41,7 @@ export function LanguageSwitch() {
       className="flex h-12 min-w-12 shrink-0 items-center justify-center rounded-sm border border-line px-2 font-display text-lg font-semibold text-ink no-underline hover:border-ink"
     >
       {t.header.otherLanguageShort}
-    </Link>
+    </a>
   );
 }
 
