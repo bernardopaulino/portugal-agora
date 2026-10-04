@@ -28,6 +28,8 @@
   --stage-accent: #0b5cad;
   /* Distritos esbatidos na página de um distrito. */
   --land-dim: #b5cbdd;
+  /* Barra de legenda do boletim: branca nos dois temas, como no ecrã da televisão. */
+  --caption: #ffffff;
 
   /* Preenchimentos do mapa do boletim (escala do IPMA). */
   --land-none: #4f9d63;
@@ -154,6 +156,7 @@
   --color-stage-ink-2: var(--stage-ink-2);
   --color-stage-line: var(--stage-line);
   --color-stage-accent: var(--stage-accent);
+  --color-caption: var(--caption);
   --color-ink-on-land: var(--ink-on-land);
 
   --color-sev-none: var(--sev-none);

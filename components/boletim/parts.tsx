@@ -96,7 +96,7 @@ export function LowerThird({
 }) {
   const Icon = levels[level].icon;
   return (
-    <div className="lower-third lower-third-in flex min-h-16 items-stretch overflow-hidden rounded-sm bg-stage-ink text-ink-on-land shadow-[0_10px_30px_-12px_rgb(0_0_0/0.55)]">
+    <div className="lower-third lower-third-in flex min-h-16 items-stretch overflow-hidden rounded-sm bg-caption text-ink-on-land shadow-[0_10px_30px_-12px_rgb(0_0_0/0.55)]">
       <span
         className={cn(
           "flex shrink-0 flex-col items-center justify-center gap-1 px-3 font-display text-base font-bold sm:min-w-44 sm:flex-row sm:justify-start sm:gap-2 sm:px-4 sm:text-lg",
