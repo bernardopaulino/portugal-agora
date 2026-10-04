@@ -4,7 +4,7 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useEffect } from "react";
 
 import { useStoredValue, writeStorage } from "@/lib/hooks/external";
-import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/client";
 
 export { useResolvedTheme } from "@/lib/hooks/external";
 
@@ -24,13 +24,15 @@ function apply(choice: ThemeChoice) {
   document.documentElement.dataset.theme = dark ? "dark" : "light";
 }
 
-const options: { value: ThemeChoice; label: string; icon: typeof Sun }[] = [
-  { value: "system", label: "Automático", icon: Monitor },
-  { value: "light", label: "Claro", icon: Sun },
-  { value: "dark", label: "Escuro", icon: Moon },
-];
+const icons: Record<ThemeChoice, typeof Sun> = { system: Monitor, light: Sun, dark: Moon };
+const order: ThemeChoice[] = ["system", "light", "dark"];
 
-export function ThemeSwitcher() {
+/**
+ * Botão do tema no cabeçalho: cada clique passa para o seguinte
+ * (automático → claro → escuro). O ícone mostra o tema escolhido.
+ */
+export function ThemeToggle() {
+  const { t } = useI18n();
   const choice = (useStoredValue(KEY) as ThemeChoice | null) ?? "system";
 
   // Em "Automático", acompanhar mudanças do sistema.
@@ -42,36 +44,23 @@ export function ThemeSwitcher() {
     return () => media.removeEventListener("change", onChange);
   }, [choice]);
 
-  function select(value: ThemeChoice) {
-    writeStorage(KEY, value);
-    apply(value);
+  function cycle() {
+    const next = order[(order.indexOf(choice) + 1) % order.length]!;
+    writeStorage(KEY, next);
+    apply(next);
   }
 
+  const Icon = icons[choice];
+  const label = t.header.themeButton(t.header.themeNames[choice]);
   return (
-    <fieldset className="flex flex-col gap-2">
-      <legend className="mb-2 font-bold">Aspeto</legend>
-      <div className="inline-flex flex-wrap gap-2">
-        {options.map(({ value, label, icon: Icon }) => (
-          <label
-            key={value}
-            className={cn(
-              "inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full border px-4 text-base has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent",
-              choice === value ? "border-ink bg-ink text-bg" : "border-line bg-surface text-ink",
-            )}
-          >
-            <input
-              type="radio"
-              name="tema"
-              value={value}
-              checked={choice === value}
-              onChange={() => select(value)}
-              className="sr-only"
-            />
-            <Icon aria-hidden className="size-5" />
-            {label}
-          </label>
-        ))}
-      </div>
-    </fieldset>
+    <button
+      type="button"
+      onClick={cycle}
+      aria-label={label}
+      title={label}
+      className="flex size-12 shrink-0 items-center justify-center rounded-sm border border-line text-ink hover:border-ink"
+    >
+      <Icon aria-hidden className="size-5" />
+    </button>
   );
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { groupWarnings, riskLevel, warningTypes } from "@/lib/state/bulletin";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { WarningEvent } from "@/lib/sources/types";
 
 function warning(district: string, overrides: Partial<WarningEvent> = {}): WarningEvent {
@@ -64,7 +65,7 @@ describe("warningTypes", () => {
         warning("porto"),
         warning("braga", { type: "Precipitação" }),
         warning("faro", { type: "Trovoada" }),
-      ]),
+      ], getDictionary("pt")),
     ).toBe("trovoada e precipitação");
   });
 });

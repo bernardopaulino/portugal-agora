@@ -1,10 +1,14 @@
+"use client";
+
+import { useI18n } from "@/lib/i18n/client";
 import { fireRiskLabels } from "@/lib/sources/ipma-rcm";
 import type { ConcelhoRisk } from "@/lib/state/district";
 
 import { riskColors } from "./fire-risk";
 
 function RiskCell({ level }: { level: number }) {
-  if (!level) return <span className="text-ink-2">Sem dados</span>;
+  const { t } = useI18n();
+  if (!level) return <span className="text-ink-2">{t.topics.noData}</span>;
   return (
     <span className="inline-flex items-center gap-2">
       <span
@@ -12,32 +16,33 @@ function RiskCell({ level }: { level: number }) {
         className="size-3.5 shrink-0 rounded-sm"
         style={{ background: riskColors[level] }}
       />
-      {fireRiskLabels[level]}
+      {t.term(fireRiskLabels[level]!)}
     </span>
   );
 }
 
 export function RiskTable({ rows }: { rows: ConcelhoRisk[] }) {
+  const { t } = useI18n();
   return (
     // Focável para quem usa teclado conseguir deslocar a tabela em ecrãs estreitos.
     <div
       className="overflow-x-auto border-t border-line"
       tabIndex={0}
       role="region"
-      aria-label="Tabela de risco de incêndio por concelho"
+      aria-label={t.lists.riskTable}
     >
       <table className="w-full text-left text-base">
-        <caption className="sr-only">Risco de incêndio por concelho, hoje e amanhã</caption>
+        <caption className="sr-only">{t.lists.riskTable}</caption>
         <thead>
           <tr className="border-b border-line">
             <th scope="col" className="px-4 py-3 font-bold">
-              Concelho
+              {t.lists.concelho}
             </th>
             <th scope="col" className="px-4 py-3 font-bold">
-              Hoje
+              {t.lists.today}
             </th>
             <th scope="col" className="px-4 py-3 font-bold">
-              Amanhã
+              {t.lists.tomorrow}
             </th>
           </tr>
         </thead>

@@ -1,6 +1,9 @@
+"use client";
+
 import { MapPin } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 
 import { SeverityBadge, type Level } from "../status/severity";
@@ -29,6 +32,7 @@ export function EventRow({
   onShow?: () => void;
   id?: string;
 }) {
+  const { t } = useI18n();
   return (
     <li
       id={id}
@@ -53,7 +57,7 @@ export function EventRow({
           className="inline-flex h-11 shrink-0 items-center gap-1.5 self-start rounded-sm px-2 text-base font-bold text-accent underline-offset-4 hover:underline"
         >
           <MapPin aria-hidden className="size-4" />
-          Ver no mapa
+          {t.lists.showMap}
         </button>
       ) : null}
     </li>

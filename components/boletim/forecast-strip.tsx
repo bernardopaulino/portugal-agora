@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Cloud,
   CloudDrizzle,
@@ -13,7 +15,8 @@ import {
 } from "lucide-react";
 
 import type { ForecastDay } from "@/lib/sources/ipma-forecast";
-import { capitalize, formatLongDate, localDate } from "@/lib/time/format";
+import { useI18n } from "@/lib/i18n/client";
+import { formatWeekday, localDate } from "@/lib/time/format";
 
 /** Tipos de tempo do IPMA → pictograma do boletim. */
 function weatherIcon(id: number): LucideIcon {
@@ -39,19 +42,16 @@ export function ForecastStrip({
   reference: Date;
   capital: string;
 }) {
+  const { t, locale } = useI18n();
   const today = localDate(reference.toISOString());
   const tomorrow = localDate(new Date(reference.getTime() + 86_400_000).toISOString());
   const name = (date: string) =>
-    date === today
-      ? "Hoje"
-      : date === tomorrow
-        ? "Amanhã"
-        : capitalize(formatLongDate(date).split(",")[0]!.replace("-feira", ""));
+    date === today ? t.stage.today : date === tomorrow ? t.stage.tomorrow : formatWeekday(date, locale);
 
   return (
     <section aria-labelledby="previsao-titulo" className="flex flex-col gap-3">
       <h2 id="previsao-titulo" className="font-display text-2xl font-bold">
-        Previsão para {capital}
+        {t.stage.forecastFor(capital)}
       </h2>
       <ol className="lower-third-in grid grid-cols-5 overflow-hidden rounded-sm bg-stage-2">
         {days.slice(0, 5).map((d, i) => {
@@ -68,22 +68,22 @@ export function ForecastStrip({
                 {name(d.date)}
               </span>
               <Icon aria-hidden className="size-8 text-stage-accent sm:size-10" strokeWidth={1.8} />
-              <span className="sr-only">{d.weather}.</span>
+              <span className="sr-only">{t.term(d.weather)}.</span>
               <span className="font-display text-2xl leading-none font-bold sm:text-3xl">
                 {d.max}°
                 <span className="text-lg font-semibold text-stage-ink-2 sm:text-xl"> {d.min}°</span>
               </span>
               <span className="text-sm text-stage-ink-2">
-                <span className="sr-only">Probabilidade de chuva: </span>
+                <span className="sr-only">{t.stage.rainChance}</span>
                 {d.rainChance}%
               </span>
-              <span className="hidden text-sm text-stage-ink-2 lg:block">{d.weather}</span>
+              <span className="hidden text-sm text-stage-ink-2 lg:block">{t.term(d.weather)}</span>
             </li>
           );
         })}
       </ol>
       <p className="text-sm text-stage-ink-2">
-        Máxima e mínima; percentagem é a probabilidade de chuva. Fonte: IPMA.
+        {t.stage.forecastNote}
       </p>
     </section>
   );

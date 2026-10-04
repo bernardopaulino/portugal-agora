@@ -1,6 +1,8 @@
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { useI18n } from "@/lib/i18n/client";
 import type { Topic } from "@/lib/state/bulletin";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +15,7 @@ export const levelBlock: Record<Level, string> = {
   orange: "bg-[var(--land-orange)] text-ink-on-land",
   red: "bg-[var(--land-red)] text-white",
   unknown: "bg-[var(--land-unknown)] text-ink-on-land",
-  info: "bg-stage-accent text-ink-on-land",
+  info: "bg-[var(--land-info)] text-ink-on-land",
 };
 
 /** Quadrado com o ícone do nível, para as linhas do boletim. */
@@ -34,13 +36,20 @@ export function LevelMark({ level, className }: { level: Level; className?: stri
 }
 
 /** As linhas do boletim: cada uma leva à secção com o detalhe. */
-export function TopicList({ topics }: { topics: Topic[] }) {
+export function TopicList({
+  topics,
+  hrefFor = (id) => `#${id}`,
+}: {
+  topics: Topic[];
+  /** Para onde leva cada linha (na página inicial, às páginas de cada tema). */
+  hrefFor?: (id: Topic["id"]) => string;
+}) {
   return (
     <ul className="flex flex-col border-t border-stage-line">
       {topics.map((t) => (
         <li key={t.id} className="border-b border-stage-line">
-          <a
-            href={`#${t.id}`}
+          <Link
+            href={hrefFor(t.id)}
             className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 py-3 no-underline"
           >
             <LevelMark level={t.level} />
@@ -60,7 +69,7 @@ export function TopicList({ topics }: { topics: Topic[] }) {
               aria-hidden
               className="size-5 text-stage-ink-2 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-stage-ink"
             />
-          </a>
+          </Link>
         </li>
       ))}
     </ul>
@@ -117,6 +126,7 @@ export function LowerThird({
 
 /** Legenda do mapa: as quatro cores do IPMA e os pictogramas. */
 export function MapLegend({ showMarkers = true }: { showMarkers?: boolean }) {
+  const { t } = useI18n();
   return (
     <ul className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-stage-ink-2">
       {(["none", "yellow", "orange", "red"] as const).map((l) => {
@@ -132,19 +142,19 @@ export function MapLegend({ showMarkers = true }: { showMarkers?: boolean }) {
             >
               <Icon className="size-3.5" strokeWidth={2.6} />
             </span>
-            {levels[l].word}
+            {t.levels[l]}
           </li>
         );
       })}
       {showMarkers ? (
         <>
           <li className="inline-flex items-center gap-2">
-            <span aria-hidden className="size-3.5 rounded-full bg-[#e2401b] ring-2 ring-white" />
-            Incêndio em curso
+            <span aria-hidden className="size-3.5 rounded-full bg-[var(--fire)] ring-2 ring-white" />
+            {t.stage.legendFire}
           </li>
           <li className="inline-flex items-center gap-2">
             <span aria-hidden className="size-3.5 rounded-full ring-2 ring-stage-accent" />
-            Sismo sentido
+            {t.stage.legendQuake}
           </li>
         </>
       ) : null}

@@ -2,8 +2,10 @@
 
 import { X } from "lucide-react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 
 import { getDistrict, type Region } from "@/data/districts";
+import { useI18n } from "@/lib/i18n/client";
 import { fireRiskLabels } from "@/lib/sources/ipma-rcm";
 import type { CountryState } from "@/lib/state/aggregate";
 import { capitalize, formatDayTime, formatNumber } from "@/lib/time/format";
@@ -16,18 +18,19 @@ import { layerOptions, type LayerId } from "./layers";
 
 const LiveMap = dynamic(() => import("./live-map"), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-surface-2 text-ink-2">
-      A carregar o mapa…
-    </div>
-  ),
+  loading: () => <MapLoading />,
 });
 
-const regions: { id: Region; label: string }[] = [
-  { id: "continente", label: "Continente" },
-  { id: "acores", label: "Açores" },
-  { id: "madeira", label: "Madeira" },
-];
+function MapLoading() {
+  const { t } = useI18n();
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-surface-2 text-ink-2">
+      {t.map.loading}
+    </div>
+  );
+}
+
+const regions: Region[] = ["continente", "acores", "madeira"];
 
 function Chip({
   pressed,
@@ -68,6 +71,7 @@ function Detail({
   selection: Selection;
   onClose: () => void;
 }) {
+  const { t, locale, path } = useI18n();
   const reference = new Date(state.generatedAt);
   let body: React.ReactNode = null;
 
@@ -80,24 +84,22 @@ function Detail({
       <>
         <div className="flex flex-wrap items-center gap-2">
           <SeverityBadge level={state.levelKnown ? (status?.level ?? "none") : "unknown"} />
-          <p className="text-lg font-extrabold">{d?.name}</p>
+          <p className="text-lg font-extrabold">{d ? t.districtName(d) : null}</p>
         </div>
         <p className="text-base">
           {warnings.length === 0
-            ? "Sem avisos meteorológicos."
+            ? t.map.noWarnings
             : warnings
-                .map((w) => w.title)
+                .map((w) => t.term(w.title))
                 .filter((t, i, all) => all.indexOf(t) === i)
                 .join(". ") + "."}
-          {status && status.activeFires > 0
-            ? ` ${status.activeFires} ${status.activeFires === 1 ? "incêndio" : "incêndios"} em curso.`
-            : ""}
-          {air ? ` Qualidade do ar: ${air.label.toLowerCase()}.` : ""}
+          {status && status.activeFires > 0 ? t.map.firesInProgress(status.activeFires) : ""}
+          {air ? t.map.airShort(t.term(air.label)) : ""}
         </p>
         {d ? (
-          <a href={`/${d.slug}`} className="text-base font-bold">
-            Ver tudo sobre {d.name}
-          </a>
+          <Link href={path(`/${d.slug}`)} className="text-base font-bold">
+            {t.map.seeAllAbout(t.districtName(d))}
+          </Link>
         ) : null}
       </>
     );
@@ -110,16 +112,20 @@ function Detail({
           <div className="flex flex-wrap items-center gap-2">
             <SeverityBadge
               level={fire.severity === "none" ? "info" : fire.severity}
-              label={fire.status}
+              label={t.term(fire.status)}
             />
             <p className="text-lg font-extrabold">{fire.place.label}</p>
           </div>
           <p className="text-base">
-            {fire.nature}. Início {formatDayTime(fire.startedAt, reference, fire.place.region)}.{" "}
-            {fire.operatives} operacionais, {fire.aerialUnits} meios aéreos.
+            {t.map.fireDetail(
+              t.term(fire.nature),
+              formatDayTime(fire.startedAt, reference, fire.place.region, locale),
+              fire.operatives,
+              fire.aerialUnits,
+            )}
           </p>
           <p className="text-sm text-ink-2">
-            Fonte:{" "}
+            {t.source.source}:{" "}
             <a href="https://fogos.pt" rel="noopener">
               Fogos.pt
             </a>
@@ -132,16 +138,18 @@ function Detail({
           <div className="flex flex-wrap items-center gap-2">
             <SeverityBadge
               level={quake.severity === "none" ? "info" : quake.severity}
-              label={`Magnitude ${formatNumber(quake.magnitude)}`}
+              label={t.lists.magnitude(formatNumber(quake.magnitude, 1, locale))}
             />
-            <p className="text-lg font-extrabold">{capitalize(quake.place.label)}</p>
+            <p className="text-lg font-extrabold">{capitalize(t.term(quake.place.label))}</p>
           </div>
           <p className="text-base">
-            {quake.felt ? "Sentido pela população. " : ""}
-            {capitalize(formatDayTime(quake.occurredAt, reference, quake.place.region))}, a{" "}
-            {Math.round(quake.depthKm)} km de profundidade.
+            {quake.felt ? t.lists.felt : ""}
+            {t.map.quakeDetail(
+              capitalize(formatDayTime(quake.occurredAt, reference, quake.place.region, locale)),
+              Math.round(quake.depthKm),
+            )}
           </p>
-          <p className="text-sm text-ink-2">Fonte: IPMA</p>
+          <p className="text-sm text-ink-2">{t.source.source}: IPMA</p>
         </>
       );
     }
@@ -155,7 +163,7 @@ function Detail({
         type="button"
         onClick={onClose}
         className="flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface-2"
-        aria-label="Fechar detalhe"
+        aria-label={t.map.close}
       >
         <X aria-hidden className="size-5" />
       </button>
@@ -164,6 +172,7 @@ function Detail({
 }
 
 function Legend({ layers }: { layers: LayerId[] }) {
+  const { t } = useI18n();
   const items: React.ReactNode[] = [];
   if (
     layers.includes("warnings") ||
@@ -176,7 +185,7 @@ function Legend({ layers }: { layers: LayerId[] }) {
         {(["none", "yellow", "orange", "red"] as const).map((l) => (
           <span key={l} className="inline-flex items-center gap-1.5">
             <span aria-hidden className={cn("size-3.5 rounded-full", levels[l].solid)} />
-            {levels[l].word}
+            {t.levels[l]}
           </span>
         ))}
       </span>,
@@ -185,7 +194,7 @@ function Legend({ layers }: { layers: LayerId[] }) {
   if (layers.includes("risk")) {
     items.push(
       <span key="risk" className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="font-bold">Risco:</span>
+        <span className="font-bold">{t.map.risk}</span>
         {[1, 2, 3, 4, 5].map((l) => (
           <span key={l} className="inline-flex items-center gap-1.5">
             <span
@@ -193,7 +202,7 @@ function Legend({ layers }: { layers: LayerId[] }) {
               className="size-3.5 rounded-sm"
               style={{ background: riskColors[l] }}
             />
-            {fireRiskLabels[l]}
+            {t.term(fireRiskLabels[l]!)}
           </span>
         ))}
       </span>,
@@ -201,7 +210,7 @@ function Legend({ layers }: { layers: LayerId[] }) {
   }
   if (layers.includes("quakes"))
     items.push(
-      <span key="q">Sismos: círculo maior, magnitude maior; mais transparente, mais antigo.</span>,
+      <span key="q">{t.map.quakeLegend}</span>,
     );
   return <div className="flex flex-col gap-2 text-sm text-ink-2">{items}</div>;
 }
@@ -229,13 +238,14 @@ export function MapPanel({
   focus?: string;
   className?: string;
 }) {
+  const { t } = useI18n();
   return (
     <div className={cn("flex flex-col gap-3", className)}>
       {onRegion ? (
-        <div role="radiogroup" aria-label="Zona do mapa" className="flex flex-wrap gap-2">
+        <div role="radiogroup" aria-label={t.map.zone} className="flex flex-wrap gap-2">
           {regions.map((r) => (
-            <Chip key={r.id} role="radio" pressed={region === r.id} onClick={() => onRegion(r.id)}>
-              {r.label}
+            <Chip key={r} role="radio" pressed={region === r} onClick={() => onRegion(r)}>
+              {t.map.regions[r]}
             </Chip>
           ))}
         </div>
@@ -254,11 +264,11 @@ export function MapPanel({
         ) : null}
       </div>
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-base font-bold">Mostrar no mapa</legend>
+        <legend className="mb-1 text-base font-bold">{t.map.show}</legend>
         <div className="flex flex-wrap gap-2">
           {layerOptions.map((l) => (
-            <Chip key={l.id} pressed={layers.includes(l.id)} onClick={() => onToggleLayer(l.id)}>
-              {l.label}
+            <Chip key={l} pressed={layers.includes(l)} onClick={() => onToggleLayer(l)}>
+              {t.map.layers[l]}
             </Chip>
           ))}
         </div>

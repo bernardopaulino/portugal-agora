@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 
+import type { Locale } from "@/lib/i18n/locales";
 import type { Severity } from "@/lib/sources/types";
 
 export const ogSize = { width: 1200, height: 630 };
@@ -12,17 +13,27 @@ const tint: Record<Severity | "unknown", { bar: string; bg: string; label: strin
   unknown: { bar: "#7c8b94", bg: "#e6ebee", label: "Sem dados do IPMA" },
 };
 
+const labelEn: Record<Severity | "unknown", string> = {
+  none: "No warnings",
+  yellow: "Yellow warning",
+  orange: "Orange warning",
+  red: "Red warning",
+  unknown: "No IPMA data",
+};
+
 /** Imagem de partilha com o estado atual: é o que aparece no WhatsApp ou no LinkedIn. */
 export function statusCard({
   level,
   place,
   headline,
+  locale = "pt",
 }: {
   level: Severity | "unknown";
   place: string;
   headline: string;
+  locale?: Locale;
 }) {
-  const t = tint[level];
+  const t = { ...tint[level], label: locale === "en" ? labelEn[level] : tint[level].label };
   return new ImageResponse(
     <div style={{ display: "flex", width: "100%", height: "100%", background: t.bg }}>
       <div style={{ width: 28, height: "100%", background: t.bar }} />

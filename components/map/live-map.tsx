@@ -13,6 +13,8 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { getDistrict, regionBounds, type Region } from "@/data/districts";
+import { useI18n } from "@/lib/i18n/client";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { CountryState } from "@/lib/state/aggregate";
 
 import { riskColors } from "../cards/fire-risk";
@@ -32,19 +34,22 @@ const STYLE = {
   dark: "https://tiles.openfreemap.org/styles/dark",
 };
 
-const LOCALE = {
-  "NavigationControl.ZoomIn": "Aproximar",
-  "NavigationControl.ZoomOut": "Afastar",
-  "NavigationControl.ResetBearing": "Repor orientação",
-  "AttributionControl.ToggleAttribution": "Mostrar créditos",
-  "CooperativeGesturesHandler.WindowsHelpText": "Use Ctrl + roda do rato para ampliar o mapa",
-  "CooperativeGesturesHandler.MacHelpText": "Use ⌘ + roda do rato para ampliar o mapa",
-  "CooperativeGesturesHandler.MobileHelpText": "Use dois dedos para mover o mapa",
-};
+/** Textos dos controlos do MapLibre no idioma da página. */
+function mapLocale(t: Dictionary) {
+  return {
+    "NavigationControl.ZoomIn": t.map.zoomIn,
+    "NavigationControl.ZoomOut": t.map.zoomOut,
+    "NavigationControl.ResetBearing": t.map.resetBearing,
+    "AttributionControl.ToggleAttribution": t.map.attribution,
+    "CooperativeGesturesHandler.WindowsHelpText": t.map.ctrlScroll,
+    "CooperativeGesturesHandler.MacHelpText": t.map.cmdScroll,
+    "CooperativeGesturesHandler.MobileHelpText": t.map.twoFingers,
+  };
+}
 
 // O estilo do OpenFreeMap já credita OpenFreeMap, OpenMapTiles e OpenStreetMap.
-const ATTRIBUTION =
-  'Limites © <a href="https://www.dgterritorio.gov.pt" target="_blank" rel="noopener">DGT</a> (CAOP 2025)';
+const attribution = (t: Dictionary) =>
+  `${t.map.boundaries} © <a href="https://www.dgterritorio.gov.pt" target="_blank" rel="noopener">DGT</a> (CAOP 2025)`;
 
 const FIT_PADDING = { top: 24, right: 24, bottom: 44, left: 24 };
 
@@ -114,6 +119,7 @@ export default function LiveMap({
   focus?: string;
   region: Region;
 }) {
+  const { t } = useI18n();
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const onSelectRef = useRef(onSelect);
@@ -155,16 +161,25 @@ export default function LiveMap({
       style: STYLE[document.documentElement.dataset.theme === "dark" ? "dark" : "light"],
       bounds: regionBounds[focusFeatureBounds?.region ?? region],
       fitBoundsOptions: { padding: FIT_PADDING },
-      attributionControl: { compact: true, customAttribution: ATTRIBUTION },
+      attributionControl: { compact: true, customAttribution: attribution(t) },
       cooperativeGestures: true,
-      locale: LOCALE,
+      locale: mapLocale(t),
       dragRotate: false,
       pitchWithRotate: false,
       maxZoom: 13,
     });
     map.touchZoomRotate.disableRotation();
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+    // O estilo do OpenFreeMap refere ícones que não estão no seu sprite
+    // (ex.: "circle-11"); em vez de um aviso na consola, fica um ícone vazio.
+    map.setMissingStyleImageResolver((id) => {
+      if (!map.hasImage(id)) map.addImage(id, { width: 1, height: 1, data: new Uint8Array(4) });
+    });
     map.on("style.load", () => {
+      // Camadas de escudos de estrada do estilo com filtros inválidos: nunca
+      // desenham nada e só enchem a consola de avisos.
+      for (const id of ["highway-shield-non-us", "highway-shield-us-interstate", "road_shield_us"])
+        if (map.getLayer(id)) map.removeLayer(id);
       styleReady.current = true;
       applyPortugueseLabels(map);
       setStyleVersion((v) => v + 1);
@@ -546,7 +561,7 @@ export default function LiveMap({
     <div
       ref={container}
       role="region"
-      aria-label="Mapa interativo. A mesma informação está nas listas desta página."
+      aria-label={t.map.ariaLabel}
       className="h-full w-full"
     />
   );

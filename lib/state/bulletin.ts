@@ -1,14 +1,16 @@
 import { concelhoByDico } from "@/data/dico";
-import { getDistrict } from "@/data/districts";
+import { getDistrict, type District } from "@/data/districts";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { fireRiskLabels } from "@/lib/sources/ipma-rcm";
 import { severityRank, type Severity, type WarningEvent } from "@/lib/sources/types";
 import { formatNumber, formatRange } from "@/lib/time/format";
 
-import type { CountryState } from "./aggregate";
+import type { CountryState, DistrictStatus } from "./aggregate";
 
 /**
  * O "boletim": o estado do país reduzido ao que se lê num relance.
- * Funções puras, partilhadas pela página inicial e pelas dos distritos.
+ * Funções puras, partilhadas pela página inicial, pelas páginas de cada
+ * tema e pelas dos distritos. O texto vem do dicionário do idioma.
  */
 
 export interface WarningWindow {
@@ -65,19 +67,61 @@ export function groupWarnings(warnings: WarningEvent[]): WarningGroup[] {
   );
 }
 
-function plural(n: number, one: string, many: string) {
-  return `${n} ${n === 1 ? one : many}`;
-}
-
-function joinPt(items: string[]): string {
-  return items.length <= 1
-    ? (items[0] ?? "")
-    : `${items.slice(0, -1).join(", ")} e ${items.at(-1)}`;
-}
-
 /** Tipos de aviso em minúsculas, sem repetições: "trovoada e precipitação". */
-export function warningTypes(warnings: WarningEvent[]): string {
-  return joinPt([...new Set(warnings.map((w) => w.type.toLowerCase()))]);
+export function warningTypes(warnings: WarningEvent[], t: Dictionary): string {
+  return t.join([...new Set(warnings.map((w) => t.term(w.type.toLowerCase())))]);
+}
+
+/** "no Porto e em Viana do Castelo", "em 9 distritos e nos Açores". */
+export function placesPhrase(slugs: string[], t: Dictionary): string {
+  const items = slugs.map((s) => getDistrict(s)).filter((d) => d !== undefined);
+  if (items.length <= 2) return t.join(items.map((d) => t.inPlace(d)));
+  const mainland = items.filter((d) => d.region === "continente");
+  const islands = items.filter((d) => d.region !== "continente");
+  const parts: string[] = [];
+  if (mainland.length === 1) parts.push(t.inPlace(mainland[0]!));
+  else if (mainland.length > 1) parts.push(t.headline.inDistricts(mainland.length));
+  parts.push(...islands.map((d) => t.inPlace(d)));
+  return t.join(parts);
+}
+
+/** O título do país: "Aviso laranja em Beja. Aviso amarelo em 13 distritos." */
+export function countryHeadline(
+  levelKnown: boolean,
+  statuses: Record<string, DistrictStatus>,
+  t: Dictionary,
+): string {
+  if (!levelKnown) return t.headline.noData;
+  const byLevel = (["red", "orange", "yellow"] as const)
+    .map((level) => ({
+      level,
+      slugs: Object.values(statuses)
+        .filter((s) => s.level === level)
+        .map((s) => s.slug),
+    }))
+    .filter((g) => g.slugs.length > 0);
+  if (byLevel.length === 0) return t.headline.calm;
+  return byLevel.map((g) => t.headline.level(g.level, placesPhrase(g.slugs, t))).join(" ");
+}
+
+/** "Aviso laranja de vento em Lisboa. Aviso amarelo de precipitação." */
+export function districtHeadline(
+  district: District,
+  warnings: WarningEvent[],
+  known: boolean,
+  t: Dictionary,
+): string {
+  if (!known) return t.headline.districtNoData(t.districtName(district));
+  const own = warnings.filter((w) => w.place.district === district.slug);
+  if (own.length === 0) return t.headline.districtCalm(t.inPlace(district));
+  return (["red", "orange", "yellow"] as const)
+    .map((level) => {
+      const types = own.filter((w) => w.severity === level);
+      return types.length ? { level, types: warningTypes(types, t) } : null;
+    })
+    .filter((x) => x !== null)
+    .map((g, i) => t.headline.districtLevel(g.level, g.types, i === 0 ? t.inPlace(district) : ""))
+    .join(" ");
 }
 
 export type TopicId = "avisos" | "incendios" | "sismos" | "risco" | "ar";
@@ -95,78 +139,68 @@ export interface Topic {
   unavailable?: boolean;
 }
 
+function unavailable(id: TopicId, label: string, detail: string, t: Dictionary): Topic {
+  return { id, label, value: t.topics.noData, detail, level: "unknown", unavailable: true };
+}
+
+function worstFire(active: { severity: Severity }[]): Severity | "info" | "none" {
+  if (active.length === 0) return "none";
+  const worst = active.reduce<Severity>(
+    (m, f) => (severityRank[f.severity] > severityRank[m] ? f.severity : m),
+    "none",
+  );
+  return worst === "none" ? "info" : worst;
+}
+
 /** As quatro linhas do boletim nacional. */
-export function nationalTopics(state: CountryState): Topic[] {
+export function nationalTopics(state: CountryState, t: Dictionary): Topic[] {
   const topics: Topic[] = [];
+  const T = t.topics;
 
   const warnings = state.warnings.data;
-  if (!warnings) {
-    topics.push({
-      id: "avisos",
-      label: "Avisos",
-      value: "Sem dados",
-      detail: "IPMA indisponível",
-      level: "unknown",
-      unavailable: true,
-    });
-  } else {
+  if (!warnings) topics.push(unavailable("avisos", T.warnings, T.ipmaDown, t));
+  else {
     const warned = Object.values(state.districts)
       .filter((s) => s.level !== "none")
       .map((s) => getDistrict(s.slug))
       .filter((d) => d !== undefined);
     const mainland = warned.filter((d) => d.region === "continente").length;
-    const islands = warned.filter((d) => d.region !== "continente").map((d) => d.name);
+    const islands = warned.filter((d) => d.region !== "continente").map((d) => t.districtName(d));
     topics.push({
       id: "avisos",
-      label: "Avisos",
-      value:
-        warned.length === 0
-          ? "Nenhum"
-          : mainland > 0
-            ? plural(mainland, "distrito", "distritos")
-            : joinPt(islands),
+      label: T.warnings,
+      value: warned.length === 0 ? T.none : mainland > 0 ? T.districts(mainland) : t.join(islands),
       detail:
         warned.length === 0
-          ? "em todo o país"
-          : warningTypes(warnings) +
-            (mainland > 0 && islands.length ? `; também ${joinPt(islands)}` : ""),
+          ? T.wholeCountry
+          : warningTypes(warnings, t) +
+            (mainland > 0 && islands.length ? T.alsoIn(t.join(islands)) : ""),
       level: state.level,
     });
   }
 
   const fires = state.fires.data;
-  if (!fires) {
-    topics.push({
-      id: "incendios",
-      label: "Incêndios",
-      value: "Sem dados",
-      detail: "consulte fogos.pt",
-      level: "unknown",
-      unavailable: true,
-    });
-  } else {
+  if (!fires) topics.push(unavailable("incendios", T.fires, T.fogosDown, t));
+  else {
     const active = fires.filter((f) => f.active);
-    const worst = active.reduce<Severity>(
-      (m, f) => (severityRank[f.severity] > severityRank[m] ? f.severity : m),
-      "none",
-    );
     const places = [...new Set(active.map((f) => f.concelho ?? f.place.label))];
     topics.push({
       id: "incendios",
-      label: "Incêndios",
-      value: active.length === 0 ? "Nenhum" : `${active.length} em curso`,
+      label: T.fires,
+      value: active.length === 0 ? T.none : T.inProgress(active.length),
       detail:
         active.length === 0
-          ? "em curso"
+          ? T.inProgressDetail
           : places.length <= 2
-            ? joinPt(places)
-            : `${places.slice(0, 2).join(", ")} e mais ${places.length - 2}`,
-      level: active.length === 0 ? "none" : worst === "none" ? "info" : worst,
+            ? t.join(places)
+            : T.andMore(places.slice(0, 2).join(", "), places.length - 2),
+      level: worstFire(active),
     });
   }
 
   const quakes = state.earthquakes.data;
-  if (quakes) {
+  if (!quakes) topics.push(unavailable("sismos", T.quakesNational, T.ipmaDown, t));
+  else {
     // Os mesmos sismos que a lista mostra por omissão e que o índice conta:
     // sentidos ou em território português (os dados do IPMA cobrem 7 dias).
     const notable = quakes.filter(isNotableQuake);
@@ -177,21 +211,12 @@ export function nationalTopics(state: CountryState): Topic[] {
     );
     topics.push({
       id: "sismos",
-      label: "Sismos em Portugal (7 dias)",
-      value: notable.length === 0 ? "Nenhum" : plural(notable.length, "sismo", "sismos"),
+      label: T.quakesNational,
+      value: notable.length === 0 ? T.none : T.quakes(notable.length),
       detail: strongest
-        ? `${felt === 0 ? "nenhum sentido" : plural(felt, "sentido", "sentidos")}; o maior com magnitude ${formatNumber(strongest.magnitude)}`
-        : "sentido ou em território português",
+        ? T.quakeDetail(felt, formatNumber(strongest.magnitude, 1, t.locale))
+        : T.quakeNoneNational,
       level: felt === 0 ? "none" : "info",
-    });
-  } else {
-    topics.push({
-      id: "sismos",
-      label: "Sismos em Portugal (7 dias)",
-      value: "Sem dados",
-      detail: "IPMA indisponível",
-      level: "unknown",
-      unavailable: true,
     });
   }
 
@@ -202,9 +227,9 @@ export function nationalTopics(state: CountryState): Topic[] {
     const count = values.filter((v) => v === top).length;
     topics.push({
       id: "risco",
-      label: "Risco de incêndio",
-      value: top ? `Até ${fireRiskLabels[top]?.toLowerCase()}` : "Sem dados",
-      detail: top ? `hoje, em ${plural(count, "concelho", "concelhos")}` : undefined,
+      label: T.riskToday,
+      value: top ? T.riskUpTo(t.term(fireRiskLabels[top] ?? "")) : T.noData,
+      detail: top ? T.riskWhere(count) : undefined,
       level: riskLevel(top),
     });
   }
@@ -221,15 +246,12 @@ export interface DistrictCaption {
   activeFires: number;
 }
 
-const levelWord: Record<Severity, string> = {
-  none: "verde",
-  yellow: "amarelo",
-  orange: "laranja",
-  red: "vermelho",
-};
-
 /** A legenda que aparece quando se aponta para um distrito no mapa. */
-export function districtCaption(state: CountryState, slug: string): DistrictCaption | null {
+export function districtCaption(
+  state: CountryState,
+  slug: string,
+  t: Dictionary,
+): DistrictCaption | null {
   const district = getDistrict(slug);
   if (!district) return null;
   const status = state.districts[slug];
@@ -239,13 +261,13 @@ export function districtCaption(state: CountryState, slug: string): DistrictCapt
   );
   const line =
     level === "unknown"
-      ? "Sem dados de avisos do IPMA"
+      ? t.caption.noWarningData
       : level === "none"
-        ? "Sem avisos meteorológicos"
-        : `Aviso ${levelWord[level]} de ${warningTypes(own)}`;
+        ? t.caption.calm
+        : t.caption.level(level, warningTypes(own, t));
   return {
     slug,
-    name: district.name,
+    name: t.districtName(district),
     level,
     line,
     activeFires: status?.activeFires ?? 0,
@@ -253,8 +275,9 @@ export function districtCaption(state: CountryState, slug: string): DistrictCapt
 }
 
 /** As linhas do boletim de um distrito ou região. */
-export function districtTopics(state: CountryState, slug: string): Topic[] {
+export function districtTopics(state: CountryState, slug: string, t: Dictionary): Topic[] {
   const topics: Topic[] = [];
+  const T = t.topics;
 
   const warnings = state.warnings.data;
   const own = (warnings ?? []).filter((w) => w.place.district === slug && w.severity !== "none");
@@ -263,60 +286,43 @@ export function districtTopics(state: CountryState, slug: string): Topic[] {
     warnings
       ? {
           id: "avisos",
-          label: "Avisos",
-          value: groups === 0 ? "Nenhum" : plural(groups, "aviso", "avisos"),
-          detail: groups === 0 ? "nos próximos três dias" : warningTypes(own),
+          label: T.warnings,
+          value: groups === 0 ? T.none : T.warningsCount(groups),
+          detail: groups === 0 ? T.nextDays : warningTypes(own, t),
           level: state.districts[slug]?.level ?? "none",
         }
-      : {
-          id: "avisos",
-          label: "Avisos",
-          value: "Sem dados",
-          detail: "IPMA indisponível",
-          level: "unknown",
-          unavailable: true,
-        },
+      : unavailable("avisos", T.warnings, T.ipmaDown, t),
   );
 
   const fires = state.fires.data;
   if (fires) {
     const active = fires.filter((f) => f.active && f.place.district === slug);
-    const worst = active.reduce<Severity>(
-      (m, f) => (severityRank[f.severity] > severityRank[m] ? f.severity : m),
-      "none",
-    );
     const places = [...new Set(active.map((f) => f.concelho ?? f.place.label))];
     topics.push({
       id: "incendios",
-      label: "Incêndios",
-      value: active.length === 0 ? "Nenhum" : `${active.length} em curso`,
-      detail: active.length === 0 ? "em curso" : joinPt(places.slice(0, 3)),
-      level: active.length === 0 ? "none" : worst === "none" ? "info" : worst,
+      label: T.fires,
+      value: active.length === 0 ? T.none : T.inProgress(active.length),
+      detail: active.length === 0 ? T.inProgressDetail : t.join(places.slice(0, 3)),
+      level: worstFire(active),
     });
-  } else {
-    topics.push({
-      id: "incendios",
-      label: "Incêndios",
-      value: "Sem dados",
-      detail: "consulte fogos.pt",
-      level: "unknown",
-      unavailable: true,
-    });
-  }
+  } else topics.push(unavailable("incendios", T.fires, T.fogosDown, t));
 
   const quakes = state.earthquakes.data;
   if (quakes) {
     // Os mesmos sismos que a lista e o índice da página do distrito.
-    const own = quakes.filter((q) => q.place.district === slug);
-    const felt = own.filter((q) => q.felt).length;
+    const ownQuakes = quakes.filter((q) => q.place.district === slug);
+    const felt = ownQuakes.filter((q) => q.felt).length;
     topics.push({
       id: "sismos",
-      label: "Sismos (7 dias)",
-      value: own.length === 0 ? "Nenhum" : plural(own.length, "sismo", "sismos"),
+      label: T.quakesDistrict,
+      value: ownQuakes.length === 0 ? T.none : T.quakes(ownQuakes.length),
       detail:
-        own.length === 0
-          ? "de magnitude 2 ou superior"
-          : `${felt === 0 ? "nenhum sentido" : plural(felt, "sentido", "sentidos")}; o maior com magnitude ${formatNumber(Math.max(...own.map((q) => q.magnitude)))}`,
+        ownQuakes.length === 0
+          ? T.quakeNoneDistrict
+          : T.quakeDetail(
+              felt,
+              formatNumber(Math.max(...ownQuakes.map((q) => q.magnitude)), 1, t.locale),
+            ),
       level: felt === 0 ? "none" : "info",
     });
   }
@@ -331,9 +337,9 @@ export function districtTopics(state: CountryState, slug: string): Topic[] {
       const count = values.filter((v) => v === top).length;
       topics.push({
         id: "risco",
-        label: "Risco de incêndio hoje",
-        value: `Até ${fireRiskLabels[top]?.toLowerCase()}`,
-        detail: `em ${plural(count, "concelho", "concelhos")}`,
+        label: T.riskTodayDistrict,
+        value: T.riskUpTo(t.term(fireRiskLabels[top] ?? "")),
+        detail: T.riskWhereDistrict(count),
         level: riskLevel(top),
       });
     }
@@ -342,11 +348,12 @@ export function districtTopics(state: CountryState, slug: string): Topic[] {
   const air = state.airQuality.data?.find((a) => a.district === slug);
   const uv = state.uv.data?.find((u) => u.district === slug);
   if (air || uv) {
+    const uvIndex = uv ? formatNumber(uv.index, 0, t.locale) : "";
     topics.push({
       id: "ar",
-      label: "Ar e raios UV",
-      value: air ? `Ar ${air.label.toLowerCase()}` : `UV ${formatNumber(uv!.index, 0)}`,
-      detail: air && uv ? `UV ${formatNumber(uv.index, 0)}, ${uv.label.toLowerCase()}` : undefined,
+      label: T.air,
+      value: air ? T.airValue(t.term(air.label)) : T.uv(uvIndex),
+      detail: air && uv ? T.uv(uvIndex, t.term(uv.label)) : undefined,
       level: air ? air.severity : "info",
     });
   }
@@ -373,31 +380,30 @@ export function isNotableQuake(q: { felt: boolean; place: { district?: string } 
 
 /**
  * A frase do "apresentador" para a barra do rodapé: o aviso mais grave,
- * quando e onde. "Trovoada até às 22:00 de hoje em 15 distritos; amanhã,
- * das 13:00 às 22:00, em 6."
+ * quando e onde. "Trovoada: em vigor até às 22:00 de hoje em 15 locais;
+ * amanhã, das 13:00 às 22:00, em 6."
  */
-export function nationalCaption(state: CountryState, now: Date): string {
-  if (!state.levelKnown) return "Sem dados de avisos do IPMA. Consulte ipma.pt.";
+export function nationalCaption(state: CountryState, now: Date, t: Dictionary): string {
+  const C = t.caption;
+  if (!state.levelKnown) return C.nationalNoData;
   const groups = groupWarnings((state.warnings.data ?? []).filter((w) => w.severity !== "none"));
   const top = groups[0];
   if (!top) {
     const fires = (state.fires.data ?? []).filter((f) => f.active).length;
-    return fires > 0
-      ? `Sem avisos meteorológicos; ${plural(fires, "incêndio em curso", "incêndios em curso")}.`
-      : "Sem avisos meteorológicos nem incêndios em curso.";
+    return fires > 0 ? C.nationalCalmFires(fires) : C.nationalCalm;
   }
-  const parts: string[] = [];
   const seen = new Map<string, number>();
   for (const w of top.windows) {
-    const label = formatRange(w.startsAt, w.endsAt, now, "continente");
+    const label = formatRange(w.startsAt, w.endsAt, now, "continente", t.locale);
     seen.set(label, (seen.get(label) ?? 0) + new Set(w.items.map((i) => i.area)).size);
   }
-  [...seen.entries()].forEach(([label, n], i) =>
-    parts.push(i === 0 ? `${label} em ${plural(n, "local", "locais")}` : `${label}, em ${n}`),
+  const parts = [...seen.entries()].map(([label, n], i) =>
+    i === 0 ? C.firstWindow(label, n) : C.nextWindow(label, n),
   );
+  const type = t.term(top.type);
   const others = groups.length - 1;
   return (
-    `${top.type}: ${parts.join("; ")}.` +
-    (others > 0 ? ` Mais ${plural(others, "aviso diferente", "avisos diferentes")} abaixo.` : "")
+    `${type.charAt(0).toUpperCase()}${type.slice(1)}: ${parts.join("; ")}.` +
+    (others > 0 ? C.others(others) : "")
   );
 }

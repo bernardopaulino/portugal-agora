@@ -2,6 +2,7 @@
 
 import type { Region } from "@/data/districts";
 import { useNow } from "@/lib/hooks/external";
+import { useI18n } from "@/lib/i18n/client";
 import { formatRelative, formatTime } from "@/lib/time/format";
 
 /**
@@ -10,10 +11,11 @@ import { formatRelative, formatTime } from "@/lib/time/format";
  */
 export function RelativeTime({ iso, region }: { iso: string; region?: Region }) {
   const now = useNow();
-  const absolute = `às ${formatTime(iso, region)}`;
+  const { locale } = useI18n();
+  const absolute = `${locale === "pt" ? "às" : "at"} ${formatTime(iso, region)}`;
   return (
     <time dateTime={iso} title={absolute}>
-      {now ? formatRelative(iso, new Date(now)) : absolute}
+      {now ? formatRelative(iso, new Date(now), locale) : absolute}
     </time>
   );
 }

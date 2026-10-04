@@ -1,40 +1,42 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import { districts } from "@/data/districts";
+import { useCurrentPath, useI18n } from "@/lib/i18n/client";
 
 /** Seletor nativo: o mais fácil de usar no telemóvel e com leitores de ecrã. */
 export function DistrictPicker() {
   const router = useRouter();
-  const pathname = usePathname();
+  const { t, path } = useI18n();
+  const pathname = useCurrentPath();
   const current = districts.find((d) => pathname === `/${d.slug}`)?.slug ?? "";
 
   return (
     <label className="relative flex min-w-0 items-center">
-      <span className="sr-only">Escolher distrito ou região</span>
+      <span className="sr-only">{t.header.pickDistrict}</span>
       <select
         value={current}
-        onChange={(e) => router.push(e.target.value ? `/${e.target.value}` : "/")}
-        className="h-12 w-full min-w-0 cursor-pointer appearance-none rounded-sm border border-line bg-surface pr-11 pl-4 font-display text-lg font-semibold text-ink hover:border-ink sm:w-64"
+        onChange={(e) => router.push(path(e.target.value ? `/${e.target.value}` : "/"))}
+        className="h-12 w-full min-w-0 cursor-pointer appearance-none rounded-sm border border-line bg-surface pr-11 pl-4 font-display text-lg font-semibold text-ink hover:border-ink md:w-60"
       >
-        <option value="">Todo o país</option>
-        <optgroup label="Continente">
+        <option value="">{t.header.wholeCountry}</option>
+        <optgroup label={t.header.mainland}>
           {districts
             .filter((d) => d.region === "continente")
             .map((d) => (
               <option key={d.slug} value={d.slug}>
-                {d.name}
+                {t.districtName(d)}
               </option>
             ))}
         </optgroup>
-        <optgroup label="Regiões autónomas">
+        <optgroup label={t.header.autonomous}>
           {districts
             .filter((d) => d.region !== "continente")
             .map((d) => (
               <option key={d.slug} value={d.slug}>
-                {d.name}
+                {t.districtName(d)}
               </option>
             ))}
         </optgroup>

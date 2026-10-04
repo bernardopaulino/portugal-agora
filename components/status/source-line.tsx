@@ -1,6 +1,7 @@
 import { CloudOff } from "lucide-react";
 
 import { attributions } from "@/lib/config/site";
+import { useI18n } from "@/lib/i18n/client";
 import type { SourceId, SourceResult } from "@/lib/sources/types";
 
 import { RelativeTime } from "./relative-time";
@@ -24,6 +25,7 @@ export function SourceLine({
 }: {
   result: Pick<SourceResult<unknown>, "id" | "status" | "fetchedAt" | "message">;
 }) {
+  const { t } = useI18n();
   const source = credit[result.id];
   return (
     <div className="flex flex-col gap-2 text-sm text-ink-2">
@@ -33,7 +35,7 @@ export function SourceLine({
             href={source.url}
             rel="noopener"
             className="inline-flex items-center"
-            aria-label="IPMA (abre o site do IPMA)"
+            aria-label={t.source.ipmaLogo}
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- SVG oficial, sem otimização */}
             <img
@@ -46,13 +48,13 @@ export function SourceLine({
           </a>
         ) : null}
         <span>
-          Fonte:{" "}
+          {t.source.source}:{" "}
           <a href={source.url} rel="noopener">
             {source.label.replace(/^Fonte: /, "")}
           </a>
           {result.fetchedAt ? (
             <>
-              . Atualizado <RelativeTime iso={result.fetchedAt} />.
+              . {t.source.updated} <RelativeTime iso={result.fetchedAt} />.
             </>
           ) : (
             "."

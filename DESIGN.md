@@ -68,7 +68,7 @@ typography:
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.55
-    fontFeature: "\"tnum\" 1"
+    fontFeature: '"tnum" 1'
   body-sm:
     fontFamily: "Atkinson Hyperlegible Next, sans-serif"
     fontSize: "0.875rem"
@@ -159,6 +159,7 @@ Below the stage the page turns into a calm, cool, light reading ground: a sticky
 Density is low on the stage and moderate below it. Type is large (an 18px root that honours the visitor's own font size), contrast is high, and every level is spoken three ways: colour, icon shape and word. Motion is restricted to the bulletin itself: the lower third wipes in once, the caption crossfades, and that is all.
 
 **Key Characteristics:**
+
 - Full-bleed broadcast-blue stage owns the first viewport, identical in light and dark.
 - Flat district fills in the IPMA scale with white borders; no gradients, no relief, no basemap on the stage.
 - Condensed broadcast sans for headlines, numbers, captions and controls; a hyperlegible sans for reading text.
@@ -170,19 +171,24 @@ Density is low on the stage and moderate below it. Type is large (an 18px root t
 A two-ground palette: a navy sea for the bulletin, cool blue-grey paper for the detail, with the IPMA severity scale as the only chromatic voice.
 
 ### Primary
+
 - **Broadcast Sea** (`stage`): the ground of the bulletin and of the brand mark. Owns the first viewport on every page and does not change between light and dark (dark only deepens it slightly, see sidecar). Also the fill of the one solid header button ("Perto de mim") and of the warning pictograms on the map.
 - **Deep Sea Panel** (`stage-2`): the second tone of the stage; the forecast strip and the hover state of stage-coloured buttons.
 
 ### Secondary
+
 - **Studio Cyan** (`stage-accent`): the single interaction accent on the stage. The outline of the pointed distrito, focus rings on the stage, the forecast pictograms and the earthquake rings.
 - **Bulletin Blue** (`accent`): the single interaction accent on the page ground. Links, text buttons, focus rings, selection tint, caret.
 
 ### Tertiary: the IPMA scale
+
 Two parallel sets of the same four levels, one per ground. Never mix them.
+
 - **Map fills** (`land-none`, `land-yellow`, `land-orange`, `land-red`, `land-unknown`): saturated broadcast fills for the map, the level marks and legend chips on the stage. Fixed across themes. Text on them is `ink-on-land`, except on red, which takes white.
 - **Page severity** (`sev-*`, `sev-*-bg`, `sev-*-ink`): the solid / soft background / readable ink triplet for each level on the page ground; used by the severity badge and the source-failure notices. These are theme-aware.
 
 ### Neutral
+
 - **Cool Paper** (`bg`): the page ground below the stage and the sticky section index.
 - **Card White** (`surface`): header, inputs, map overlay panels.
 - **Mist** (`surface-2`): count chips, selected list rows, quiet fills.
@@ -192,6 +198,7 @@ Two parallel sets of the same four levels, one per ground. Never mix them.
 - **Stage Inks** (`stage-ink`, `stage-ink-2`, `stage-line`): white text, pale blue secondary text and translucent white rules on the stage.
 
 ### Named Rules
+
 **The Only Colour Is Severity Rule.** Saturated colour appears only as an IPMA level (or the fire marker, which is a hazard of its own). Decoration, emphasis and branding stay inside the blues and greys.
 
 **The Two Grounds Rule.** Stage components use `stage-*` and `land-*` tokens; page components use the neutrals and `sev-*`. A component placed on the stage adds the `on-stage` context so links, focus and selection switch to stage colours.
@@ -206,6 +213,7 @@ Two parallel sets of the same four levels, one per ground. Never mix them.
 **Character:** Barlow is the caption face of a broadcast graphic: condensed, upright, bold, good with numbers. Atkinson is designed for low-vision readers and carries every sentence a visitor actually reads.
 
 ### Hierarchy
+
 - **Display** (700, fluid 2.1rem to 3.5rem, 1.04, -0.01em): the bulletin headline only, one per page, balanced.
 - **Headline** (700, 2.25rem, 1.25): section titles in the main column below the stage.
 - **Title** (700, 1.5rem, 1.25): topic values on the stage, caption names in the lower third, warning group titles, sidebar section titles, forecast heading.
@@ -215,6 +223,7 @@ Two parallel sets of the same four levels, one per ground. Never mix them.
 - **Body small** (400, 0.875rem): source lines, legend, notes under the stage.
 
 ### Named Rules
+
 **The Caption Face Rule.** Barlow is for what a TV graphic would set: headlines, numbers, names, labels, controls. Sentences are always Atkinson, even inside a Barlow line (the topic detail drops to Atkinson at body size).
 
 **The Generous Root Rule.** The root is 112.5% of the user's setting; never set text in px, and never go below body small.
@@ -233,9 +242,11 @@ One centred container (80rem, gutters 1rem, 1.5rem from 640px). The stage is ful
 Flat. Depth comes from the two grounds (sea above, paper below) and from hairline rules, not from shadow. One exception is native to the world: the lower third and the overlay panel on the detailed map float above their ground with a soft broadcast drop, the way a caption graphic sits over the picture.
 
 ### Shadow Vocabulary
+
 - **Caption drop** (`box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.55)`): the lower third on the stage (0.45 alpha for the map overlay panel on the page).
 
 ### Named Rules
+
 **The Flat Map Rule.** The bulletin map is flat fills with white borders. No relief, gradients, glows or drop shadows on districts; emphasis is a thicker outline (white for the focused distrito, cyan for the pointed one), and other distritos dim to a muted sea tone on a district page.
 
 ## Shapes
@@ -245,42 +256,53 @@ Small, square-ish corners everywhere (0.25rem): lower third, level marks, foreca
 ## Components
 
 ### Lower Third (signature)
+
 The bulletin's caption bar. A white bar on the stage with a level block on the left (map fill, icon and level word in Barlow) and the caption beside it: distrito name at title size, one sentence of status in body, and an "Abrir [distrito]" link. Pointing at a distrito (hover, keyboard focus, first tap on touch) swaps the caption; with nothing pointed, it shows the national caption. Wipes in once on load (clip-path left to right, 700ms, expo-out, 150ms delay); each caption change fades up 4px in 180ms. Minimum 64px tall; on phones the action drops under the text with a 44px target.
 
 ### Topic List
+
 Four rows on the stage between translucent white rules: a 40px level mark, a small pale label, the value in Barlow at title size with optional detail in Atkinson, and an arrow that nudges right on hover. Each row links to its section below.
 
 ### Level Mark and Legend Chips
+
 Square blocks in the map fill with the level icon: 40px with a 20px icon in topic rows, 24px in the district index, 20px with a white ring in the map legend.
 
 ### Severity Badge
+
 The page-ground expression of a level: a pill with the soft background and readable ink of the level, icon plus word in bold. Medium (body small) in lists, large (body) where a level needs more weight.
 
 ### Buttons
+
 - **Stage button:** solid sea fill, white Barlow label with icon, 48px tall, small corners; hover moves to the deeper sea panel. Used for "Perto de mim" in the header.
 - **Text button:** accent-blue bold body text with icon, 44px target, underline on hover ("Ver no mapa").
 - **Focus:** a 3px accent outline at 3px offset everywhere; cyan on the stage, ink on the lower third.
 
 ### Inputs / Fields
+
 - **District picker:** a native select, 48px, white with hairline border, Barlow label weight, chevron at right; border darkens to ink on hover. Full width on phones, 16rem from 640px.
 
 ### Navigation
+
 - **Header:** white bar with hairline bottom, brand mark (a sea-blue tile with a green Portugal outline) and the name in Barlow, then picker and stage button.
 - **Section index:** sticky, page ground, Barlow label links 48px tall with a 2px bottom border that turns ink on hover, each followed by a count chip in mist with tabular numerals.
 - **Emergency bar:** a thin ink band above the header with the 112 line; it inverts to mist in dark.
 
 ### Lists (instead of cards)
+
 Detail is set as ruled lists: a hairline above the list, a hairline under each item, no boxes. Warning groups show badge plus type at title size, the IPMA text once, and each time window with its places. Event rows add a meta line and a "Ver no mapa" text button; the selected row fills with mist. Empty states are a line of large slate text between two rules.
 
 ### Forecast Strip
+
 Five days in one deep-sea panel with translucent dividers: day name in Barlow, a cyan weather pictogram, max in Barlow bold with min in pale ink, rain chance in body small. Wipes in like the lower third.
 
 ### District Index
+
 A two-column ruled list of every distrito and região, sorted by level then name, each with a 24px level chip; the text path to the map.
 
 ## Do's and Don'ts
 
 ### Do:
+
 - **Do** open every hazard page with the stage: sea ground, flat level map, one display headline, the lower third.
 - **Do** show each level with its map fill or severity triplet, its icon shape and its word.
 - **Do** set headlines, numbers, names and controls in Barlow Semi Condensed and every sentence in Atkinson Hyperlegible Next.
@@ -289,6 +311,7 @@ A two-column ruled list of every distrito and região, sorted by level then name
 - **Do** keep touch targets at 44px or more and respect reduced motion.
 
 ### Don't:
+
 - **Don't** use saturated colour for anything that is not a level or a hazard marker.
 - **Don't** put `land-*` fills on the page ground or `sev-*` triplets on the stage.
 - **Don't** turn the stage light in the light theme; it is the sea in both.

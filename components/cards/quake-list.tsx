@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { useI18n } from "@/lib/i18n/client";
 import type { EarthquakeEvent } from "@/lib/sources/types";
 import { isNotableQuake } from "@/lib/state/bulletin";
 import { capitalize, formatDayTime, formatNumber } from "@/lib/time/format";
@@ -17,20 +18,24 @@ export function QuakeList({
   reference,
   selection,
   onSelect,
-  emptyText = "Nenhum sismo de magnitude 2 ou superior nos últimos 7 dias.",
+  emptyText,
+  initial = INITIAL,
 }: {
   quakes: EarthquakeEvent[];
   reference: Date;
   selection?: Selection | null;
   onSelect?: OnSelect;
   emptyText?: string;
+  /** Quantos sismos notáveis mostrar antes do botão. */
+  initial?: number;
 }) {
+  const { t, locale } = useI18n();
   const [expanded, setExpanded] = useState(false);
-  if (quakes.length === 0) return <EmptyState>{emptyText}</EmptyState>;
+  if (quakes.length === 0) return <EmptyState>{emptyText ?? t.empty.quakesNone}</EmptyState>;
   // Por omissão: só os sismos sentidos ou em território português (os de Espanha e do
   // Atlântico ficam no botão).
   const notable = quakes.filter(isNotableQuake);
-  const visible = expanded ? quakes : notable.slice(0, INITIAL);
+  const visible = expanded ? quakes : notable.slice(0, initial);
 
   return (
     <div className="flex flex-col gap-3">
@@ -41,15 +46,17 @@ export function QuakeList({
               key={q.id}
               id={q.id}
               level={q.severity === "none" ? "info" : q.severity}
-              badge={`Magnitude ${formatNumber(q.magnitude)}`}
-              title={capitalize(q.place.label)}
+              badge={t.lists.magnitude(formatNumber(q.magnitude, 1, locale))}
+              title={capitalize(t.term(q.place.label))}
               meta={
                 <>
-                  {q.felt ? "Sentido pela população. " : ""}
-                  {capitalize(formatDayTime(q.occurredAt, reference, q.place.region))}
-                  {q.place.region === "acores" ? " (hora dos Açores)" : ""}, a{" "}
-                  {Math.round(q.depthKm)} km de profundidade
-                  {q.intensity ? `, intensidade ${q.intensity}` : ""}.
+                  {q.felt ? t.lists.felt : ""}
+                  {t.lists.quakeMeta(
+                    capitalize(formatDayTime(q.occurredAt, reference, q.place.region, locale)) +
+                      (q.place.region === "acores" ? t.lists.azoresTime : ""),
+                    Math.round(q.depthKm),
+                    q.intensity,
+                  )}
                 </>
               }
               selected={selection?.type === "event" && selection.id === q.id}
@@ -68,11 +75,7 @@ export function QuakeList({
           ))}
         </ul>
       ) : null}
-      {visible.length === 0 ? (
-        <EmptyState>
-          Nenhum sismo sentido nem em território português nos últimos 7 dias.
-        </EmptyState>
-      ) : null}
+      {visible.length === 0 ? <EmptyState>{t.empty.quakesNoneNotable}</EmptyState> : null}
       {quakes.length > visible.length || expanded ? (
         <button
           type="button"
@@ -80,7 +83,7 @@ export function QuakeList({
           aria-expanded={expanded}
           className="h-12 self-start rounded-sm border border-ink px-5 font-display text-lg font-semibold hover:bg-ink hover:text-bg"
         >
-          {expanded ? "Mostrar menos" : `Mostrar os ${quakes.length} sismos dos últimos 7 dias`}
+          {expanded ? t.lists.showLess : t.lists.showAllQuakes(quakes.length)}
         </button>
       ) : null}
     </div>

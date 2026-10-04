@@ -1,10 +1,15 @@
+"use client";
+
+import { useI18n } from "@/lib/i18n/client";
+
 /**
  * Índice das secções, fixo no topo ao descer a página. Cada entrada mostra
  * quantos itens tem, para se ver a extensão da página antes de a percorrer.
  */
 export function SectionNav({ items }: { items: { id: string; label: string; count?: number }[] }) {
+  const { t } = useI18n();
   return (
-    <nav aria-label="Secções da página" className="sticky top-0 z-20 border-b border-line bg-bg">
+    <nav aria-label={t.nav.pageSections} className="sticky top-0 z-20 border-b border-line bg-bg">
       <ul className="mx-auto flex max-w-7xl [scrollbar-width:none] gap-1 overflow-x-auto px-4 sm:px-6">
         {items.map((item) => (
           <li key={item.id} className="shrink-0">

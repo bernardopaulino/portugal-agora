@@ -4,27 +4,46 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { useI18n } from "@/lib/i18n/client";
 import type { CountryState } from "@/lib/state/aggregate";
-import { districtCaption, nationalCaption, nationalTopics } from "@/lib/state/bulletin";
+import {
+  countryHeadline,
+  districtCaption,
+  nationalCaption,
+  nationalTopics,
+  type TopicId,
+} from "@/lib/state/bulletin";
 import { capitalize, formatLongDate, formatTime, localDate } from "@/lib/time/format";
 
 import { RelativeTime } from "../status/relative-time";
-import { levels } from "../status/severity";
 import { BulletinMap, type MapLevel, type MapMarker } from "./bulletin-map";
 import { LowerThird, MapLegend, TopicList } from "./parts";
 
 const WEEK = 7 * 86_400_000;
 
+/** Página de cada linha do boletim nacional. */
+export const topicPage: Record<TopicId, string> = {
+  avisos: "/avisos",
+  incendios: "/incendios",
+  sismos: "/sismos",
+  risco: "/risco",
+  ar: "/risco",
+};
+
 /** Carimbo do boletim: "Domingo, 4 de outubro · 16:07 · atualizado há 1 min". */
 export function BulletinStamp({ iso }: { iso: string }) {
+  const { locale, t } = useI18n();
   return (
     <p className="font-display text-lg font-semibold text-stage-ink-2">
       <time dateTime={iso}>
-        {capitalize(formatLongDate(localDate(iso)).replace("-feira", ""))} · {formatTime(iso)}
+        {t.stage.stamp(
+          capitalize(formatLongDate(localDate(iso), locale).replace("-feira", "")),
+          formatTime(iso),
+        )}
       </time>
       <span className="font-sans text-base font-normal">
         {" "}
-        · atualizado <RelativeTime iso={iso} />
+        · {t.stage.updated} <RelativeTime iso={iso} />
       </span>
     </p>
   );
@@ -69,14 +88,15 @@ export function mapMarkers(state: CountryState, district?: string): MapMarker[] 
 
 /**
  * O primeiro ecrã da página inicial: o boletim. Título com o estado do
- * país, quatro linhas (avisos, incêndios, sismos, risco) e o mapa com
- * a legenda do rodapé, que acompanha o distrito para onde se aponta.
+ * país, quatro linhas (avisos, incêndios, sismos, risco) que levam às
+ * páginas de cada tema, e o mapa com a legenda do rodapé, que acompanha
+ * o distrito para onde se aponta.
  */
 export function NationalStage({ state }: { state: CountryState }) {
+  const { t, path } = useI18n();
   const [pointed, setPointed] = useState<string | null>(null);
   const reference = new Date(state.generatedAt);
-  const topics = nationalTopics(state);
-  const caption = pointed ? districtCaption(state, pointed) : null;
+  const caption = pointed ? districtCaption(state, pointed, t) : null;
   const national = state.levelKnown ? state.level : "unknown";
 
   return (
@@ -88,14 +108,13 @@ export function NationalStage({ state }: { state: CountryState }) {
         <div className="flex flex-col gap-7 lg:col-span-5 lg:self-center">
           <div className="flex flex-col gap-3">
             <h1 id="boletim-titulo" className="font-display text-display font-bold text-balance">
-              {state.headline}
+              {countryHeadline(state.levelKnown, state.districts, t)}
             </h1>
             <BulletinStamp iso={state.generatedAt} />
           </div>
-          <TopicList topics={topics} />
+          <TopicList topics={nationalTopics(state, t)} hrefFor={(id) => path(topicPage[id])} />
           <p className="text-sm text-stage-ink-2">
-            O nível segue o aviso mais alto do IPMA em vigor ou previsto.{" "}
-            <Link href="/fontes#niveis">Como lemos os dados</Link>
+            {t.stage.levelRule} <Link href={path("/fontes#niveis")}>{t.stage.howWeRead}</Link>
           </p>
         </div>
 
@@ -113,36 +132,35 @@ export function NationalStage({ state }: { state: CountryState }) {
           {caption ? (
             <LowerThird
               level={caption.level}
-              levelLabel={levels[caption.level].word}
+              levelLabel={t.levels[caption.level]}
               captionKey={caption.slug}
               action={
                 <Link
-                  href={`/${caption.slug}`}
+                  href={path(`/${caption.slug}`)}
                   className="inline-flex items-center gap-1.5 font-bold"
                 >
-                  Abrir {caption.name} <ArrowRight aria-hidden className="size-4" />
+                  {t.caption.open(caption.name)} <ArrowRight aria-hidden className="size-4" />
                 </Link>
               }
             >
               <span className="font-display text-2xl font-bold">{caption.name}</span>
               <span className="text-base">
                 {caption.line}
-                {caption.activeFires > 0
-                  ? `; ${caption.activeFires} ${caption.activeFires === 1 ? "incêndio" : "incêndios"} em curso`
-                  : ""}
-                .
+                {caption.activeFires > 0 ? t.caption.fires(caption.activeFires) : ""}.
               </span>
             </LowerThird>
           ) : (
-            <LowerThird level={national} levelLabel={levels[national].word} captionKey="pais">
-              <span className="font-display text-2xl font-bold">Portugal</span>
-              <span className="text-base">{nationalCaption(state, reference)}</span>
+            <LowerThird level={national} levelLabel={t.levels[national]} captionKey="pais">
+              <span className="font-display text-2xl font-bold">{t.caption.country}</span>
+              <span className="text-base">
+                {nationalCaption(state, reference, t)}
+              </span>
             </LowerThird>
           )}
           <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
             <MapLegend />
             <p className="text-sm text-stage-ink-2">
-              Escolha um distrito no mapa para o resumo. Dados do IPMA e do Fogos.pt.
+              {t.stage.pickHint} {t.stage.dataFrom}
             </p>
           </div>
         </div>

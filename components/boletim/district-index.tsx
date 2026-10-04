@@ -1,6 +1,9 @@
+"use client";
+
 import { districts } from "@/data/districts";
 import type { CountryState } from "@/lib/state/aggregate";
 import { severityRank } from "@/lib/sources/types";
+import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 
 import { levels } from "../status/severity";
@@ -11,6 +14,7 @@ import { levelBlock } from "./parts";
  * primeiro. É o caminho em texto para o mapa do boletim.
  */
 export function DistrictIndex({ state }: { state: CountryState }) {
+  const { t, path } = useI18n();
   const rows = districts
     .map((d) => ({
       district: d,
@@ -20,7 +24,7 @@ export function DistrictIndex({ state }: { state: CountryState }) {
       (a, b) =>
         (b.level === "unknown" ? 0 : severityRank[b.level]) -
           (a.level === "unknown" ? 0 : severityRank[a.level]) ||
-        a.district.name.localeCompare(b.district.name, "pt"),
+        t.districtName(a.district).localeCompare(t.districtName(b.district), t.locale),
     );
 
   return (
@@ -30,7 +34,7 @@ export function DistrictIndex({ state }: { state: CountryState }) {
         return (
           <li key={district.slug} className="border-b border-line">
             <a
-              href={`/${district.slug}`}
+              href={path(`/${district.slug}`)}
               className="flex min-h-11 items-center gap-2.5 py-1.5 text-base text-ink no-underline hover:underline"
             >
               <span
@@ -40,9 +44,9 @@ export function DistrictIndex({ state }: { state: CountryState }) {
                 )}
               >
                 <Icon aria-hidden className="size-3.5" strokeWidth={2.6} />
-                <span className="sr-only">{levels[level].word}: </span>
+                <span className="sr-only">{t.levels[level]}: </span>
               </span>
-              <span className="min-w-0 truncate">{district.name}</span>
+              <span className="min-w-0 truncate">{t.districtName(district)}</span>
             </a>
           </li>
         );

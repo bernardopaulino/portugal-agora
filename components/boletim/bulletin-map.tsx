@@ -3,6 +3,7 @@
 import { getDistrict, type Region } from "@/data/districts";
 import { MAP_VIEWBOX, mapFrames, mapShapes, projectPoint } from "@/data/map-shapes";
 import type { Severity } from "@/lib/sources/types";
+import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 import { useRef } from "react";
 
@@ -14,14 +15,6 @@ const fill: Record<MapLevel, string> = {
   orange: "var(--land-orange)",
   red: "var(--land-red)",
   unknown: "var(--land-unknown)",
-};
-
-const levelName: Record<MapLevel, string> = {
-  none: "sem aviso",
-  yellow: "aviso amarelo",
-  orange: "aviso laranja",
-  red: "aviso vermelho",
-  unknown: "sem dados",
 };
 
 export interface MapMarker {
@@ -50,7 +43,7 @@ function WarningGlyph({ level, x, y }: { level: MapLevel; x: number; y: number }
     <g transform={`translate(${x} ${y})`} aria-hidden>
       <path
         d={g.shape}
-        fill="var(--stage)"
+        fill="var(--ink-on-land)"
         stroke="#fff"
         strokeWidth="2.5"
         strokeLinejoin="round"
@@ -64,7 +57,7 @@ function WarningGlyph({ level, x, y }: { level: MapLevel; x: number; y: number }
 function FireGlyph({ x, y }: { x: number; y: number }) {
   return (
     <g transform={`translate(${x} ${y})`} aria-hidden>
-      <circle r="13" fill="#e2401b" stroke="#fff" strokeWidth="2.5" />
+      <circle r="13" fill="var(--fire)" stroke="#fff" strokeWidth="2.5" />
       <path
         d="M0.4-7.5C1.5-4.2 5.5-2.6 5.5 2.2 5.5 5.6 3 8 0 8S-5.5 5.6-5.5 2.4C-5.5-0.6-3.7-2.3-2.4-3.3-2.2-1.2-1.1 0.1 0.2 0.4-0.6-2.6-0.5-5.2 0.4-7.5Z"
         fill="#fff"
@@ -107,6 +100,7 @@ export function BulletinMap({
 }) {
   // O último toque foi com o dedo ou caneta (e não com o rato)?
   const touch = useRef(false);
+  const { t } = useI18n();
   const active = pointed ? mapShapes.find((s) => s.slug === pointed) : undefined;
   const focused = focus ? mapShapes.find((s) => s.slug === focus) : undefined;
 
@@ -115,7 +109,7 @@ export function BulletinMap({
       viewBox={MAP_VIEWBOX}
       className={cn("h-auto w-full", className)}
       role="group"
-      aria-label="Mapa de Portugal com o nível de aviso de cada distrito"
+      aria-label={t.stage.mapLabel}
       onMouseLeave={() => onPoint?.(null)}
       onPointerDown={(e) => {
         touch.current = e.pointerType !== "mouse";
@@ -145,7 +139,7 @@ export function BulletinMap({
               fontSize="20"
               fontWeight="600"
             >
-              {region === "acores" ? "Açores" : "Madeira"}
+              {region === "acores" ? t.stage.acores : t.stage.madeira}
             </text>
           </g>
         );
@@ -153,13 +147,14 @@ export function BulletinMap({
 
       {mapShapes.map((shape) => {
         const level = levels[shape.slug] ?? "unknown";
-        const name = getDistrict(shape.slug)?.name ?? shape.slug;
+        const district = getDistrict(shape.slug);
+        const name = district ? t.districtName(district) : shape.slug;
         const dim = focus !== undefined && focus !== shape.slug;
         return (
           <a
             key={shape.slug}
             href={`/${shape.slug}`}
-            aria-label={`${name}: ${levelName[level]}`}
+            aria-label={`${name}: ${t.levels[level].toLowerCase()}`}
             onMouseEnter={() => !touch.current && onPoint?.(shape.slug)}
             onFocus={() => !touch.current && onPoint?.(shape.slug)}
             onClick={(e) => {
@@ -174,7 +169,7 @@ export function BulletinMap({
           >
             <path
               d={shape.d}
-              fill={dim ? "#2b4f75" : fill[level]}
+              fill={dim ? "var(--land-dim)" : fill[level]}
               fillOpacity={1}
               stroke="#fff"
               strokeOpacity={dim ? 0.35 : 0.95}

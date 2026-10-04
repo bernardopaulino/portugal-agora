@@ -2,16 +2,13 @@
 
 import { useState } from "react";
 
+import { useI18n } from "@/lib/i18n/client";
 import type { FireEvent } from "@/lib/sources/types";
 import { formatDayTime } from "@/lib/time/format";
 
 import { EmptyState } from "../status/section";
 import { EventRow } from "./row";
 import type { OnSelect, Selection } from "./types";
-
-function plural(n: number, one: string, many: string) {
-  return `${n} ${n === 1 ? one : many}`;
-}
 
 export function FireList({
   fires,
@@ -24,19 +21,17 @@ export function FireList({
   selection?: Selection | null;
   onSelect?: OnSelect;
 }) {
+  const { t, locale } = useI18n();
   const [showAll, setShowAll] = useState(false);
   const relevant = fires.filter((f) => f.severity !== "none");
   const others = fires.filter((f) => f.severity === "none");
 
-  if (fires.length === 0)
-    return <EmptyState>Não há incêndios registados neste momento.</EmptyState>;
+  if (fires.length === 0) return <EmptyState>{t.empty.firesNone}</EmptyState>;
 
   const visible = showAll ? fires : relevant;
   return (
     <div className="flex flex-col gap-3">
-      {relevant.length === 0 ? (
-        <EmptyState>Nenhum incêndio em curso ou em resolução.</EmptyState>
-      ) : null}
+      {relevant.length === 0 ? <EmptyState>{t.empty.firesNoneActive}</EmptyState> : null}
       {visible.length > 0 ? (
         <ul className="flex flex-col border-t border-line">
           {visible.map((f) => (
@@ -44,9 +39,12 @@ export function FireList({
               key={f.id}
               id={f.id}
               level={f.severity === "none" ? "info" : f.severity}
-              badge={f.status}
+              badge={t.term(f.status)}
               title={f.place.label}
-              meta={`${f.nature}. Início ${formatDayTime(f.startedAt, reference, f.place.region)}.`}
+              meta={t.lists.fireMeta(
+                t.term(f.nature),
+                formatDayTime(f.startedAt, reference, f.place.region, locale),
+              )}
               selected={selection?.type === "event" && selection.id === f.id}
               onShow={
                 onSelect && f.coordinates
@@ -61,9 +59,7 @@ export function FireList({
               }
             >
               <p className="text-base">
-                {plural(f.operatives, "operacional", "operacionais")},{" "}
-                {plural(f.groundUnits, "meio terrestre", "meios terrestres")},{" "}
-                {plural(f.aerialUnits, "meio aéreo", "meios aéreos")}.
+                {t.lists.fireMeans(f.operatives, f.groundUnits, f.aerialUnits)}
               </p>
             </EventRow>
           ))}
@@ -76,9 +72,7 @@ export function FireList({
           aria-expanded={showAll}
           className="h-12 self-start rounded-sm border border-ink px-5 font-display text-lg font-semibold hover:bg-ink hover:text-bg"
         >
-          {showAll
-            ? "Mostrar só os ativos"
-            : `Mostrar também ${plural(others.length, "em conclusão ou vigilância", "em conclusão ou vigilância")}`}
+          {showAll ? t.lists.showActiveOnly : t.lists.showOthers(others.length)}
         </button>
       ) : null}
     </div>

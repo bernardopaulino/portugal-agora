@@ -1,4 +1,5 @@
-import { districts, getDistrict } from "@/data/districts";
+import { districts } from "@/data/districts";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { formatNumber } from "@/lib/time/format";
 import { maxSeverity, severityRank } from "@/lib/sources/types";
 import type {
@@ -11,6 +12,10 @@ import type {
   UvReading,
   WarningEvent,
 } from "@/lib/sources/types";
+
+import { countryHeadline, placesPhrase as phrase } from "./bulletin";
+
+const pt = getDictionary("pt");
 
 export interface DistrictStatus {
   slug: string;
@@ -45,27 +50,13 @@ export interface StateInputs {
   airQuality: SourceResult<AirQualityReading[]>;
 }
 
-const levelWord: Record<Severity, string> = {
-  none: "verde",
-  yellow: "amarelo",
-  orange: "laranja",
-  red: "vermelho",
-};
 
 /** Sismos que entram na lista: magnitude ≥ 2 ou sentidos. */
 export const MIN_LISTED_MAGNITUDE = 2;
 
 /** "no Porto e em Viana do Castelo", "em 9 distritos e nos Açores". */
 export function placesPhrase(slugs: string[]): string {
-  const items = slugs.map((s) => getDistrict(s)).filter((d) => d !== undefined);
-  if (items.length <= 2) return items.map((d) => d.inName).join(" e ");
-  const mainland = items.filter((d) => d.region === "continente");
-  const islands = items.filter((d) => d.region !== "continente");
-  const parts: string[] = [];
-  if (mainland.length === 1) parts.push(mainland[0]!.inName);
-  else if (mainland.length > 1) parts.push(`em ${mainland.length} distritos`);
-  parts.push(...islands.map((d) => d.inName));
-  return parts.length > 1 ? `${parts.slice(0, -1).join(", ")} e ${parts.at(-1)}` : (parts[0] ?? "");
+  return phrase(slugs, pt);
 }
 
 export function districtStatuses(
@@ -92,27 +83,10 @@ export function buildHeadline(
   warnings: SourceResult<WarningEvent[]>,
   statuses: Record<string, DistrictStatus>,
 ): { level: Severity; levelKnown: boolean; headline: string } {
-  if (!warnings.data) {
-    return {
-      level: "none",
-      levelKnown: false,
-      headline: "Não foi possível obter os avisos meteorológicos do IPMA.",
-    };
-  }
-  const byLevel = (["red", "orange", "yellow"] as const)
-    .map((level) => ({
-      level,
-      slugs: Object.values(statuses)
-        .filter((s) => s.level === level)
-        .map((s) => s.slug),
-    }))
-    .filter((g) => g.slugs.length > 0);
-
-  if (byLevel.length === 0) {
-    return { level: "none", levelKnown: true, headline: "Sem avisos meteorológicos em Portugal." };
-  }
-  const sentences = byLevel.map((g) => `Aviso ${levelWord[g.level]} ${placesPhrase(g.slugs)}.`);
-  return { level: byLevel[0]!.level, levelKnown: true, headline: sentences.join(" ") };
+  const levelKnown = Boolean(warnings.data);
+  const level = levelKnown ? maxSeverity(Object.values(statuses).map((s) => s.level)) : "none";
+  // O texto em português (API, imagens de partilha); as páginas usam o do idioma.
+  return { level, levelKnown, headline: countryHeadline(levelKnown, statuses, pt) };
 }
 
 export function buildSummary(inputs: StateInputs, now: Date): string[] {

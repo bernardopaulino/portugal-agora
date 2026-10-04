@@ -7,8 +7,8 @@
 
 /*
  * Tokens do Portugal Agora: o boletim meteorológico.
- * O "palco" é o azul do mar do boletim da televisão, igual nos dois
- * temas. A cor viva é só a severidade (os quatro níveis do IPMA).
+ * O "palco" é o mar à volta do mapa: azul-claro de dia, azul-noite no
+ * tema escuro. A cor viva é só a severidade (os quatro níveis do IPMA).
  */
 :root {
   --bg: #eef2f5;
@@ -20,12 +20,14 @@
   --accent: #0b5cad;
 
   /* Palco (mar) e o que está sobre ele. */
-  --stage: #0a2a4a;
-  --stage-2: #0f3560;
-  --stage-ink: #ffffff;
-  --stage-ink-2: #b8cbe0;
-  --stage-line: rgb(255 255 255 / 0.16);
-  --stage-accent: #8fd6ff;
+  --stage: #dcebf5;
+  --stage-2: #c6dcec;
+  --stage-ink: #0a1d2e;
+  --stage-ink-2: #3a5168;
+  --stage-line: rgb(10 29 46 / 0.15);
+  --stage-accent: #0b5cad;
+  /* Distritos esbatidos na página de um distrito. */
+  --land-dim: #b5cbdd;
 
   /* Preenchimentos do mapa do boletim (escala do IPMA). */
   --land-none: #4f9d63;
@@ -33,6 +35,9 @@
   --land-orange: #f07f1a;
   --land-red: #d7262b;
   --land-unknown: #8797a3;
+  --land-info: #8fd6ff;
+  /* Incêndio em curso (pictograma no mapa e na legenda). */
+  --fire: #e2401b;
   /* Texto sobre as cores do mapa e sobre a barra clara: escuro nos dois temas. */
   --ink-on-land: #0a1d2e;
 
@@ -85,6 +90,11 @@
   --accent: #7fc7ff;
   --stage: #071f38;
   --stage-2: #0b2b4c;
+  --stage-ink: #ffffff;
+  --stage-ink-2: #b8cbe0;
+  --stage-line: rgb(255 255 255 / 0.16);
+  --stage-accent: #8fd6ff;
+  --land-dim: #2b4f75;
 
   --sev-none: #4caf73;
   --sev-none-bg: #15321f;
@@ -116,6 +126,11 @@
     --accent: #7fc7ff;
     --stage: #071f38;
     --stage-2: #0b2b4c;
+    --stage-ink: #ffffff;
+    --stage-ink-2: #b8cbe0;
+    --stage-line: rgb(255 255 255 / 0.16);
+    --stage-accent: #8fd6ff;
+    --land-dim: #2b4f75;
     color-scheme: dark;
   }
 }

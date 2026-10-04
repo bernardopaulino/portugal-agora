@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Activity,
   CircleCheck,
@@ -9,6 +11,7 @@ import {
 } from "lucide-react";
 
 import type { Severity } from "@/lib/sources/types";
+import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 
 /** Losango com ponto de exclamação: o símbolo do nível laranja, diferente do triângulo do amarelo. */
@@ -118,6 +121,7 @@ export function SeverityBadge({
   size?: "md" | "lg";
   className?: string;
 }) {
+  const { t } = useI18n();
   const style = levels[level];
   const Icon = style.icon;
   return (
@@ -130,7 +134,7 @@ export function SeverityBadge({
       )}
     >
       <Icon aria-hidden className={size === "lg" ? "size-5" : "size-4"} strokeWidth={2.4} />
-      {label ?? style.word}
+      {label ?? t.levels[level]}
     </span>
   );
 }

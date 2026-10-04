@@ -2,14 +2,14 @@
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useI18n } from "@/lib/i18n/client";
 
 import type { District } from "@/data/districts";
 import type { ForecastDay } from "@/lib/sources/ipma-forecast";
 import type { SourceResult } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
-import { districtTopics } from "@/lib/state/bulletin";
-import { districtHeadline } from "@/lib/state/district";
+import { districtHeadline, districtTopics } from "@/lib/state/bulletin";
+
 
 import { BulletinMap } from "./bulletin-map";
 import { ForecastStrip } from "./forecast-strip";
@@ -29,7 +29,7 @@ export function DistrictStage({
   state: CountryState;
   forecast: SourceResult<ForecastDay[]>;
 }) {
-  const [pointed, setPointed] = useState<string | null>(null);
+  const { t, path } = useI18n();
   const reference = new Date(state.generatedAt);
 
   return (
@@ -40,20 +40,20 @@ export function DistrictStage({
       <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-8 px-4 pt-6 pb-8 sm:px-6 lg:grid-cols-12 lg:pt-8">
         <div className="flex flex-col gap-6 lg:col-span-7 lg:self-center">
           <Link
-            href="/"
+            href={path("/")}
             className="inline-flex items-center gap-2 self-start text-base font-bold no-underline hover:underline"
           >
-            <ArrowLeft aria-hidden className="size-4" /> Todo o país
+            <ArrowLeft aria-hidden className="size-4" /> {t.stage.back}
           </Link>
           <div className="flex flex-col gap-3">
             <h1 id="boletim-titulo" className="font-display text-display font-bold text-balance">
-              {districtHeadline(district, state.warnings.data ?? [], state.levelKnown)}
+              {districtHeadline(district, state.warnings.data ?? [], state.levelKnown, t)}
             </h1>
             <BulletinStamp iso={state.generatedAt} />
           </div>
-          <TopicList topics={districtTopics(state, district.slug)} />
+          <TopicList topics={districtTopics(state, district.slug, t)} />
           <p className="text-sm text-stage-ink-2">
-            <Link href="/fontes#niveis">Como lemos os dados</Link>
+            <Link href={path("/fontes#niveis")}>{t.stage.howWeRead}</Link>
           </p>
         </div>
 
@@ -62,8 +62,6 @@ export function DistrictStage({
             levels={mapLevels(state)}
             markers={mapMarkers(state, district.slug)}
             focus={district.slug}
-            pointed={pointed}
-            onPoint={setPointed}
             className="max-w-[300px] sm:max-w-[400px]"
           />
           <MapLegend showMarkers={false} />
@@ -75,10 +73,10 @@ export function DistrictStage({
           ) : (
             <section aria-labelledby="previsao-titulo" className="flex flex-col gap-2">
               <h2 id="previsao-titulo" className="font-display text-2xl font-bold">
-                Previsão para {district.capital}
+                {t.stage.forecastFor(district.capital)}
               </h2>
               <p className="text-stage-ink-2">
-                Sem previsão de momento. Consulte <a href="https://www.ipma.pt">ipma.pt</a>.
+                {t.stage.forecastNone} <a href="https://www.ipma.pt">ipma.pt</a>.
               </p>
             </section>
           )}

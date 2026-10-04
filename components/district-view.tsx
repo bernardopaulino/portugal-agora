@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import useSWR from "swr";
+import { useState } from "react";
 
 import type { District } from "@/data/districts";
+import { useI18n } from "@/lib/i18n/client";
+import { useLiveState, useMapControls } from "@/lib/hooks/live-state";
 import type { ForecastDay } from "@/lib/sources/ipma-forecast";
 import type { SourceResult } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
@@ -16,17 +17,10 @@ import { AirAndUv } from "./cards/air-uv";
 import { FireList } from "./cards/fire-list";
 import { QuakeList } from "./cards/quake-list";
 import { RiskTable } from "./cards/risk-table";
-import type { Selection } from "./cards/types";
 import { WarningGroups } from "./cards/warning-groups";
-import { defaultLayers, type LayerId } from "./map/layers";
+import { defaultLayers } from "./map/layers";
 import { MapPanel } from "./map/map-panel";
 import { EmptyState, Section } from "./status/section";
-
-const fetcher = async (url: string): Promise<CountryState> => {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
-};
 
 export function DistrictView({
   district,
@@ -37,27 +31,12 @@ export function DistrictView({
   initial: CountryState;
   forecast: SourceResult<ForecastDay[]>;
 }) {
-  const { data } = useSWR("/api/state", fetcher, {
-    fallbackData: initial,
-    refreshInterval: 60_000,
-    revalidateOnMount: false,
-    keepPreviousData: true,
-  });
-  const state = data ?? initial;
+  const { t } = useI18n();
+  const state = useLiveState(initial);
   const reference = new Date(state.generatedAt);
-  const [layers, setLayers] = useState<LayerId[]>(defaultLayers);
-  const [selection, setSelection] = useState<Selection | null>(null);
+  const { map: controls, mapRef } = useMapControls(defaultLayers, district.region);
   const [allRisk, setAllRisk] = useState(false);
-  const mapRef = useRef<HTMLElement>(null);
-  const toggleLayer = useCallback(
-    (layer: LayerId) =>
-      setLayers((c) => (c.includes(layer) ? c.filter((l) => l !== layer) : [...c, layer])),
-    [],
-  );
-  const showOnMap = useCallback((s: Selection) => {
-    setSelection(s);
-    mapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
+  const inPlace = t.inPlace(district);
 
   const warnings = (state.warnings.data ?? []).filter((w) => w.place.district === district.slug);
   const fires = (state.fires.data ?? []).filter((f) => f.place.district === district.slug);
@@ -75,46 +54,49 @@ export function DistrictView({
 
       <SectionNav
         items={[
-          { id: "avisos", label: "Avisos", count: state.warnings.data ? groups : undefined },
+          {
+            id: "avisos",
+            label: t.nav.warnings,
+            count: state.warnings.data ? groups : undefined,
+          },
           {
             id: "incendios",
-            label: "Incêndios",
+            label: t.nav.fires,
             count: state.fires.data ? fires.filter((f) => f.active).length : undefined,
           },
           {
             id: "sismos",
-            label: "Sismos",
+            label: t.nav.quakes,
             count: state.earthquakes.data ? quakes.length : undefined,
           },
-          ...(risk.length > 0 ? [{ id: "risco", label: "Risco por concelho" }] : []),
-          { id: "ar", label: "Ar e UV" },
-          { id: "mapa", label: "Mapa detalhado" },
+          ...(risk.length > 0 ? [{ id: "risco", label: t.sections.riskByConcelho }] : []),
+          { id: "ar", label: t.sections.airUv },
+          { id: "mapa", label: t.sections.map },
         ]}
       />
 
       <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-x-14 gap-y-14 px-4 pt-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="flex min-w-0 flex-col gap-14">
-          <Section id="avisos" title="Avisos meteorológicos" result={state.warnings}>
+          <Section id="avisos" title={t.sections.warnings} result={state.warnings}>
             <WarningGroups
               warnings={warnings}
               reference={reference}
-              emptyText={`Não há avisos meteorológicos ${district.inName} para os próximos três dias.`}
+              emptyText={t.empty.warningsDistrict(inPlace)}
               showPlaces={district.region === "acores"}
             />
           </Section>
 
-          <Section id="incendios" title="Incêndios" result={state.fires}>
+          <Section id="incendios" title={t.sections.fires} result={state.fires}>
             {state.fires.data ? (
               <FireList
                 fires={fires}
                 reference={reference}
-                selection={selection}
-                onSelect={showOnMap}
+                selection={controls.selection}
+                onSelect={controls.showOnMap}
               />
             ) : (
               <EmptyState>
-                Informação sobre incêndios indisponível neste momento. Consulte os incêndios ativos
-                em{" "}
+                {t.empty.firesDown}{" "}
                 <a href="https://fogos.pt" rel="noopener">
                   fogos.pt
                 </a>
@@ -123,22 +105,22 @@ export function DistrictView({
             )}
           </Section>
 
-          <Section id="sismos" title="Sismos nos últimos 7 dias" result={state.earthquakes}>
+          <Section id="sismos" title={t.sections.quakes} result={state.earthquakes}>
             <QuakeList
               quakes={quakes}
               reference={reference}
-              selection={selection}
-              onSelect={showOnMap}
-              emptyText={`Nenhum sismo de magnitude 2 ou superior ${district.inName} nos últimos 7 dias.`}
+              selection={controls.selection}
+              onSelect={controls.showOnMap}
+              emptyText={t.empty.quakesNoneDistrict(inPlace)}
             />
           </Section>
         </div>
 
         <aside className="flex flex-col gap-12 self-start lg:sticky lg:top-16">
           {risk.length > 0 ? (
-            <Section id="risco" title="Risco de incêndio" result={state.fireRisk} size="md">
+            <Section id="risco" title={t.sections.riskByConcelho} result={state.fireRisk} size="md">
               {notableRisk.length === 0 && !allRisk ? (
-                <EmptyState>Risco reduzido em todos os concelhos, hoje e amanhã.</EmptyState>
+                <EmptyState>{t.empty.riskLow}</EmptyState>
               ) : (
                 <RiskTable rows={allRisk ? risk : notableRisk} />
               )}
@@ -149,20 +131,15 @@ export function DistrictView({
                   aria-expanded={allRisk}
                   className="self-start text-base font-bold text-accent underline underline-offset-4"
                 >
-                  {allRisk
-                    ? "Mostrar só risco moderado ou superior"
-                    : `Mostrar os ${risk.length} concelhos`}
+                  {allRisk ? t.lists.riskOnlyNotable : t.lists.riskAll(risk.length)}
                 </button>
               ) : null}
             </Section>
           ) : null}
 
-          <Section id="ar" title="Ar e raios UV" result={state.airQuality} size="md">
+          <Section id="ar" title={t.sections.airUv} result={state.airQuality} size="md">
             <AirAndUv air={air} uv={uv} />
-            <p className="text-sm text-ink-2">
-              Qualidade do ar: estimativa de modelo (Copernicus CAMS via Open-Meteo) para{" "}
-              {district.capital}. Índice UV: previsão do IPMA.
-            </p>
+            <p className="text-sm text-ink-2">{t.lists.airNoteDistrict(district.capital)}</p>
           </Section>
         </aside>
       </div>
@@ -174,15 +151,15 @@ export function DistrictView({
         className="mx-auto mt-16 flex max-w-7xl scroll-mt-14 flex-col gap-4 px-4 sm:px-6"
       >
         <h2 id="mapa-titulo" className="font-display text-4xl leading-tight font-bold">
-          Mapa de {district.name}
+          {t.sections.mapOf(t.districtName(district))}
         </h2>
         <MapPanel
           state={state}
-          layers={layers}
-          onToggleLayer={toggleLayer}
-          selection={selection}
-          onSelect={setSelection}
-          onClearSelection={() => setSelection(null)}
+          layers={controls.layers}
+          onToggleLayer={controls.toggleLayer}
+          selection={controls.selection}
+          onSelect={controls.setSelection}
+          onClearSelection={() => controls.setSelection(null)}
           region={district.region}
           focus={district.slug}
         />

@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { districtAt, type DistrictFeature } from "@/lib/geo/geometry";
 import { writeStorage } from "@/lib/hooks/external";
+import { useI18n } from "@/lib/i18n/client";
 
 export const MY_DISTRICT_KEY = "pa:distrito";
 
@@ -17,13 +18,14 @@ type Status = "idle" | "locating" | "error";
  */
 export function NearMeButton() {
   const router = useRouter();
+  const { t, path } = useI18n();
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
 
   async function locate() {
     if (!("geolocation" in navigator)) {
       setStatus("error");
-      setMessage("Este dispositivo não permite obter a localização. Escolha o distrito na lista.");
+      setMessage(t.header.geoUnsupported);
       return;
     }
     setStatus("locating");
@@ -40,20 +42,20 @@ export function NearMeButton() {
           );
           if (!slug) {
             setStatus("error");
-            setMessage("Parece estar fora de Portugal. Escolha o distrito na lista.");
+            setMessage(t.header.geoOutside);
             return;
           }
           writeStorage(MY_DISTRICT_KEY, slug);
           setStatus("idle");
-          router.push(`/${slug}`);
+          router.push(path(`/${slug}`));
         } catch {
           setStatus("error");
-          setMessage("Não foi possível identificar o distrito. Escolha-o na lista.");
+          setMessage(t.header.geoFailed);
         }
       },
       () => {
         setStatus("error");
-        setMessage("Sem acesso à localização. Pode escolher o distrito na lista.");
+        setMessage(t.header.geoDenied);
       },
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 600_000 },
     );
@@ -65,14 +67,17 @@ export function NearMeButton() {
         type="button"
         onClick={locate}
         disabled={status === "locating"}
-        className="inline-flex h-12 items-center gap-2 rounded-sm bg-stage px-3 font-display text-base font-semibold whitespace-nowrap text-stage-ink hover:bg-stage-2 disabled:opacity-70 sm:px-4 sm:text-lg"
+        aria-label={t.header.nearMe}
+        className="inline-flex h-12 min-w-12 items-center justify-center gap-2 rounded-sm bg-ink px-3 font-display text-lg font-semibold whitespace-nowrap text-bg hover:opacity-90 disabled:opacity-70 sm:px-4"
       >
         <LocateFixed aria-hidden className="size-5" />
-        <span>{status === "locating" ? "A localizar…" : "Perto de mim"}</span>
+        <span className="hidden sm:inline">
+          {status === "locating" ? t.header.locating : t.header.nearMe}
+        </span>
       </button>
       <div role="status" aria-live="polite">
         {message ? (
-          <p className="mt-2 max-w-xs text-sm text-ink sm:absolute sm:top-14 sm:right-0 sm:z-30 sm:mt-0 sm:w-72 sm:rounded-lg sm:border sm:border-line sm:bg-surface sm:p-3 sm:shadow-lg">
+          <p className="mt-2 max-w-xs text-sm text-ink sm:absolute sm:top-14 sm:right-0 sm:z-30 sm:mt-0 sm:w-72 sm:rounded-sm sm:border sm:border-line sm:bg-surface sm:p-3 sm:shadow-[0_10px_30px_-12px_rgb(0_0_0/0.35)]">
             {message}
           </p>
         ) : null}

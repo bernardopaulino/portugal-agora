@@ -1,45 +1,20 @@
 import { concelhoByDico } from "@/data/dico";
 import type { District } from "@/data/districts";
 import { fireRiskLabels } from "@/lib/sources/ipma-rcm";
+import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import { maxSeverity, type Severity, type WarningEvent } from "@/lib/sources/types";
 
 import type { CountryState } from "./aggregate";
-
-const levelWord: Record<Severity, string> = {
-  none: "verde",
-  yellow: "amarelo",
-  orange: "laranja",
-  red: "vermelho",
-};
-
-function joinPt(items: string[]): string {
-  return items.length <= 1
-    ? (items[0] ?? "")
-    : `${items.slice(0, -1).join(", ")} e ${items.at(-1)}`;
-}
+import { districtHeadline as headline } from "./bulletin";
 
 /** "Aviso laranja de vento em Lisboa. Aviso amarelo de precipitação." */
 export function districtHeadline(
   district: District,
   warnings: WarningEvent[],
   known: boolean,
+  t: Dictionary = getDictionary("pt"),
 ): string {
-  if (!known) return `Não foi possível obter os avisos do IPMA para ${district.name}.`;
-  const own = warnings.filter((w) => w.place.district === district.slug);
-  if (own.length === 0) return `Sem avisos meteorológicos ${district.inName}.`;
-  return (["red", "orange", "yellow"] as const)
-    .map((level) => {
-      const types = [
-        ...new Set(own.filter((w) => w.severity === level).map((w) => w.type.toLowerCase())),
-      ];
-      return types.length ? { level, types } : null;
-    })
-    .filter((x) => x !== null)
-    .map(
-      (g, i) =>
-        `Aviso ${levelWord[g.level]} de ${joinPt(g.types)}${i === 0 ? ` ${district.inName}` : ""}.`,
-    )
-    .join(" ");
+  return headline(district, warnings, known, t);
 }
 
 export interface ConcelhoRisk {

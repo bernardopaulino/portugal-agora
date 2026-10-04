@@ -111,6 +111,71 @@ for (const feature of geo.features) {
   shapes.set(slug, entry);
 }
 
+/**
+ * Contorno do continente para o logótipo: os segmentos que pertencem a um
+ * só distrito são a fronteira exterior; encadeados, dão o contorno do país.
+ */
+function mainlandOutline() {
+  const key = ([x, y]) => `${x.toFixed(6)},${y.toFixed(6)}`;
+  const count = new Map();
+  const edges = [];
+  for (const feature of geo.features) {
+    if (feature.properties.region !== "continente") continue;
+    const polygons =
+      feature.geometry.type === "Polygon"
+        ? [feature.geometry.coordinates]
+        : feature.geometry.coordinates;
+    for (const polygon of polygons)
+      for (const ring of polygon)
+        for (let i = 0; i < ring.length - 1; i++) {
+          const a = key(ring[i]);
+          const b = key(ring[i + 1]);
+          const k = a < b ? `${a}|${b}` : `${b}|${a}`;
+          count.set(k, (count.get(k) ?? 0) + 1);
+          edges.push([a, b, ring[i], ring[i + 1]]);
+        }
+  }
+  const next = new Map();
+  const point = new Map();
+  for (const [a, b, pa, pb] of edges) {
+    const k = a < b ? `${a}|${b}` : `${b}|${a}`;
+    if (count.get(k) !== 1) continue;
+    next.set(a, b);
+    point.set(a, pa);
+    point.set(b, pb);
+  }
+  const rings = [];
+  const seen = new Set();
+  for (const start of next.keys()) {
+    if (seen.has(start)) continue;
+    const ring = [];
+    let cur = start;
+    while (cur && !seen.has(cur)) {
+      seen.add(cur);
+      ring.push(point.get(cur));
+      cur = next.get(cur);
+    }
+    rings.push(ring);
+  }
+  const p = proj.continente;
+  const largest = rings
+    .map((r) => r.map((c) => project(p, c)))
+    .reduce((a, b) => (Math.abs(ringArea(b)) > Math.abs(ringArea(a)) ? b : a));
+  const simple = simplify([...largest, largest[0]], 6);
+  const xs = simple.map((q) => q[0]);
+  const ys = simple.map((q) => q[1]);
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  const scale = 100 / (Math.max(...ys) - minY);
+  const norm = simple.map(([x, y]) => [(x - minX) * scale, (y - minY) * scale]);
+  return {
+    d: ringPath(norm),
+    width: round((Math.max(...xs) - minX) * scale),
+  };
+}
+
+const outline = mainlandOutline();
+
 const out = [...shapes.values()].map(({ slug, region, d, rings }) => {
   const largest = rings.reduce((a, b) => (Math.abs(ringArea(b)) > Math.abs(ringArea(a)) ? b : a));
   const [cx, cy] = ringCentroid(largest);
@@ -147,6 +212,9 @@ export function projectPoint([lon, lat]: [number, number], region: Region): [num
 }
 
 export const mapShapes: MapShape[] = ${JSON.stringify(out)};
+
+/** Contorno simplificado do continente para o logótipo (altura 100). */
+export const logoOutline = { d: ${JSON.stringify(outline.d)}, width: ${outline.width}, height: 100 };
 `;
 
 writeFileSync("data/map-shapes.ts", ts);
