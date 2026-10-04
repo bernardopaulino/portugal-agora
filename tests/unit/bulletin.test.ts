@@ -61,11 +61,14 @@ describe("riskLevel", () => {
 describe("warningTypes", () => {
   it("junta os tipos sem repetir", () => {
     expect(
-      warningTypes([
-        warning("porto"),
-        warning("braga", { type: "Precipitação" }),
-        warning("faro", { type: "Trovoada" }),
-      ], getDictionary("pt")),
+      warningTypes(
+        [
+          warning("porto"),
+          warning("braga", { type: "Precipitação" }),
+          warning("faro", { type: "Trovoada" }),
+        ],
+        getDictionary("pt"),
+      ),
     ).toBe("trovoada e precipitação");
   });
 });

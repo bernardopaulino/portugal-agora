@@ -558,11 +558,6 @@ export default function LiveMap({
   }, [focus, districtGeo]);
 
   return (
-    <div
-      ref={container}
-      role="region"
-      aria-label={t.map.ariaLabel}
-      className="h-full w-full"
-    />
+    <div ref={container} role="region" aria-label={t.map.ariaLabel} className="h-full w-full" />
   );
 }

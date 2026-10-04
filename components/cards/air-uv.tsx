@@ -13,7 +13,8 @@ export function AirQualitySummary({ readings }: { readings: AirQualityReading[] 
   const { t } = useI18n();
   const concerning = readings.filter((r) => r.severity !== "none").sort((a, b) => b.eaqi - a.eaqi);
   if (readings.length === 0) return <EmptyState>{t.empty.airNone}</EmptyState>;
-  if (concerning.length === 0) return <EmptyState>{t.empty.airAllGood(readings.length)}</EmptyState>;
+  if (concerning.length === 0)
+    return <EmptyState>{t.empty.airAllGood(readings.length)}</EmptyState>;
   return (
     <ul className="flex flex-col border-t border-line">
       {concerning.map((r) => (

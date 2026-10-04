@@ -238,8 +238,8 @@ function English() {
       </ul>
       <h3>How we classify earthquakes</h3>
       <p>
-        Magnitude 5.5 or more: red. 4.5 to 5.4: orange. 3.5 to 4.4, or any felt earthquake:
-        yellow. Below that: not highlighted.
+        Magnitude 5.5 or more: red. 4.5 to 5.4: orange. 3.5 to 4.4, or any felt earthquake: yellow.
+        Below that: not highlighted.
       </p>
 
       <h2>Wildfires</h2>
@@ -252,8 +252,8 @@ function English() {
       </p>
       <h3>How we classify wildfires</h3>
       <p>
-        Dispatched, in progress or with crews on site: orange. Being resolved: yellow. Concluding
-        or under watch: not highlighted. Incidents that ANEPC flags as important: red.
+        Dispatched, in progress or with crews on site: orange. Being resolved: yellow. Concluding or
+        under watch: not highlighted. Incidents that ANEPC flags as important: red.
       </p>
 
       <h2>Air quality</h2>
@@ -270,8 +270,8 @@ function English() {
       </p>
       <p>
         It is a <strong>model estimate</strong> for each district capital, not a station
-        measurement. We use the European Air Quality Index: good or fair, not highlighted;
-        moderate, yellow; poor, orange; very poor or worse, red.
+        measurement. We use the European Air Quality Index: good or fair, not highlighted; moderate,
+        yellow; poor, orange; very poor or worse, red.
       </p>
 
       <h2>Map and administrative boundaries</h2>

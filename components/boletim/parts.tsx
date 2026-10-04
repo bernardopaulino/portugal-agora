@@ -149,7 +149,10 @@ export function MapLegend({ showMarkers = true }: { showMarkers?: boolean }) {
       {showMarkers ? (
         <>
           <li className="inline-flex items-center gap-2">
-            <span aria-hidden className="size-3.5 rounded-full bg-[var(--fire)] ring-2 ring-white" />
+            <span
+              aria-hidden
+              className="size-3.5 rounded-full bg-[var(--fire)] ring-2 ring-white"
+            />
             {t.stage.legendFire}
           </li>
           <li className="inline-flex items-center gap-2">

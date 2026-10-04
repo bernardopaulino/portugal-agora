@@ -66,7 +66,12 @@ export function formatTime(iso: string, region?: Region): string {
 }
 
 /** "hoje às 16:15", "amanhã às 06:00", "ontem às 21:00" ou "3 out. às 12:00". */
-export function formatDayTime(iso: string, now: Date, region?: Region, locale: Locale = "pt"): string {
+export function formatDayTime(
+  iso: string,
+  now: Date,
+  region?: Region,
+  locale: Locale = "pt",
+): string {
   const { day, time } = dayAndTime(iso, now, region, locale);
   return words[locale].dayTime(day, time);
 }

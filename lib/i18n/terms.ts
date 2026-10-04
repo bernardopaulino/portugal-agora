@@ -141,9 +141,7 @@ export function translateTerm(text: string): string {
   if (place) {
     const dir = directions[place[1]!.toLowerCase()];
     if (dir) {
-      const country = place[3]
-        ? ` (${countries[place[3].toLowerCase()] ?? place[3]})`
-        : "";
+      const country = place[3] ? ` (${countries[place[3].toLowerCase()] ?? place[3]})` : "";
       return `${dir.charAt(0).toUpperCase()}${dir.slice(1)} of ${place[2]}${country}`;
     }
   }

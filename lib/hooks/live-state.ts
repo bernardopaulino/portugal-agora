@@ -67,6 +67,15 @@ export function useMapControls(initialLayers: LayerId[], initialRegion: Region =
 
   return {
     mapRef,
-    map: { layers, toggleLayer, selection, setSelection, region, setRegion, showOnMap, scrollToMap },
+    map: {
+      layers,
+      toggleLayer,
+      selection,
+      setSelection,
+      region,
+      setRegion,
+      showOnMap,
+      scrollToMap,
+    },
   };
 }

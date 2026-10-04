@@ -208,10 +208,7 @@ function Legend({ layers }: { layers: LayerId[] }) {
       </span>,
     );
   }
-  if (layers.includes("quakes"))
-    items.push(
-      <span key="q">{t.map.quakeLegend}</span>,
-    );
+  if (layers.includes("quakes")) items.push(<span key="q">{t.map.quakeLegend}</span>);
   return <div className="flex flex-col gap-2 text-sm text-ink-2">{items}</div>;
 }
 

@@ -5,9 +5,7 @@ import { ProsePage } from "@/components/layout/prose-page";
 import { isLocale } from "@/lib/i18n/locales";
 import { alternates } from "@/lib/i18n/metadata";
 
-export async function generateMetadata(
-  props: PageProps<"/[lang]/privacidade">,
-): Promise<Metadata> {
+export async function generateMetadata(props: PageProps<"/[lang]/privacidade">): Promise<Metadata> {
   const { lang } = await props.params;
   if (!isLocale(lang)) return {};
   return {

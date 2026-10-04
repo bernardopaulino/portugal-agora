@@ -152,9 +152,7 @@ export function NationalStage({ state }: { state: CountryState }) {
           ) : (
             <LowerThird level={national} levelLabel={t.levels[national]} captionKey="pais">
               <span className="font-display text-2xl font-bold">{t.caption.country}</span>
-              <span className="text-base">
-                {nationalCaption(state, reference, t)}
-              </span>
+              <span className="text-base">{nationalCaption(state, reference, t)}</span>
             </LowerThird>
           )}
           <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">

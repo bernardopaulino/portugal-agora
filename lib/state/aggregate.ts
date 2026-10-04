@@ -50,7 +50,6 @@ export interface StateInputs {
   airQuality: SourceResult<AirQualityReading[]>;
 }
 
-
 /** Sismos que entram na lista: magnitude ≥ 2 ou sentidos. */
 export const MIN_LISTED_MAGNITUDE = 2;
 
