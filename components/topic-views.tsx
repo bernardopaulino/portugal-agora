@@ -182,7 +182,7 @@ export function RiskView({ initial }: { initial: CountryState }) {
           <button
             type="button"
             onClick={controls.scrollToMap}
-            className="self-start text-base font-bold text-accent underline underline-offset-4"
+            className="inline-flex min-h-11 items-center self-start text-base font-bold text-accent underline underline-offset-4"
           >
             {t.lists.riskOnMap}
           </button>

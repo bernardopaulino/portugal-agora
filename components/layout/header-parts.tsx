@@ -14,7 +14,7 @@ export function HomeLink({ children }: { children: ReactNode }) {
     <Link
       href={path("/")}
       aria-label={t.nav.home}
-      className="flex min-w-0 items-center gap-2.5 text-ink no-underline"
+      className="flex min-h-11 min-w-11 items-center gap-2 text-ink no-underline sm:gap-2.5"
     >
       {children}
     </Link>
@@ -59,7 +59,7 @@ export function MainNav() {
   const current = useCurrentPath();
   return (
     <nav aria-label={t.nav.label} className="border-b border-line bg-surface">
-      <ul className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-2 [scrollbar-width:none] sm:px-4">
+      <ul className="mx-auto flex max-w-7xl [scrollbar-width:none] gap-1 overflow-x-auto px-2 sm:px-4">
         {tabs.map((tab) => {
           const active = current === tab.path;
           return (

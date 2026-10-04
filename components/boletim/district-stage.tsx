@@ -10,7 +10,6 @@ import type { SourceResult } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
 import { districtHeadline, districtTopics } from "@/lib/state/bulletin";
 
-
 import { BulletinMap } from "./bulletin-map";
 import { ForecastStrip } from "./forecast-strip";
 import { BulletinStamp, mapLevels, mapMarkers } from "./national-stage";
@@ -41,7 +40,7 @@ export function DistrictStage({
         <div className="flex flex-col gap-6 lg:col-span-7 lg:self-center">
           <Link
             href={path("/")}
-            className="inline-flex items-center gap-2 self-start text-base font-bold no-underline hover:underline"
+            className="inline-flex min-h-11 items-center gap-2 self-start text-base font-bold no-underline hover:underline"
           >
             <ArrowLeft aria-hidden className="size-4" /> {t.stage.back}
           </Link>

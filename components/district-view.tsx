@@ -129,7 +129,7 @@ export function DistrictView({
                   type="button"
                   onClick={() => setAllRisk((v) => !v)}
                   aria-expanded={allRisk}
-                  className="self-start text-base font-bold text-accent underline underline-offset-4"
+                  className="inline-flex min-h-11 items-center self-start text-base font-bold text-accent underline underline-offset-4"
                 >
                   {allRisk ? t.lists.riskOnlyNotable : t.lists.riskAll(risk.length)}
                 </button>

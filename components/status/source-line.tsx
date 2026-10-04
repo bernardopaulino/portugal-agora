@@ -34,7 +34,8 @@ export function SourceLine({
           <a
             href={source.url}
             rel="noopener"
-            className="inline-flex items-center"
+            // Alvo de toque de 44 px; a margem negativa mantém a altura da linha.
+            className="-my-3 inline-flex items-center py-3"
             aria-label={t.source.ipmaLogo}
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- SVG oficial, sem otimização */}

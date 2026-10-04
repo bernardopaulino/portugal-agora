@@ -19,7 +19,7 @@ export function DistrictPicker() {
       <select
         value={current}
         onChange={(e) => router.push(path(e.target.value ? `/${e.target.value}` : "/"))}
-        className="h-12 w-full min-w-0 cursor-pointer appearance-none rounded-sm border border-line bg-surface pr-11 pl-4 font-display text-lg font-semibold text-ink hover:border-ink md:w-60"
+        className="h-12 w-full min-w-0 cursor-pointer appearance-none rounded-sm border border-line bg-surface pr-11 pl-4 font-display text-lg font-semibold text-ink hover:border-ink lg:w-60"
       >
         <option value="">{t.header.wholeCountry}</option>
         <optgroup label={t.header.mainland}>

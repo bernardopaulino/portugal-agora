@@ -11,15 +11,16 @@ export async function SiteHeader() {
   return (
     <>
       <header className="bg-surface">
-        <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center gap-1.5 px-4 py-2.5 sm:gap-3 sm:px-6">
           <HomeLink>
-            <LogoMark level={state.levelKnown ? state.level : "unknown"} />
-            <span className="font-display text-xl leading-none font-bold whitespace-nowrap sm:text-2xl">
+            <LogoMark level={state.levelKnown ? state.level : "unknown"} className="h-9 sm:h-10" />
+            {/* Abaixo de 360 px só cabe o logótipo; o nome fica para leitores de ecrã. */}
+            <span className="truncate font-display text-base leading-none font-bold whitespace-nowrap max-[359px]:sr-only sm:text-2xl">
               Portugal Agora
             </span>
           </HomeLink>
-          <div className="ml-auto flex items-center gap-2">
-            <div className="hidden md:block">
+          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <div className="hidden lg:block">
               <DistrictPicker />
             </div>
             <NearMeButton />
@@ -27,7 +28,8 @@ export async function SiteHeader() {
             <LanguageSwitch />
           </div>
         </div>
-        <div className="px-4 pb-3 md:hidden">
+        {/* Em telemóveis e tablets, a escolha do distrito tem a sua linha. */}
+        <div className="mx-auto max-w-7xl px-4 pb-3 sm:px-6 lg:hidden">
           <DistrictPicker />
         </div>
       </header>

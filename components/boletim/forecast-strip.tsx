@@ -46,7 +46,11 @@ export function ForecastStrip({
   const today = localDate(reference.toISOString());
   const tomorrow = localDate(new Date(reference.getTime() + 86_400_000).toISOString());
   const name = (date: string) =>
-    date === today ? t.stage.today : date === tomorrow ? t.stage.tomorrow : formatWeekday(date, locale);
+    date === today
+      ? t.stage.today
+      : date === tomorrow
+        ? t.stage.tomorrow
+        : formatWeekday(date, locale);
 
   return (
     <section aria-labelledby="previsao-titulo" className="flex flex-col gap-3">
@@ -60,13 +64,11 @@ export function ForecastStrip({
             <li
               key={d.date}
               className={
-                "flex flex-col items-center gap-1.5 px-1 py-3 text-center sm:px-3 sm:py-4" +
+                "flex min-w-0 flex-col items-center gap-1.5 px-0.5 py-3 text-center sm:px-3 sm:py-4" +
                 (i > 0 ? " border-l border-stage-line" : "")
               }
             >
-              <span className="font-display text-base font-semibold sm:text-lg">
-                {name(d.date)}
-              </span>
+              <span className="font-display text-sm font-semibold sm:text-lg">{name(d.date)}</span>
               <Icon aria-hidden className="size-8 text-stage-accent sm:size-10" strokeWidth={1.8} />
               <span className="sr-only">{t.term(d.weather)}.</span>
               <span className="font-display text-2xl leading-none font-bold sm:text-3xl">
@@ -82,9 +84,7 @@ export function ForecastStrip({
           );
         })}
       </ol>
-      <p className="text-sm text-stage-ink-2">
-        {t.stage.forecastNote}
-      </p>
+      <p className="text-sm text-stage-ink-2">{t.stage.forecastNote}</p>
     </section>
   );
 }
