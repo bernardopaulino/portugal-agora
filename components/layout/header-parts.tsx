@@ -3,8 +3,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { getDistrict } from "@/data/districts";
 import { useCurrentPath, useI18n } from "@/lib/i18n/client";
 import { localePath, type Locale } from "@/lib/i18n/locales";
+import { splitDistrictPath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 /** Ligação para a página inicial no idioma atual (logótipo + nome). */
@@ -46,26 +48,36 @@ export function LanguageSwitch() {
 }
 
 const tabs = [
-  { path: "/", key: "overview" },
+  { path: "", key: "overview" },
   { path: "/avisos", key: "warnings" },
   { path: "/incendios", key: "fires" },
   { path: "/sismos", key: "quakes" },
   { path: "/risco", key: "riskAir" },
 ] as const;
 
-/** As páginas do site: resumo e um separador por tema. */
+/**
+ * As páginas do site: resumo e um separador por tema. Dentro de um
+ * distrito, os mesmos separadores levam às páginas desse distrito
+ * (/lisboa, /lisboa/avisos…); o seletor no cabeçalho mostra qual é.
+ */
 export function MainNav() {
   const { t, path } = useI18n();
   const current = useCurrentPath();
+  const district = getDistrict(splitDistrictPath(current).district ?? "");
+  const base = district ? `/${district.slug}` : "";
   return (
-    <nav aria-label={t.nav.label} className="border-b border-line bg-surface">
+    <nav
+      aria-label={district ? t.districtPages.menu(t.districtName(district)) : t.nav.label}
+      className="border-b border-line bg-surface"
+    >
       <ul className="mx-auto flex max-w-7xl [scrollbar-width:none] gap-1 overflow-x-auto px-2 sm:px-4">
         {tabs.map((tab) => {
-          const active = current === tab.path;
+          const href = base + tab.path || "/";
+          const active = current === href;
           return (
-            <li key={tab.path} className="shrink-0">
+            <li key={tab.key} className="shrink-0">
               <Link
-                href={path(tab.path)}
+                href={path(href)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "inline-flex h-12 items-center border-b-[3px] px-3 font-display text-lg font-semibold no-underline",

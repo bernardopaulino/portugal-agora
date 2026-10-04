@@ -2,6 +2,7 @@
 
 import type { ReactNode, RefObject } from "react";
 
+import type { District, Region } from "@/data/districts";
 import { useI18n } from "@/lib/i18n/client";
 import { useLiveState, useMapControls } from "@/lib/hooks/live-state";
 import type { CountryState } from "@/lib/state/aggregate";
@@ -20,16 +21,20 @@ import { EmptyState, Section } from "./status/section";
  * As páginas de cada tema (avisos, incêndios, sismos, risco e ar). Cada
  * uma tem o cabeçalho, a lista e, por baixo, o mapa detalhado já com as
  * camadas desse tema ligadas. A página inicial fica só com o boletim.
+ * Com `district`, é a página do tema num distrito (/lisboa/avisos): leva
+ * a ligação de volta ao distrito e o mapa enquadrado no distrito (o menu
+ * do cabeçalho passa a mostrar os temas do distrito).
  */
 
 type Controls = ReturnType<typeof useMapControls>["map"];
 
-function TopicLayout({
+export function TopicLayout({
   title,
   intro,
   state,
   controls,
   mapRef,
+  district,
   children,
 }: {
   title: string;
@@ -37,12 +42,22 @@ function TopicLayout({
   state: CountryState;
   controls: Controls;
   mapRef: RefObject<HTMLElement | null>;
+  district?: District;
   children: ReactNode;
 }) {
-  const { t } = useI18n();
+  const { t, path } = useI18n();
   return (
     <>
-      <PageHead title={title} intro={intro} generatedAt={state.generatedAt} />
+      <PageHead
+        title={title}
+        intro={intro}
+        generatedAt={state.generatedAt}
+        back={
+          district
+            ? { href: path(`/${district.slug}`), label: t.districtName(district) }
+            : undefined
+        }
+      />
       <div className="mx-auto flex max-w-7xl flex-col gap-14 px-4 pt-10 sm:px-6">{children}</div>
       <section
         id="mapa"
@@ -52,7 +67,7 @@ function TopicLayout({
       >
         <div className="flex flex-col gap-1.5">
           <h2 id="mapa-titulo" className="font-display text-4xl leading-tight font-bold">
-            {t.sections.map}
+            {district ? t.sections.mapOf(t.districtName(district)) : t.sections.map}
           </h2>
           <p className="max-w-[70ch] text-base text-ink-2">{t.sections.mapIntro}</p>
         </div>
@@ -63,17 +78,18 @@ function TopicLayout({
           selection={controls.selection}
           onSelect={controls.setSelection}
           onClearSelection={() => controls.setSelection(null)}
-          region={controls.region}
-          onRegion={controls.setRegion}
+          region={district ? district.region : controls.region}
+          onRegion={district ? undefined : controls.setRegion}
+          focus={district?.slug}
         />
       </section>
     </>
   );
 }
 
-function useTopic(initial: CountryState, layers: LayerId[]) {
+export function useTopic(initial: CountryState, layers: LayerId[], region?: Region) {
   const state = useLiveState(initial);
-  const { map: controls, mapRef } = useMapControls(layers);
+  const { map: controls, mapRef } = useMapControls(layers, region);
   return { state, controls, mapRef, reference: new Date(state.generatedAt) };
 }
 

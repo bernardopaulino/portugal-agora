@@ -48,7 +48,8 @@ const pt = {
     autonomous: "Regiões autónomas",
     nearMe: "Perto de mim",
     locating: "A localizar…",
-    geoUnsupported: "Este dispositivo não permite obter a localização. Escolha o distrito na lista.",
+    geoUnsupported:
+      "Este dispositivo não permite obter a localização. Escolha o distrito na lista.",
     geoOutside: "Parece estar fora de Portugal. Escolha o distrito na lista.",
     geoFailed: "Não foi possível identificar o distrito. Escolha-o na lista.",
     geoDenied: "Sem acesso à localização. Pode escolher o distrito na lista.",
@@ -81,10 +82,12 @@ const pt = {
     info: "Informação",
     unknown: "Sem dados",
   } satisfies Record<BadgeKey, string>,
-  levelAdjective: { none: "verde", yellow: "amarelo", orange: "laranja", red: "vermelho" } satisfies Record<
-    LevelKey,
-    string
-  >,
+  levelAdjective: {
+    none: "verde",
+    yellow: "amarelo",
+    orange: "laranja",
+    red: "vermelho",
+  } satisfies Record<LevelKey, string>,
   /** Nome de um distrito ou região, como aparece no texto. */
   districtName: (d: District) => d.name,
   /** "em Lisboa", "no Porto", "nos Açores". */
@@ -197,12 +200,31 @@ const pt = {
     riskIntro:
       "O risco de incêndio rural por concelho (IPMA) e a qualidade do ar estimada para as capitais de distrito.",
   },
+  /** Páginas de cada tema dentro de um distrito (/lisboa/avisos…). */
+  districtPages: {
+    menu: (name: string) => `Temas: ${name}`,
+    warningsTitle: (inPlace: string) => `Avisos ${inPlace}`,
+    warningsIntro: (inPlace: string) =>
+      `Os avisos do IPMA ${inPlace} para os próximos três dias, com o horário de cada um.`,
+    firesTitle: (inPlace: string) => `Incêndios ${inPlace}`,
+    firesIntro: (inPlace: string) =>
+      `Ocorrências registadas pela Proteção Civil (ANEPC) ${inPlace}, via Fogos.pt.`,
+    quakesTitle: (inPlace: string) => `Sismos ${inPlace}`,
+    quakesIntro: (inPlace: string) =>
+      `Sismos de magnitude 2 ou superior registados pelo IPMA ${inPlace} nos últimos 7 dias.`,
+    riskTitle: (inPlace: string) => `Risco de incêndio, ar e UV ${inPlace}`,
+    airTitle: (inPlace: string) => `Ar e raios UV ${inPlace}`,
+    riskIntro: (capital: string) =>
+      `O risco de incêndio rural por concelho, hoje e amanhã (IPMA), e a qualidade do ar e o índice UV em ${capital}.`,
+    airIntro: (capital: string) => `A qualidade do ar e o índice UV em ${capital}.`,
+  },
   empty: {
     warnings: "Não há avisos meteorológicos em vigor nem previstos para os próximos três dias.",
     warningsDistrict: (inPlace: string) =>
       `Não há avisos meteorológicos ${inPlace} para os próximos três dias.`,
     warningsDown: "Consulte os avisos em ipma.pt enquanto a ligação ao IPMA não é restabelecida.",
-    firesDown: "Informação sobre incêndios indisponível neste momento. Consulte os incêndios ativos em",
+    firesDown:
+      "Informação sobre incêndios indisponível neste momento. Consulte os incêndios ativos em",
     firesNone: "Não há incêndios registados neste momento.",
     firesNoneActive: "Nenhum incêndio em curso ou em resolução.",
     quakesDown: "Sem dados de sismos de momento.",
@@ -250,7 +272,8 @@ const pt = {
     uvToday: "Índice UV máximo hoje",
     uvAdvice: ". Use proteção solar entre as 11h e as 17h.",
     noForecast: "Sem previsão de momento.",
-    airNote: "Estimativa de modelo (Copernicus CAMS) para as capitais de distrito, não medição de estação.",
+    airNote:
+      "Estimativa de modelo (Copernicus CAMS) para as capitais de distrito, não medição de estação.",
     airNoteDistrict: (capital: string) =>
       `Qualidade do ar: estimativa de modelo (Copernicus CAMS via Open-Meteo) para ${capital}. Índice UV: previsão do IPMA.`,
   },
@@ -306,8 +329,7 @@ const pt = {
 
 export type Dictionary = typeof pt;
 
-const enDistrictName = (d: District) =>
-  d.slug === "acores" ? "the Azores" : d.name;
+const enDistrictName = (d: District) => (d.slug === "acores" ? "the Azores" : d.name);
 
 const en: Dictionary = {
   locale: "en",
@@ -479,6 +501,23 @@ const en: Dictionary = {
     riskIntro:
       "Rural wildfire risk by municipality (IPMA) and estimated air quality for the district capitals.",
   },
+  districtPages: {
+    menu: (name) => `Topics: ${name}`,
+    warningsTitle: (inPlace) => `Warnings ${inPlace}`,
+    warningsIntro: (inPlace) =>
+      `IPMA warnings ${inPlace} for the next three days, with the times of each one.`,
+    firesTitle: (inPlace) => `Wildfires ${inPlace}`,
+    firesIntro: (inPlace) =>
+      `Incidents recorded by Civil Protection (ANEPC) ${inPlace}, via Fogos.pt.`,
+    quakesTitle: (inPlace) => `Earthquakes ${inPlace}`,
+    quakesIntro: (inPlace) =>
+      `Earthquakes of magnitude 2 or more recorded by IPMA ${inPlace} in the last 7 days.`,
+    riskTitle: (inPlace) => `Wildfire risk, air and UV ${inPlace}`,
+    airTitle: (inPlace) => `Air and UV ${inPlace}`,
+    riskIntro: (capital) =>
+      `Rural wildfire risk by municipality for today and tomorrow (IPMA), and air quality and UV index in ${capital}.`,
+    airIntro: (capital) => `Air quality and UV index in ${capital}.`,
+  },
   empty: {
     warnings: "No weather warnings in force or forecast for the next three days.",
     warningsDistrict: (inPlace) => `No weather warnings ${inPlace} for the next three days.`,
@@ -529,7 +568,8 @@ const en: Dictionary = {
     uvToday: "Highest UV index today",
     uvAdvice: ". Use sun protection between 11:00 and 17:00.",
     noForecast: "No forecast right now.",
-    airNote: "Model estimate (Copernicus CAMS) for the district capitals, not a station measurement.",
+    airNote:
+      "Model estimate (Copernicus CAMS) for the district capitals, not a station measurement.",
     airNoteDistrict: (capital) =>
       `Air quality: model estimate (Copernicus CAMS via Open-Meteo) for ${capital}. UV index: IPMA forecast.`,
   },

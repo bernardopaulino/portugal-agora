@@ -8,12 +8,21 @@ import type { District } from "@/data/districts";
 import type { ForecastDay } from "@/lib/sources/ipma-forecast";
 import type { SourceResult } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
-import { districtHeadline, districtTopics } from "@/lib/state/bulletin";
+import { districtHeadline, districtTopics, type TopicId } from "@/lib/state/bulletin";
 
 import { BulletinMap } from "./bulletin-map";
 import { ForecastStrip } from "./forecast-strip";
 import { BulletinStamp, mapLevels, mapMarkers } from "./national-stage";
 import { MapLegend, TopicList } from "./parts";
+
+/** Página de cada linha do boletim do distrito (o ar e UV estão na do risco). */
+const districtTopicPage: Record<TopicId, string> = {
+  avisos: "/avisos",
+  incendios: "/incendios",
+  sismos: "/sismos",
+  risco: "/risco",
+  ar: "/risco",
+};
 
 /**
  * O boletim de um distrito: o país com o distrito em destaque, o título
@@ -50,7 +59,10 @@ export function DistrictStage({
             </h1>
             <BulletinStamp iso={state.generatedAt} />
           </div>
-          <TopicList topics={districtTopics(state, district.slug, t)} />
+          <TopicList
+            topics={districtTopics(state, district.slug, t)}
+            hrefFor={(id) => path(`/${district.slug}${districtTopicPage[id]}`)}
+          />
           <p className="text-sm text-stage-ink-2">
             <Link href={path("/fontes#niveis")}>{t.stage.howWeRead}</Link>
           </p>
