@@ -21,8 +21,8 @@ export function FireRiskSummary({ risk }: { risk: FireRisk }) {
   }));
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg bg-surface p-4">
-      <div className="flex h-5 w-full overflow-hidden rounded-full" aria-hidden>
+    <div className="flex flex-col gap-3">
+      <div className="flex h-4 w-full overflow-hidden rounded-sm" aria-hidden>
         {counts
           .filter((c) => c.n > 0)
           .map((c) => (
@@ -32,7 +32,7 @@ export function FireRiskSummary({ risk }: { risk: FireRisk }) {
             />
           ))}
       </div>
-      <ul className="grid gap-x-6 gap-y-1.5 text-base sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-base">
         {counts.map((c) => (
           <li key={c.level} className={cn("flex items-center gap-2", c.n === 0 && "text-ink-2")}>
             <span

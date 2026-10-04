@@ -4,11 +4,25 @@ import {
   CircleHelp,
   OctagonAlert,
   TriangleAlert,
+  createLucideIcon,
   type LucideIcon,
 } from "lucide-react";
 
 import type { Severity } from "@/lib/sources/types";
 import { cn } from "@/lib/utils";
+
+/** Losango com ponto de exclamação: o símbolo do nível laranja, diferente do triângulo do amarelo. */
+const DiamondAlert = createLucideIcon("diamond-alert", [
+  [
+    "path",
+    {
+      d: "M10.6 2.6a2 2 0 0 1 2.8 0l8 8a2 2 0 0 1 0 2.8l-8 8a2 2 0 0 1-2.8 0l-8-8a2 2 0 0 1 0-2.8Z",
+      key: "d1",
+    },
+  ],
+  ["path", { d: "M12 8v4", key: "d2" }],
+  ["path", { d: "M12 16h.01", key: "d3" }],
+]);
 
 /** "info": evento sem gravidade (sismo pequeno, incêndio concluído). Não é "tudo bem", é só informação. */
 export type Level = Severity | "unknown" | "info";
@@ -44,7 +58,7 @@ export const levels: Record<Level, LevelStyle> = {
   },
   orange: {
     word: "Laranja",
-    icon: TriangleAlert,
+    icon: DiamondAlert,
     solid: "bg-sev-orange",
     soft: "bg-sev-orange-bg text-sev-orange-ink",
     border: "border-sev-orange",

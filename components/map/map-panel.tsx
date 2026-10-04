@@ -48,7 +48,7 @@ function Chip({
       aria-checked={role ? pressed : undefined}
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-base font-bold",
+        "inline-flex min-h-11 items-center gap-2 rounded-sm border px-4 font-display text-lg font-semibold",
         pressed
           ? "border-ink bg-ink text-bg"
           : "border-line bg-surface text-ink hover:bg-surface-2",
@@ -149,7 +149,7 @@ function Detail({
   if (!body) return null;
 
   return (
-    <div className="absolute inset-x-3 bottom-3 z-10 flex gap-3 rounded-xl border border-line bg-surface p-4 shadow-xl sm:right-auto sm:max-w-md">
+    <div className="absolute inset-x-3 bottom-3 z-10 flex gap-3 rounded-sm border border-line bg-surface p-4 shadow-[0_10px_30px_-12px_rgb(0_0_0/0.45)] sm:right-auto sm:max-w-md">
       <div className="flex min-w-0 flex-1 flex-col gap-2">{body}</div>
       <button
         type="button"
@@ -240,7 +240,7 @@ export function MapPanel({
           ))}
         </div>
       ) : null}
-      <div className="relative h-[62vh] min-h-[360px] overflow-hidden rounded-xl border border-line bg-surface-2 lg:h-[min(72vh,760px)]">
+      <div className="relative h-[62vh] min-h-[360px] overflow-hidden rounded-sm border border-line bg-surface-2 lg:h-[min(72vh,720px)]">
         <LiveMap
           state={state}
           layers={layers}

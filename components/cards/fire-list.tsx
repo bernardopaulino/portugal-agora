@@ -38,7 +38,7 @@ export function FireList({
         <EmptyState>Nenhum incêndio em curso ou em resolução.</EmptyState>
       ) : null}
       {visible.length > 0 ? (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col border-t border-line">
           {visible.map((f) => (
             <EventRow
               key={f.id}
@@ -74,7 +74,7 @@ export function FireList({
           type="button"
           onClick={() => setShowAll((v) => !v)}
           aria-expanded={showAll}
-          className="h-12 self-start rounded-full border border-line bg-surface px-5 text-base font-bold hover:bg-surface-2"
+          className="h-12 self-start rounded-sm border border-ink px-5 font-display text-lg font-semibold hover:bg-ink hover:text-bg"
         >
           {showAll
             ? "Mostrar só os ativos"

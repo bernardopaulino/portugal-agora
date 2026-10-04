@@ -48,3 +48,11 @@ next-env.d.ts
 /test-results
 /playwright-report
 /blob-report
+
+.vercel
+
+# Impeccable: cache e capturas de revisão (o resumo da superfície fica no repositório)
+.impeccable/hook.cache.json
+.impeccable/review/
+.impeccable/live/
+.impeccable/questions/

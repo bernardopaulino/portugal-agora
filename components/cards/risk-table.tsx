@@ -21,7 +21,7 @@ export function RiskTable({ rows }: { rows: ConcelhoRisk[] }) {
   return (
     // Focável para quem usa teclado conseguir deslocar a tabela em ecrãs estreitos.
     <div
-      className="overflow-x-auto rounded-lg bg-surface"
+      className="overflow-x-auto border-t border-line"
       tabIndex={0}
       role="region"
       aria-label="Tabela de risco de incêndio por concelho"

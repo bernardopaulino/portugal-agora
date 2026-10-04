@@ -6,18 +6,35 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /*
- * Tokens do Portugal Agora.
- * Calmo por defeito; a cor é a severidade. Os únicos tons saturados
- * são os quatro níveis de aviso do IPMA (e o cinzento "sem dados").
+ * Tokens do Portugal Agora: o boletim meteorológico.
+ * O "palco" é o azul do mar do boletim da televisão, igual nos dois
+ * temas. A cor viva é só a severidade (os quatro níveis do IPMA).
  */
 :root {
-  --bg: #f2f5f6; /* névoa */
+  --bg: #eef2f5;
   --surface: #ffffff;
-  --surface-2: #e7edf0;
-  --ink: #0d2b3a; /* azul-mar profundo */
-  --ink-2: #44596a;
-  --line: #cfd9de;
-  --accent: #185f8c;
+  --surface-2: #e2e9ef;
+  --ink: #0a1d2e;
+  --ink-2: #45586a;
+  --line: #cdd7df;
+  --accent: #0b5cad;
+
+  /* Palco (mar) e o que está sobre ele. */
+  --stage: #0a2a4a;
+  --stage-2: #0f3560;
+  --stage-ink: #ffffff;
+  --stage-ink-2: #b8cbe0;
+  --stage-line: rgb(255 255 255 / 0.16);
+  --stage-accent: #8fd6ff;
+
+  /* Preenchimentos do mapa do boletim (escala do IPMA). */
+  --land-none: #4f9d63;
+  --land-yellow: #f2c200;
+  --land-orange: #f07f1a;
+  --land-red: #d7262b;
+  --land-unknown: #8797a3;
+  /* Texto sobre as cores do mapa e sobre a barra clara: escuro nos dois temas. */
+  --ink-on-land: #0a1d2e;
 
   --sev-none: #2e7d4f;
   --sev-none-bg: #e2f1e7;
@@ -35,7 +52,7 @@
   --sev-unknown-bg: #e6ebee;
   --sev-unknown-ink: #3d4a52;
 
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 
   /* Mapeamento para os componentes shadcn/ui. */
   --background: var(--bg);
@@ -59,13 +76,15 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #0b1a23;
-  --surface: #112431;
-  --surface-2: #17303f;
-  --ink: #e3ecf0;
-  --ink-2: #a3b5bf;
-  --line: #27404f;
-  --accent: #7bc4ee;
+  --bg: #06121d;
+  --surface: #0c1c2b;
+  --surface-2: #12283a;
+  --ink: #e6eef4;
+  --ink-2: #a4b6c4;
+  --line: #223a4e;
+  --accent: #7fc7ff;
+  --stage: #071f38;
+  --stage-2: #0b2b4c;
 
   --sev-none: #4caf73;
   --sev-none-bg: #15321f;
@@ -88,13 +107,15 @@
 /* Sem JavaScript: segue o sistema. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --bg: #0b1a23;
-    --surface: #112431;
-    --surface-2: #17303f;
-    --ink: #e3ecf0;
-    --ink-2: #a3b5bf;
-    --line: #27404f;
-    --accent: #7bc4ee;
+    --bg: #06121d;
+    --surface: #0c1c2b;
+    --surface-2: #12283a;
+    --ink: #e6eef4;
+    --ink-2: #a4b6c4;
+    --line: #223a4e;
+    --accent: #7fc7ff;
+    --stage: #071f38;
+    --stage-2: #0b2b4c;
     color-scheme: dark;
   }
 }
@@ -102,6 +123,7 @@
 @theme inline {
   --font-sans: var(--font-sans);
   --font-heading: var(--font-sans);
+  --font-display: var(--font-display);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --color-bg: var(--bg);
@@ -111,6 +133,13 @@
   --color-ink-2: var(--ink-2);
   --color-line: var(--line);
   --color-accent: var(--accent);
+  --color-stage: var(--stage);
+  --color-stage-2: var(--stage-2);
+  --color-stage-ink: var(--stage-ink);
+  --color-stage-ink-2: var(--stage-ink-2);
+  --color-stage-line: var(--stage-line);
+  --color-stage-accent: var(--stage-accent);
+  --color-ink-on-land: var(--ink-on-land);
 
   --color-sev-none: var(--sev-none);
   --color-sev-none-bg: var(--sev-none-bg);
@@ -151,9 +180,9 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.5);
 
-  --text-display: clamp(1.85rem, 1.1rem + 3.2vw, 3.1rem);
-  --text-display--line-height: 1.12;
-  --text-display--letter-spacing: -0.02em;
+  --text-display: clamp(2.1rem, 1.3rem + 2.6vw, 3.5rem);
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.01em;
 }
 
 @layer base {
@@ -195,6 +224,51 @@
   ::selection {
     background: color-mix(in srgb, var(--accent) 25%, transparent);
   }
+  html {
+    scrollbar-color: color-mix(in srgb, var(--ink-2) 55%, transparent) transparent;
+    accent-color: var(--accent);
+    caret-color: var(--accent);
+  }
+  /* Ligações, foco e seleção sobre o palco azul. */
+  .on-stage a {
+    color: var(--stage-ink);
+    text-decoration-color: color-mix(in srgb, var(--stage-ink) 55%, transparent);
+  }
+  .on-stage :focus-visible {
+    outline-color: var(--stage-accent);
+  }
+  .on-stage .lower-third a {
+    color: var(--ink-on-land);
+    text-decoration-color: color-mix(in srgb, var(--ink-on-land) 45%, transparent);
+  }
+  .on-stage .lower-third :focus-visible {
+    outline-color: var(--ink-on-land);
+  }
+  .on-stage ::selection {
+    background: color-mix(in srgb, var(--stage-accent) 40%, transparent);
+  }
+}
+
+/* Boletim: a barra de rodapé entra uma vez, como no ecrã da televisão. */
+@keyframes lower-third-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.lower-third-in {
+  animation: lower-third-in 700ms cubic-bezier(0.16, 1, 0.3, 1) 150ms both;
+}
+@keyframes caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.caption-in {
+  animation: caption-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {

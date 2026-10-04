@@ -65,7 +65,7 @@ export function NearMeButton() {
         type="button"
         onClick={locate}
         disabled={status === "locating"}
-        className="inline-flex h-12 items-center gap-2 rounded-full border border-ink bg-ink px-4 text-base font-bold text-bg disabled:opacity-70"
+        className="inline-flex h-12 items-center gap-2 rounded-sm bg-stage px-3 font-display text-base font-semibold whitespace-nowrap text-stage-ink hover:bg-stage-2 disabled:opacity-70 sm:px-4 sm:text-lg"
       >
         <LocateFixed aria-hidden className="size-5" />
         <span>{status === "locating" ? "A localizar…" : "Perto de mim"}</span>

@@ -19,11 +19,11 @@ export function AirQualitySummary({ readings }: { readings: AirQualityReading[] 
     );
   }
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="flex flex-col border-t border-line">
       {concerning.map((r) => (
         <li
           key={r.district}
-          className="flex flex-wrap items-center gap-3 rounded-lg bg-surface px-4 py-3"
+          className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line py-3"
         >
           <SeverityBadge level={r.severity} label={r.label} />
           <span className="text-lg font-bold">{getDistrict(r.district)?.capital}</span>
@@ -40,8 +40,8 @@ export function AirQualitySummary({ readings }: { readings: AirQualityReading[] 
 export function AirAndUv({ air, uv }: { air?: AirQualityReading; uv?: UvReading[] }) {
   const today = uv?.[0];
   return (
-    <dl className="grid gap-3 sm:grid-cols-2">
-      <div className="flex flex-col gap-2 rounded-lg bg-surface p-4">
+    <dl className="grid gap-y-5">
+      <div className="flex flex-col gap-2 border-t border-line pt-3">
         <dt className="text-base text-ink-2">Qualidade do ar agora</dt>
         <dd className="flex flex-wrap items-center gap-3">
           {air ? (
@@ -57,7 +57,7 @@ export function AirAndUv({ air, uv }: { air?: AirQualityReading; uv?: UvReading[
           )}
         </dd>
       </div>
-      <div className="flex flex-col gap-2 rounded-lg bg-surface p-4">
+      <div className="flex flex-col gap-2 border-t border-line pt-3">
         <dt className="text-base text-ink-2">Índice UV máximo hoje</dt>
         <dd className="text-lg">
           {today ? (

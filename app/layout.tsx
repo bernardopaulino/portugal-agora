@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Atkinson_Hyperlegible_Next } from "next/font/google";
+import { Atkinson_Hyperlegible_Next, Barlow_Semi_Condensed } from "next/font/google";
 
 import { EmergencyBar } from "@/components/layout/emergency-bar";
 import { OfflineBanner } from "@/components/layout/offline-banner";
@@ -21,6 +21,17 @@ const atkinson = Atkinson_Hyperlegible_Next({
   display: "swap",
   // A fonte é recente e o Next ainda não tem métricas para gerar o fallback ajustado.
   adjustFontFallback: false,
+});
+
+/**
+ * Barlow Semi Condensed: a letra das legendas do boletim (título,
+ * números, barra de rodapé). O texto corrido fica em Atkinson.
+ */
+const barlow = Barlow_Semi_Condensed({
+  subsets: ["latin", "latin-ext"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -49,13 +60,17 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b1a23" },
+    { media: "(prefers-color-scheme: dark)", color: "#06121d" },
   ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-PT" className={atkinson.variable} suppressHydrationWarning>
+    <html
+      lang="pt-PT"
+      className={`${atkinson.variable} ${barlow.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         {/* Define o tema antes da primeira pintura (evita o "flash").
             suppressHydrationWarning: há extensões do browser que alteram
