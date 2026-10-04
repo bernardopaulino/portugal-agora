@@ -5,6 +5,11 @@ import { expect, test, type Page } from "@playwright/test";
 // para o "voltar" ser instantâneo; por isso procuramos o título visível pelo papel.
 const pageTitle = (page: Page) => page.getByRole("heading", { level: 1 });
 
+// O seletor existe duas vezes no HTML (cabeçalho em computador, linha própria em
+// telemóvel); getByRole só encontra o que está visível.
+const picker = (page: Page, name = "Escolher distrito ou região") =>
+  page.getByRole("combobox", { name });
+
 async function expectAccessible(page: Page) {
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
@@ -14,34 +19,74 @@ async function expectAccessible(page: Page) {
   expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([]);
 }
 
-test("página inicial mostra o estado do país", async ({ page }) => {
+test("página inicial mostra o boletim do país", async ({ page }) => {
   await page.goto("/");
   await expect(pageTitle(page)).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Avisos meteorológicos" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Todos os distritos" })).toBeVisible();
   await expect(page.getByRole("link", { name: "112" })).toHaveAttribute("href", "tel:112");
+  await expectAccessible(page);
+});
+
+test("cada tema tem a sua página", async ({ page }) => {
+  for (const [path, title] of [
+    ["/avisos", "Avisos meteorológicos"],
+    ["/incendios", "Incêndios"],
+    ["/sismos", "Sismos"],
+    ["/risco", "Risco de incêndio e qualidade do ar"],
+  ]) {
+    await page.goto(path);
+    await expect(pageTitle(page)).toHaveText(title);
+  }
   await expectAccessible(page);
 });
 
 test("o seletor leva à página do distrito", async ({ page }) => {
   await page.goto("/");
-  await page.getByLabel("Escolher distrito ou região").selectOption("porto");
+  await picker(page).selectOption("porto");
   await expect(page).toHaveURL(/\/porto$/);
   await expect(pageTitle(page)).toContainText("Porto");
   await expect(page.getByRole("heading", { name: "Previsão para Porto" })).toBeVisible();
   await expectAccessible(page);
 });
 
+test("o distrito tem uma página por tema e o seletor mantém o tema", async ({ page }) => {
+  await page.goto("/lisboa/avisos");
+  await expect(pageTitle(page)).toHaveText("Avisos em Lisboa");
+  // O menu do cabeçalho passa a ser o do distrito.
+  const menu = page.getByRole("navigation", { name: "Temas: Lisboa" });
+  await expect(menu.getByRole("link", { name: "Avisos" })).toHaveAttribute("aria-current", "page");
+  await expectAccessible(page);
+
+  await picker(page).selectOption("porto");
+  await expect(page).toHaveURL(/\/porto\/avisos$/);
+  await expect(pageTitle(page)).toHaveText("Avisos no Porto");
+});
+
 test("regiões autónomas têm página própria", async ({ page }) => {
   await page.goto("/acores");
   await expect(pageTitle(page)).toContainText("Açores");
+  // Sem risco de incêndio do IPMA nas ilhas: a página do risco mostra só ar e UV.
+  await page.goto("/acores/risco");
+  await expect(pageTitle(page)).toHaveText("Ar e raios UV nos Açores");
 });
 
 test("camadas do mapa podem ser ligadas e desligadas", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/avisos");
   const risk = page.getByRole("button", { name: "Risco de incêndio", exact: true });
   await expect(risk).toHaveAttribute("aria-pressed", "false");
   await risk.click();
   await expect(risk).toHaveAttribute("aria-pressed", "true");
+});
+
+test("versão em inglês", async ({ page }) => {
+  await page.goto("/en/porto/avisos");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en-GB");
+  await expect(pageTitle(page)).toHaveText("Warnings in Porto");
+  await expectAccessible(page);
+  // PT|EN leva à mesma página no outro idioma.
+  await page.getByRole("link", { name: "Português" }).click();
+  await expect(page).toHaveURL(/\/porto\/avisos$/);
+  await expect(pageTitle(page)).toHaveText("Avisos no Porto");
 });
 
 test("página de fontes explica os níveis", async ({ page }) => {
@@ -51,9 +96,11 @@ test("página de fontes explica os níveis", async ({ page }) => {
 });
 
 test("endereço inexistente devolve 404", async ({ page }) => {
-  const response = await page.goto("/distrito-que-nao-existe");
-  expect(response?.status()).toBe(404);
-  await expect(page.getByRole("heading", { name: "Esta página não existe." })).toBeVisible();
+  for (const path of ["/distrito-que-nao-existe", "/distrito-que-nao-existe/avisos"]) {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(404);
+    await expect(page.getByRole("heading", { name: "Esta página não existe." })).toBeVisible();
+  }
 });
 
 test("API de estado responde com o formato esperado", async ({ request }) => {
@@ -62,4 +109,11 @@ test("API de estado responde com o formato esperado", async ({ request }) => {
   const state = await response.json();
   expect(state).toMatchObject({ headline: expect.any(String), districts: expect.any(Object) });
   expect(Object.keys(state.districts)).toHaveLength(20);
+});
+
+test("API de fontes só aceita fontes conhecidas", async ({ request }) => {
+  expect((await request.get("/api/sources/ipma-warnings")).ok()).toBe(true);
+  for (const id of ["nope", "constructor", "__proto__"]) {
+    expect((await request.get(`/api/sources/${id}`)).status()).toBe(404);
+  }
 });
