@@ -12,6 +12,13 @@ export function proxy(request: NextRequest) {
 
   if (pathname === "/en" || pathname.startsWith("/en/")) return NextResponse.next();
 
+  // As imagens de partilha (opengraph-image) são servidas no endereço que o
+  // Next lhes dá (/pt/...): um redirecionamento aqui fazia alguns serviços
+  // (WhatsApp, Facebook) mostrarem a pré-visualização sem imagem.
+  if (pathname.startsWith("/pt/") && pathname.endsWith("/opengraph-image")) {
+    return NextResponse.next();
+  }
+
   if (pathname === "/pt" || pathname.startsWith("/pt/")) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.slice(3) || "/";
