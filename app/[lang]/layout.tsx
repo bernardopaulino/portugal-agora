@@ -41,6 +41,9 @@ export async function generateMetadata(props: LayoutProps<"/[lang]">): Promise<M
     twitter: { card: "summary_large_image" },
     robots: { index: true, follow: true },
     formatDetection: { telephone: false },
+    // O site tem as suas versões em português e inglês: sem tradução automática do
+    // Chrome/Google, que estragaria nomes, níveis e frases já traduzidas.
+    other: { google: "notranslate" },
   };
 }
 
@@ -60,7 +63,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   const t = getDictionary(lang);
 
   return (
-    <html lang={intlLocale[lang]} className={fontClasses} suppressHydrationWarning>
+    <html lang={intlLocale[lang]} translate="no" className={fontClasses} suppressHydrationWarning>
       <head>
         {/* Define o tema antes da primeira pintura (evita o "flash").
             suppressHydrationWarning: há extensões do browser que alteram
