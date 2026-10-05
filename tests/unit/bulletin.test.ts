@@ -5,6 +5,7 @@ import { aggregate } from "@/lib/state/aggregate";
 import {
   districtTopics,
   groupWarnings,
+  nationalCaption,
   riskLevel,
   riskSummary,
   warningTypes,
@@ -137,5 +138,67 @@ describe("riskSummary", () => {
     );
     const risk = districtTopics(state, "lisboa", pt).find((topic) => topic.id === "risco");
     expect(risk).toMatchObject({ value: "Reduzido", detail: "em todos os 16 concelhos" });
+  });
+});
+
+describe("nationalCaption", () => {
+  const now = new Date("2026-10-04T09:00:00.000Z");
+  const ok = <T>(id: SourceResult<T>["id"], data: T): SourceResult<T> => ({
+    id,
+    status: "ok",
+    data,
+    fetchedAt: now.toISOString(),
+  });
+  const caption = (warnings: WarningEvent[], locale: "pt" | "en" = "pt") =>
+    nationalCaption(
+      aggregate(
+        {
+          warnings: ok("ipma-warnings", warnings),
+          earthquakes: ok("ipma-seismic", []),
+          fires: ok("fogos", []),
+          fireRisk: ok("ipma-rcm", {
+            today: { date: "", byDico: {} },
+            tomorrow: { date: "", byDico: {} },
+          }),
+          uv: ok("ipma-uv", []),
+          airQuality: ok("openmeteo-aq", []),
+        },
+        now,
+      ),
+      now,
+      getDictionary(locale),
+    );
+  const azores = (area: string) =>
+    warning("acores", { area, place: { district: "acores", region: "acores", label: area } });
+
+  it("conta distritos e não zonas de aviso", () => {
+    const six = ["porto", "braga", "aveiro", "viseu", "guarda", "coimbra"].map((d) => warning(d));
+    expect(caption(six)).toBe("Trovoada: hoje, das 13:00 às 22:00 em 6 distritos.");
+    expect(caption(six, "en")).toBe("Thunderstorm: today, 13:00 to 22:00 in 6 districts.");
+  });
+
+  it("nomeia um ou dois distritos", () => {
+    expect(caption([warning("porto"), warning("braga")])).toBe(
+      "Trovoada: hoje, das 13:00 às 22:00 em Braga e no Porto.",
+    );
+  });
+
+  it("os três grupos de ilhas dos Açores contam como um sítio, com o nome", () => {
+    const warnings = [
+      ...["porto", "braga", "aveiro", "viseu", "guarda"].map((d) => warning(d)),
+      azores("AOC"),
+      azores("ACE"),
+      azores("AOR"),
+    ];
+    expect(caption(warnings)).toBe(
+      "Trovoada: hoje, das 13:00 às 22:00 em 5 distritos e nos Açores.",
+    );
+  });
+
+  it("as janelas seguintes também dizem onde", () => {
+    const tomorrow = { startsAt: "2026-10-05T12:00:00.000Z", endsAt: "2026-10-05T21:00:00.000Z" };
+    expect(caption([warning("porto"), warning("lisboa", tomorrow)])).toBe(
+      "Trovoada: hoje, das 13:00 às 22:00 no Porto; amanhã, das 13:00 às 22:00, em Lisboa.",
+    );
   });
 });

@@ -161,8 +161,9 @@ const pt = {
     nationalCalmFires: (n: number) =>
       `Sem avisos meteorológicos; ${plural(n, "incêndio em curso", "incêndios em curso")}.`,
     nationalCalm: "Sem avisos meteorológicos nem incêndios em curso.",
-    firstWindow: (when: string, n: number) => `${when} em ${plural(n, "local", "locais")}`,
-    nextWindow: (when: string, n: number) => `${when}, em ${n}`,
+    /** `places` vem de placesPhrase: "no Porto e em Braga", "em 6 distritos e nos Açores". */
+    firstWindow: (when: string, places: string) => `${when} ${places}`,
+    nextWindow: (when: string, places: string) => `${when}, ${places}`,
     others: (n: number) => ` Há mais ${plural(n, "aviso diferente", "avisos diferentes")}.`,
   },
   stage: {
@@ -502,8 +503,8 @@ const en: Dictionary = {
     nationalNoData: "No IPMA warning data. See ipma.pt.",
     nationalCalmFires: (n) => `No weather warnings; ${plural(n, "wildfire", "wildfires")} active.`,
     nationalCalm: "No weather warnings and no active wildfires.",
-    firstWindow: (when, n) => `${when} in ${plural(n, "area", "areas")}`,
-    nextWindow: (when, n) => `${when}, in ${n}`,
+    firstWindow: (when, places) => `${when} ${places}`,
+    nextWindow: (when, places) => `${when}, ${places}`,
     others: (n) => ` ${plural(n, "other warning", "other warnings")} in force.`,
   },
   stage: {

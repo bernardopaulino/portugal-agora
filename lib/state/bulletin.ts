@@ -402,8 +402,9 @@ export function isNotableQuake(q: { felt: boolean; place: { district?: string } 
 
 /**
  * A frase do "apresentador" para a barra do rodapé: o aviso mais grave,
- * quando e onde. "Trovoada: em vigor até às 22:00 de hoje em 15 locais;
- * amanhã, das 13:00 às 22:00, em 6."
+ * quando e onde. "Trovoada: hoje, das 13:00 às 22:00 em 6 distritos;
+ * amanhã, das 13:00 às 22:00, no Porto e em Braga." Conta distritos (e
+ * nomeia as regiões autónomas), não as zonas de aviso do IPMA.
  */
 export function nationalCaption(state: CountryState, now: Date, t: Dictionary): string {
   const C = t.caption;
@@ -414,14 +415,18 @@ export function nationalCaption(state: CountryState, now: Date, t: Dictionary): 
     const fires = (state.fires.data ?? []).filter((f) => f.active).length;
     return fires > 0 ? C.nationalCalmFires(fires) : C.nationalCalm;
   }
-  const seen = new Map<string, number>();
+  const seen = new Map<string, Set<string>>();
   for (const w of top.windows) {
     const label = formatRange(w.startsAt, w.endsAt, now, "continente", t.locale);
-    seen.set(label, (seen.get(label) ?? 0) + new Set(w.items.map((i) => i.area)).size);
+    const slugs = seen.get(label) ?? new Set<string>();
+    for (const item of w.items) if (item.place.district) slugs.add(item.place.district);
+    seen.set(label, slugs);
   }
-  const parts = [...seen.entries()].map(([label, n], i) =>
-    i === 0 ? C.firstWindow(label, n) : C.nextWindow(label, n),
-  );
+  const parts = [...seen.entries()].map(([label, slugs], i) => {
+    const places = placesPhrase([...slugs], t);
+    if (!places) return label;
+    return i === 0 ? C.firstWindow(label, places) : C.nextWindow(label, places);
+  });
   const type = t.term(top.type);
   const others = groups.length - 1;
   return (
