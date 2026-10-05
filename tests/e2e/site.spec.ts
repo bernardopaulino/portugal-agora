@@ -70,12 +70,19 @@ test("regiões autónomas têm página própria", async ({ page }) => {
   await expect(pageTitle(page)).toHaveText("Ar e raios UV nos Açores");
 });
 
-test("camadas do mapa podem ser ligadas e desligadas", async ({ page }) => {
-  await page.goto("/avisos");
-  const risk = page.getByRole("button", { name: "Risco de incêndio", exact: true });
-  await expect(risk).toHaveAttribute("aria-pressed", "false");
-  await risk.click();
-  await expect(risk).toHaveAttribute("aria-pressed", "true");
+test("o mapa mostra só o tema da página", async ({ page }) => {
+  // Num tema de distrito: sem botões de camadas, com ligação para o país.
+  await page.goto("/lisboa/incendios");
+  await expect(page.getByRole("radio", { name: "Risco de incêndio", exact: true })).toHaveCount(0);
+  await page.getByRole("link", { name: "Ver os incêndios em todo o país" }).click();
+  await expect(page).toHaveURL(/\/incendios$/);
+
+  // Na página do risco, escolhe-se entre risco de incêndio e qualidade do ar.
+  await page.goto("/risco");
+  const air = page.getByRole("radio", { name: "Qualidade do ar", exact: true });
+  await expect(air).toHaveAttribute("aria-checked", "false");
+  await air.click();
+  await expect(air).toHaveAttribute("aria-checked", "true");
 });
 
 test("versão em inglês", async ({ page }) => {

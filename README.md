@@ -11,12 +11,12 @@ Projeto **sem fins lucrativos**: sem publicidade, sem donativos, sem monetizaç�
 ## Funcionalidades
 
 - **Boletim:** a página inicial abre como um boletim meteorológico de televisão. Um mapa de Portugal com o nível de aviso de cada distrito, um título em português simples ("Aviso amarelo em 6 distritos.") e uma linha por tema (avisos, incêndios, sismos, risco de incêndio). Apontar para um distrito mostra o seu resumo na barra por baixo do mapa.
-- **Uma página por tema**, para não ter tudo numa só página: `/avisos`, `/incendios`, `/sismos` e `/risco` (risco de incêndio e qualidade do ar). Cada uma tem a lista e um mapa detalhado com a camada desse tema ligada.
+- **Uma página por tema**, para não ter tudo numa só página: `/avisos`, `/incendios`, `/sismos` e `/risco` (risco de incêndio e qualidade do ar). Cada uma tem a lista e um mapa detalhado só com esse tema.
 - **Páginas por distrito** (18 distritos + Açores + Madeira), com a mesma divisão:
   - `/lisboa`: o boletim do distrito e a previsão a 5 dias.
   - `/lisboa/avisos`, `/lisboa/incendios`, `/lisboa/sismos` e `/lisboa/risco` (risco de incêndio por concelho, hoje e amanhã, qualidade do ar e UV), com o mapa enquadrado no distrito.
   - O menu do cabeçalho acompanha o distrito, e o seletor mantém o tema ao mudar de sítio (de `/lisboa/avisos` para `/porto/avisos`).
-- **Mapa detalhado** (MapLibre + OpenFreeMap) com 5 camadas: avisos por distrito, incêndios, sismos, risco de incêndio por concelho e qualidade do ar. Liga-se às listas: "Ver no mapa" enquadra o evento, e um clique no mapa mostra o detalhe.
+- **Mapa detalhado** (MapLibre + OpenFreeMap) com 5 camadas: avisos por distrito, incêndios, sismos, risco de incêndio por concelho e qualidade do ar. Cada página mostra só a camada do seu tema (na página do risco escolhe-se entre risco de incêndio e qualidade do ar), com a legenda dessa camada. Nas páginas de distrito, o mapa mostra só o que é do distrito, esbate o resto do país e tem uma ligação para o mesmo tema em todo o país. Liga-se às listas: "Ver no mapa" enquadra o evento, e um clique no mapa mostra o detalhe.
 - **Português e inglês:** o português fica na raiz (`/`, `/lisboa`) e o inglês em `/en` (`/en`, `/en/lisboa`). O botão PT | EN leva à mesma página no outro idioma. Os textos que vêm das fontes (descrições dos avisos, nomes de locais) ficam em português, como publicados; o vocabulário fixo (tipos de aviso, estado dos incêndios, classes de qualidade do ar) é traduzido.
 - **Perto de mim:** a localização é convertida em distrito **no próprio dispositivo** (ponto-em-polígono com os limites da CAOP). Nada é enviado ao servidor.
 - **Resiliência:** se uma fonte falhar, o site mostra os últimos dados obtidos, assinalados como desatualizados. Nunca fica em branco.

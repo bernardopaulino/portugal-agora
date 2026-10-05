@@ -183,7 +183,9 @@ const pt = {
     allDistricts: "Todos os distritos",
     map: "Mapa",
     mapOf: (name: string) => `Mapa de ${name}`,
-    mapIntro: "Aproxime para ver cada evento. Use os botões por baixo para mostrar outras camadas.",
+    mapIntro: "Aproxime para ver cada evento e toque num deles para ver o detalhe.",
+    mapIntroDistrict: (inPlace: string) =>
+      `Mostra só o que acontece ${inPlace}. Aproxime para ver cada evento e toque num deles para ver o detalhe.`,
   },
   pages: {
     warningsList: "Em vigor e previstos",
@@ -294,7 +296,34 @@ const pt = {
       air: "Qualidade do ar",
     },
     risk: "Risco:",
-    quakeLegend: "Sismos: círculo maior, magnitude maior; mais transparente, mais antigo.",
+    quakeLegend: "Círculo maior, magnitude maior; mais transparente, mais antigo.",
+    fireLegend: {
+      red: "Importante",
+      orange: "Em curso",
+      yellow: "Em resolução",
+      none: "Em vigilância ou concluído",
+    },
+    quakeLevels: {
+      red: "Magnitude 5,5 ou mais",
+      orange: "4,5 a 5,4",
+      yellow: "3,5 a 4,4 ou sentido",
+      none: "Abaixo de 3,5",
+    },
+    airLegend: {
+      none: "Boa ou razoável",
+      yellow: "Moderada",
+      orange: "Fraca",
+      red: "Muito fraca",
+    },
+    riskMainlandOnly:
+      "O risco de incêndio do IPMA só existe para o continente. Veja a qualidade do ar nas ilhas.",
+    seeCountry: {
+      warnings: "Ver os avisos em todo o país",
+      fires: "Ver os incêndios em todo o país",
+      quakes: "Ver os sismos em todo o país",
+      risk: "Ver o risco de incêndio em todo o país",
+      air: "Ver a qualidade do ar em todo o país",
+    },
     close: "Fechar detalhe",
     noWarnings: "Sem avisos meteorológicos.",
     firesInProgress: (n: number) => ` ${plural(n, "incêndio", "incêndios")} em curso.`,
@@ -484,7 +513,9 @@ const en: Dictionary = {
     allDistricts: "All districts",
     map: "Map",
     mapOf: (name) => `Map of ${name}`,
-    mapIntro: "Zoom in to see each event. Use the buttons below to show other layers.",
+    mapIntro: "Zoom in to see each event and tap one for details.",
+    mapIntroDistrict: (inPlace) =>
+      `Shows only what is happening ${inPlace}. Zoom in to see each event and tap one for details.`,
   },
   pages: {
     warningsList: "In force and forecast",
@@ -590,7 +621,34 @@ const en: Dictionary = {
       air: "Air quality",
     },
     risk: "Risk:",
-    quakeLegend: "Earthquakes: bigger circle, bigger magnitude; more transparent, older.",
+    quakeLegend: "Bigger circle, bigger magnitude; more transparent, older.",
+    fireLegend: {
+      red: "Major",
+      orange: "Active",
+      yellow: "Being resolved",
+      none: "Under watch or over",
+    },
+    quakeLevels: {
+      red: "Magnitude 5.5 or more",
+      orange: "4.5 to 5.4",
+      yellow: "3.5 to 4.4 or felt",
+      none: "Below 3.5",
+    },
+    airLegend: {
+      none: "Good or fair",
+      yellow: "Moderate",
+      orange: "Poor",
+      red: "Very poor",
+    },
+    riskMainlandOnly:
+      "IPMA's wildfire risk only covers the mainland. See air quality for the islands.",
+    seeCountry: {
+      warnings: "See warnings across the country",
+      fires: "See wildfires across the country",
+      quakes: "See earthquakes across the country",
+      risk: "See wildfire risk across the country",
+      air: "See air quality across the country",
+    },
     close: "Close details",
     noWarnings: "No weather warnings.",
     firesInProgress: (n) => ` ${plural(n, "wildfire", "wildfires")} active.`,

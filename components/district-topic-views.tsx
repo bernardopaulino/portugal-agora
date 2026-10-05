@@ -130,7 +130,7 @@ export function DistrictRiskView({ district, initial }: Props) {
   const hasRisk = risk.length > 0;
   const { state, controls, mapRef } = useTopic(
     initial,
-    [hasRisk ? "risk" : "air"],
+    hasRisk ? ["risk", "air"] : ["air"],
     district.region,
   );
   const [allRisk, setAllRisk] = useState(false);

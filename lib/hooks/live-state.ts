@@ -28,24 +28,17 @@ export function useLiveState(initial: CountryState): CountryState {
 }
 
 /**
- * Estado do mapa detalhado de uma página: camadas ligadas, o que está
- * selecionado e a zona. `showOnMap` seleciona e desce até ao mapa.
+ * Estado do mapa detalhado de uma página: a camada mostrada (uma de cada
+ * vez, a do tema da página), o que está selecionado e a zona. `showOnMap`
+ * seleciona e desce até ao mapa.
  * O ref da secção do mapa vem à parte: o React Compiler não deixa passar
  * um objeto com um ref durante o render.
  */
-export function useMapControls(initialLayers: LayerId[], initialRegion: Region = "continente") {
-  const [layers, setLayers] = useState<LayerId[]>(initialLayers);
+export function useMapControls(initialLayer: LayerId, initialRegion: Region = "continente") {
+  const [layer, setLayer] = useState<LayerId>(initialLayer);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [region, setRegion] = useState<Region>(initialRegion);
   const mapRef = useRef<HTMLElement>(null);
-
-  const toggleLayer = useCallback(
-    (layer: LayerId) =>
-      setLayers((current) =>
-        current.includes(layer) ? current.filter((l) => l !== layer) : [...current, layer],
-      ),
-    [],
-  );
 
   const scrollToMap = useCallback(
     () => mapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
@@ -68,8 +61,8 @@ export function useMapControls(initialLayers: LayerId[], initialRegion: Region =
   return {
     mapRef,
     map: {
-      layers,
-      toggleLayer,
+      layer,
+      setLayer,
       selection,
       setSelection,
       region,

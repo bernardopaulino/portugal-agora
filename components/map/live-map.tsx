@@ -105,17 +105,20 @@ function bboxOf(features: Feature[]): [[number, number], [number, number]] | nul
 
 export default function LiveMap({
   state,
-  layers,
+  layer,
   selection,
   onSelect,
   focus,
   region,
 }: {
   state: CountryState;
-  layers: LayerId[];
+  layer: LayerId;
   selection: Selection | null;
   onSelect: OnSelect;
-  /** Slug do distrito a enquadrar ao abrir (páginas de distrito). */
+  /**
+   * Slug do distrito da página (páginas de distrito): o mapa abre
+   * enquadrado nele, só mostra o que é dele e esbate o resto do país.
+   */
   focus?: string;
   region: Region;
 }) {
@@ -136,7 +139,7 @@ export default function LiveMap({
     onSelectRef.current = onSelect;
   }, [onSelect]);
 
-  // Limites dos distritos (sempre) e dos concelhos (só quando a camada de risco é ligada).
+  // Limites dos distritos (sempre) e dos concelhos (só na camada de risco).
   useEffect(() => {
     fetch("/geo/distritos.json")
       .then((r) => r.json())
@@ -144,13 +147,13 @@ export default function LiveMap({
       .catch(() => {});
   }, []);
   useEffect(() => {
-    if (layers.includes("risk") && !concelhoGeo) {
+    if (layer === "risk" && !concelhoGeo) {
       fetch("/geo/concelhos.json")
         .then((r) => r.json())
         .then(setConcelhoGeo)
         .catch(() => {});
     }
-  }, [layers, concelhoGeo]);
+  }, [layer, concelhoGeo]);
 
   // Criar o mapa uma vez.
   useEffect(() => {
@@ -235,8 +238,10 @@ export default function LiveMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme]);
 
-  // Dados derivados do estado.
+  // Dados derivados do estado. Numa página de distrito, só o que é do
+  // distrito, para o mapa mostrar o mesmo que a lista.
   const data = useMemo(() => {
+    const inFocus = (district: unknown) => !focus || district === focus;
     const levelBy = Object.fromEntries(
       Object.values(state.districts).map((d) => [d.slug, d.level]),
     );
@@ -257,10 +262,12 @@ export default function LiveMap({
     const risk = state.fireRisk.data?.today.byDico ?? {};
     const concelhosFc = concelhoGeo
       ? collection(
-          concelhoGeo.features.map((f) => ({
-            ...f,
-            properties: { ...f.properties, risk: risk[f.properties.dico as string] ?? 0 },
-          })),
+          concelhoGeo.features
+            .filter((f) => inFocus(f.properties.district))
+            .map((f) => ({
+              ...f,
+              properties: { ...f.properties, risk: risk[f.properties.dico as string] ?? 0 },
+            })),
         )
       : collection([]);
 
@@ -276,7 +283,7 @@ export default function LiveMap({
 
     const fires = collection(
       (state.fires.data ?? [])
-        .filter((f) => f.coordinates)
+        .filter((f) => f.coordinates && inFocus(f.place.district))
         .map((f) =>
           point(f.id, f.coordinates!, {
             level: f.severity,
@@ -288,7 +295,7 @@ export default function LiveMap({
     );
     const quakes = collection(
       (state.earthquakes.data ?? [])
-        .filter((q) => q.coordinates)
+        .filter((q) => q.coordinates && inFocus(q.place.district))
         .map((q) =>
           point(q.id, q.coordinates!, {
             level: q.severity,
@@ -301,7 +308,7 @@ export default function LiveMap({
     const air = collection(
       (state.airQuality.data ?? []).flatMap((a) => {
         const d = getDistrict(a.district);
-        return d
+        return d && inFocus(a.district)
           ? [
               {
                 type: "Feature" as const,
@@ -313,7 +320,7 @@ export default function LiveMap({
       }),
     );
     return { districtsFc, concelhosFc, fires, quakes, air };
-  }, [state, districtGeo, concelhoGeo]);
+  }, [state, districtGeo, concelhoGeo, focus]);
 
   // (Re)criar fontes e camadas sempre que o estilo carrega.
   useEffect(() => {
@@ -391,6 +398,7 @@ export default function LiveMap({
         id: "warnings-fill",
         type: "fill",
         source: "districts",
+        ...(focus ? { filter: ["==", ["get", "slug"], focus] } : {}),
         paint: {
           "fill-color": levelColor,
           "fill-opacity": ["match", ["get", "level"], "none", 0.08, "unknown", 0.15, 0.42],
@@ -411,6 +419,29 @@ export default function LiveMap({
       },
       firstLabel,
     );
+    if (focus) {
+      // O resto do país fica esbatido e o distrito da página contornado.
+      add(
+        {
+          id: "focus-mask",
+          type: "fill",
+          source: "districts",
+          filter: ["!=", ["get", "slug"], focus],
+          paint: {
+            "fill-color": theme === "dark" ? "#06121d" : "#eef2f5",
+            "fill-opacity": 0.65,
+          },
+        },
+        firstLabel,
+      );
+      add({
+        id: "focus-line",
+        type: "line",
+        source: "districts",
+        filter: ["==", ["get", "slug"], focus],
+        paint: { "line-color": theme === "dark" ? "#e3ecf0" : "#0d2b3a", "line-width": 2.5 },
+      });
+    }
     add({
       id: "selected-district",
       type: "line",
@@ -500,13 +531,13 @@ export default function LiveMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !styleReady.current) return;
-    for (const [layer, ids] of Object.entries(layerIds) as [LayerId, string[]][]) {
-      for (const id of ids) {
-        if (map.getLayer(id))
-          map.setLayoutProperty(id, "visibility", layers.includes(layer) ? "visible" : "none");
+    for (const [id, ids] of Object.entries(layerIds) as [LayerId, string[]][]) {
+      for (const mapLayer of ids) {
+        if (map.getLayer(mapLayer))
+          map.setLayoutProperty(mapLayer, "visibility", id === layer ? "visible" : "none");
       }
     }
-  }, [layers, styleVersion]);
+  }, [layer, styleVersion]);
 
   // Seleção: realçar e enquadrar.
   useEffect(() => {

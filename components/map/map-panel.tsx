@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 
 import { riskColors } from "../cards/fire-risk";
 import type { OnSelect, Selection } from "../cards/types";
-import { levels, SeverityBadge } from "../status/severity";
-import { layerOptions, type LayerId } from "./layers";
+import { type Level, levels, SeverityBadge } from "../status/severity";
+import { layerTopic, type LayerId } from "./layers";
 
 const LiveMap = dynamic(() => import("./live-map"), {
   ssr: false,
@@ -171,51 +171,69 @@ function Detail({
   );
 }
 
-function Legend({ layers }: { layers: LayerId[] }) {
+type Severe = "red" | "orange" | "yellow" | "none";
+
+/** Legenda só da camada mostrada, com as cores que o mapa usa nessa camada. */
+function Legend({ layer, region }: { layer: LayerId; region: Region }) {
   const { t } = useI18n();
-  const items: React.ReactNode[] = [];
-  if (
-    layers.includes("warnings") ||
-    layers.includes("air") ||
-    layers.includes("fires") ||
-    layers.includes("quakes")
-  ) {
-    items.push(
-      <span key="lv" className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        {(["none", "yellow", "orange", "red"] as const).map((l) => (
-          <span key={l} className="inline-flex items-center gap-1.5">
-            <span aria-hidden className={cn("size-3.5 rounded-full", levels[l].solid)} />
-            {t.levels[l]}
-          </span>
-        ))}
-      </span>,
+  const scale = (labels: Record<Severe, string>, none: Level) => (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+      {(["none", "yellow", "orange", "red"] as const).map((l) => (
+        <span key={l} className="inline-flex items-center gap-1.5">
+          <span
+            aria-hidden
+            className={cn("size-3.5 rounded-full", levels[l === "none" ? none : l].solid)}
+          />
+          {labels[l]}
+        </span>
+      ))}
+    </span>
+  );
+
+  let items: React.ReactNode;
+  if (layer === "warnings") items = scale(t.levels, "none");
+  else if (layer === "fires") items = scale(t.map.fireLegend, "unknown");
+  else if (layer === "air") items = scale(t.map.airLegend, "none");
+  else if (layer === "quakes")
+    items = (
+      <>
+        {scale(t.map.quakeLevels, "info")}
+        <span>{t.map.quakeLegend}</span>
+      </>
     );
-  }
-  if (layers.includes("risk")) {
-    items.push(
-      <span key="risk" className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="font-bold">{t.map.risk}</span>
-        {[1, 2, 3, 4, 5].map((l) => (
-          <span key={l} className="inline-flex items-center gap-1.5">
-            <span
-              aria-hidden
-              className="size-3.5 rounded-sm"
-              style={{ background: riskColors[l] }}
-            />
-            {t.term(fireRiskLabels[l]!)}
-          </span>
-        ))}
-      </span>,
-    );
-  }
-  if (layers.includes("quakes")) items.push(<span key="q">{t.map.quakeLegend}</span>);
+  else
+    items =
+      region === "continente" ? (
+        <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="font-bold">{t.map.risk}</span>
+          {[1, 2, 3, 4, 5].map((l) => (
+            <span key={l} className="inline-flex items-center gap-1.5">
+              <span
+                aria-hidden
+                className="size-3.5 rounded-sm"
+                style={{ background: riskColors[l] }}
+              />
+              {t.term(fireRiskLabels[l]!)}
+            </span>
+          ))}
+        </span>
+      ) : (
+        <span>{t.map.riskMainlandOnly}</span>
+      );
   return <div className="flex flex-col gap-2 text-sm text-ink-2">{items}</div>;
 }
 
+/**
+ * O mapa de uma página de tema: mostra só a camada desse tema. Na página
+ * do risco (risco de incêndio e qualidade do ar) há uma escolha entre as
+ * duas, uma de cada vez. Com `focus` (páginas de distrito), o mapa fica no
+ * distrito e há uma ligação para o mesmo tema em todo o país.
+ */
 export function MapPanel({
   state,
-  layers,
-  onToggleLayer,
+  views,
+  layer,
+  onLayer,
   selection,
   onSelect,
   onClearSelection,
@@ -225,8 +243,10 @@ export function MapPanel({
   className,
 }: {
   state: CountryState;
-  layers: LayerId[];
-  onToggleLayer: (layer: LayerId) => void;
+  /** As camadas que esta página pode mostrar (normalmente só uma). */
+  views: LayerId[];
+  layer: LayerId;
+  onLayer: (layer: LayerId) => void;
   selection: Selection | null;
   onSelect: OnSelect;
   onClearSelection: () => void;
@@ -235,22 +255,35 @@ export function MapPanel({
   focus?: string;
   className?: string;
 }) {
-  const { t } = useI18n();
+  const { t, path } = useI18n();
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      {onRegion ? (
-        <div role="radiogroup" aria-label={t.map.zone} className="flex flex-wrap gap-2">
-          {regions.map((r) => (
-            <Chip key={r} role="radio" pressed={region === r} onClick={() => onRegion(r)}>
-              {t.map.regions[r]}
-            </Chip>
-          ))}
+      {onRegion || views.length > 1 ? (
+        <div className="flex flex-wrap gap-x-6 gap-y-3">
+          {views.length > 1 ? (
+            <div role="radiogroup" aria-label={t.map.show} className="flex flex-wrap gap-2">
+              {views.map((v) => (
+                <Chip key={v} role="radio" pressed={layer === v} onClick={() => onLayer(v)}>
+                  {t.map.layers[v]}
+                </Chip>
+              ))}
+            </div>
+          ) : null}
+          {onRegion ? (
+            <div role="radiogroup" aria-label={t.map.zone} className="flex flex-wrap gap-2">
+              {regions.map((r) => (
+                <Chip key={r} role="radio" pressed={region === r} onClick={() => onRegion(r)}>
+                  {t.map.regions[r]}
+                </Chip>
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : null}
       <div className="relative h-[62vh] min-h-[360px] overflow-hidden rounded-sm border border-line bg-surface-2 lg:h-[min(72vh,720px)]">
         <LiveMap
           state={state}
-          layers={layers}
+          layer={layer}
           selection={selection}
           onSelect={onSelect}
           region={region}
@@ -260,17 +293,15 @@ export function MapPanel({
           <Detail state={state} selection={selection} onClose={onClearSelection} />
         ) : null}
       </div>
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-base font-bold">{t.map.show}</legend>
-        <div className="flex flex-wrap gap-2">
-          {layerOptions.map((l) => (
-            <Chip key={l} pressed={layers.includes(l)} onClick={() => onToggleLayer(l)}>
-              {t.map.layers[l]}
-            </Chip>
-          ))}
-        </div>
-      </fieldset>
-      <Legend layers={layers} />
+      <Legend layer={layer} region={region} />
+      {focus ? (
+        <Link
+          href={path(layerTopic[layer])}
+          className="inline-flex min-h-11 items-center gap-1.5 self-start text-base font-bold"
+        >
+          {t.map.seeCountry[layer]} <ArrowRight aria-hidden className="size-4" />
+        </Link>
+      ) : null}
     </div>
   );
 }

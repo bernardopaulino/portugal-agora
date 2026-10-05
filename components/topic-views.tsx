@@ -19,14 +19,15 @@ import { EmptyState, Section } from "./status/section";
 
 /*
  * As páginas de cada tema (avisos, incêndios, sismos, risco e ar). Cada
- * uma tem o cabeçalho, a lista e, por baixo, o mapa detalhado já com as
- * camadas desse tema ligadas. A página inicial fica só com o boletim.
+ * uma tem o cabeçalho, a lista e, por baixo, o mapa detalhado só com a
+ * camada desse tema. A página inicial fica só com o boletim.
  * Com `district`, é a página do tema num distrito (/lisboa/avisos): leva
- * a ligação de volta ao distrito e o mapa enquadrado no distrito (o menu
- * do cabeçalho passa a mostrar os temas do distrito).
+ * a ligação de volta ao distrito e o mapa fica no distrito, só com o que
+ * é dele, como a lista (o menu do cabeçalho passa a mostrar os temas do
+ * distrito).
  */
 
-type Controls = ReturnType<typeof useMapControls>["map"];
+type Controls = ReturnType<typeof useTopic>["controls"];
 
 export function TopicLayout({
   title,
@@ -69,12 +70,15 @@ export function TopicLayout({
           <h2 id="mapa-titulo" className="font-display text-4xl leading-tight font-bold">
             {district ? t.sections.mapOf(t.districtName(district)) : t.sections.map}
           </h2>
-          <p className="max-w-[70ch] text-base text-ink-2">{t.sections.mapIntro}</p>
+          <p className="max-w-[70ch] text-base text-ink-2">
+            {district ? t.sections.mapIntroDistrict(t.inPlace(district)) : t.sections.mapIntro}
+          </p>
         </div>
         <MapPanel
           state={state}
-          layers={controls.layers}
-          onToggleLayer={controls.toggleLayer}
+          views={controls.views}
+          layer={controls.layer}
+          onLayer={controls.setLayer}
           selection={controls.selection}
           onSelect={controls.setSelection}
           onClearSelection={() => controls.setSelection(null)}
@@ -87,10 +91,16 @@ export function TopicLayout({
   );
 }
 
-export function useTopic(initial: CountryState, layers: LayerId[], region?: Region) {
+/** `views`: as camadas que o mapa da página pode mostrar; abre na primeira. */
+export function useTopic(initial: CountryState, views: LayerId[], region?: Region) {
   const state = useLiveState(initial);
-  const { map: controls, mapRef } = useMapControls(layers, region);
-  return { state, controls, mapRef, reference: new Date(state.generatedAt) };
+  const { map, mapRef } = useMapControls(views[0]!, region);
+  return {
+    state,
+    controls: { ...map, views },
+    mapRef,
+    reference: new Date(state.generatedAt),
+  };
 }
 
 export function WarningsView({ initial }: { initial: CountryState }) {
@@ -179,7 +189,7 @@ export function QuakesView({ initial }: { initial: CountryState }) {
 
 export function RiskView({ initial }: { initial: CountryState }) {
   const { t } = useI18n();
-  const { state, controls, mapRef } = useTopic(initial, ["risk"]);
+  const { state, controls, mapRef } = useTopic(initial, ["risk", "air"]);
   return (
     <TopicLayout
       title={t.pages.riskTitle}
