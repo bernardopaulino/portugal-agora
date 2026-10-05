@@ -10,18 +10,18 @@ Projeto **sem fins lucrativos**: sem publicidade, sem donativos, sem monetizaç�
 
 ## Funcionalidades
 
-- **Boletim:** a página inicial abre como um boletim meteorológico de televisão. Um mapa de Portugal com o nível de aviso de cada distrito, um título em português simples ("Aviso amarelo em 6 distritos.") e uma linha por tema (avisos, incêndios, sismos, risco de incêndio). Apontar para um distrito mostra o seu resumo na barra por baixo do mapa.
-- **Uma página por tema**, para não ter tudo numa só página: `/avisos`, `/incendios`, `/sismos` e `/risco` (risco de incêndio e qualidade do ar). Cada uma abre com um mapa detalhado só com esse tema e, por baixo, a lista.
+- **Boletim:** a página inicial abre como um boletim meteorológico de televisão. Um mapa de Portugal com o nível de aviso de cada distrito, um título em português simples ("Aviso amarelo em 6 distritos.") e uma linha por tema (avisos, incêndios, sismos, risco de incêndio). Apontar para um distrito mostra o seu resumo na barra por baixo do mapa. Os Açores e a Madeira aparecem em caixas, com as ilhas em tamanho legível mesmo num telemóvel.
+- **Uma página por tema**, para não ter tudo numa só página: `/avisos`, `/incendios`, `/sismos` e `/risco` (risco de incêndio e qualidade do ar). Cada uma abre com um mapa detalhado só com esse tema e, por baixo, a lista; em ecrãs largos, mapa e lista ficam lado a lado, com o mapa sempre à vista.
 - **Páginas por distrito** (18 distritos + Açores + Madeira), com a mesma divisão:
   - `/lisboa`: o boletim do distrito e a previsão a 5 dias.
   - `/lisboa/avisos`, `/lisboa/incendios`, `/lisboa/sismos` e `/lisboa/risco` (risco de incêndio por concelho, hoje e amanhã, qualidade do ar e UV), com o mapa enquadrado no distrito.
   - O menu do cabeçalho acompanha o distrito, e o seletor mantém o tema ao mudar de sítio (de `/lisboa/avisos` para `/porto/avisos`).
-- **Mapa detalhado** (MapLibre + OpenFreeMap) com 5 camadas: avisos por distrito, incêndios, sismos, risco de incêndio por concelho e qualidade do ar. Cada página mostra só a camada do seu tema (na página do risco escolhe-se entre risco de incêndio e qualidade do ar), com a legenda dessa camada. Nas páginas de distrito, o mapa mostra só o que é do distrito, esbate o resto do país e tem uma ligação para o mesmo tema em todo o país. Liga-se às listas: "Ver no mapa" enquadra o evento, e um clique no mapa mostra o detalhe.
+- **Mapa detalhado** (MapLibre + OpenFreeMap) com 5 camadas: avisos por distrito, incêndios, sismos, risco de incêndio por concelho e qualidade do ar. Cada página mostra só a camada do seu tema (na página do risco escolhe-se entre risco de incêndio e qualidade do ar), com a legenda dessa camada. Nas páginas de distrito, o mapa mostra só o que é do distrito, esbate o resto do país e tem uma ligação para o mesmo tema em todo o país. No risco de incêndio, escolhe-se hoje ou amanhã. Liga-se às listas: "Ver no mapa" enquadra o evento, um clique no mapa mostra o detalhe e um segundo clique no mesmo sítio tira a seleção e volta à vista geral.
 - **Português e inglês:** o português fica na raiz (`/`, `/lisboa`) e o inglês em `/en` (`/en`, `/en/lisboa`). O botão PT | EN leva à mesma página no outro idioma. Os textos que vêm das fontes (descrições dos avisos, nomes de locais) ficam em português, como publicados; o vocabulário fixo (tipos de aviso, estado dos incêndios, classes de qualidade do ar) é traduzido.
 - **Perto de mim:** a localização é convertida em distrito **no próprio dispositivo** (ponto-em-polígono com os limites da CAOP). Nada é enviado ao servidor.
 - **Resiliência:** se uma fonte falhar, o site mostra os últimos dados obtidos, assinalados como desatualizados. Nunca fica em branco.
 - **Funciona sem rede** (PWA com service worker): mostra os últimos dados guardados.
-- **Imagens de partilha dinâmicas**, em cada idioma: ao partilhar um link no WhatsApp ou no LinkedIn, a pré-visualização mostra o estado atual.
+- **Imagens de partilha dinâmicas**, em cada idioma: ao partilhar um link no WhatsApp ou no LinkedIn, a pré-visualização mostra o estado atual e a hora dos dados, com o logótipo e as letras do site (TTF em `assets/fonts`, licença OFL).
 - **Qualquer ecrã:** testado de 320 px (telemóveis pequenos) a 1920 px, incluindo telemóvel na horizontal e tablet.
 - **Acessibilidade:** WCAG 2.2 AA verificado com axe. Letra Atkinson Hyperlegible Next (desenhada para baixa visão), base de 18 px, níveis que nunca dependem só da cor (cor + ícone + palavra), alvos de toque de 44 px, tema claro/escuro/automático no cabeçalho e respeito por "reduzir movimento".
 - **SEO:** cada página tem título e descrição próprios e indica a sua versão no outro idioma (`hreflang`); o sitemap inclui as duas línguas e a página inicial declara o site com dados estruturados (schema.org).
@@ -105,7 +105,10 @@ lib/
   state/                agregação e frases ("no Porto e em Viana do Castelo")
   i18n/                 idiomas, dicionários, tradução de termos, metadados
   routes.ts             distrito e tema a partir do endereço
+  og/                   imagens de partilha (opengraph-image)
+  cache/                snapshots no Redis e verificação do Redis para o /api/health
   geo/ time/ http/      geometria, datas em pt-PT e en-GB, fetch robusto
+assets/fonts/           letras das imagens de partilha (Barlow Semi Condensed, Atkinson Hyperlegible Next; OFL)
 public/geo/             limites simplificados da CAOP 2025 (GeoJSON)
 public/icons/           ícones da app
 tests/unit/             testes com respostas reais das APIs (tests/fixtures)
@@ -135,7 +138,7 @@ Sem `FOGOS_API_KEY` a secção de incêndios mostra "indisponível" e remete par
 
 Na primeira vez que correres os testes e2e: `npx playwright install chromium`.
 
-O CI (GitHub Actions) corre `npm run check`, o build e os testes e2e em cada push para `main` e em cada pull request.
+O CI (GitHub Actions) corre `npm run check`, o build e os testes e2e em cada push para `main` e em cada pull request. O Dependabot propõe atualizações das dependências todas as semanas (`.github/dependabot.yml`).
 
 ### Acrescentar ou mudar texto
 
@@ -143,7 +146,7 @@ Todo o texto do site está em `lib/i18n/dictionaries.ts`. Ao acrescentar uma fra
 
 ### Regenerar os limites administrativos
 
-Os ficheiros em `public/geo/` foram gerados a partir dos GeoPackages oficiais da CAOP 2025 (DGT), simplificados com `geopandas` (tolerância de 400 m para os distritos, 150 m para as ilhas e 250 m para os concelhos). Quando sair uma nova CAOP, basta repetir o processo com os ficheiros novos e depois correr `node scripts/build-map-shapes.mjs`, que gera as formas do mapa do boletim e do logótipo (`data/map-shapes.ts`).
+Os ficheiros em `public/geo/` foram gerados a partir dos GeoPackages oficiais da CAOP 2025 (DGT), simplificados com `geopandas` (tolerância de 400 m para os distritos, 150 m para as ilhas e 250 m para os concelhos). Quando sair uma nova CAOP, basta repetir o processo com os ficheiros novos e depois correr `node scripts/build-map-shapes.mjs`, que gera as formas do mapa do boletim e do logótipo (`data/map-shapes.ts`). Nos Açores, o script aproxima os três grupos de ilhas (encolhe o mar entre eles) para as ilhas caberem maiores na caixa; a mesma conversão é usada para pôr os sismos no sítio certo.
 
 ## Deploy (Vercel)
 

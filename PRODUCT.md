@@ -26,11 +26,11 @@ One calm, non-commercial place that aggregates IPMA, Fogos.pt (ANEPC), Open-Mete
 
 ## Capabilities and Constraints
 
-- National summary (headline level = highest IPMA warning in force or forecast), map with layers (warnings by district, fires, earthquakes, fire risk by concelho, air quality), district pages for 18 districts + Açores + Madeira (5-day forecast, warnings, fires, quakes, fire risk today/tomorrow, air quality, UV).
+- National summary (headline level = highest IPMA warning in force or forecast), one page per topic (warnings, fires, earthquakes, fire risk and air quality), each opening with an interactive map that shows only that topic (fire risk can be shown for today or tomorrow) and the list below it, or beside it on wide screens, district pages for 18 districts + Açores + Madeira (5-day forecast, warnings, fires, quakes, fire risk today/tomorrow, air quality, UV).
 - "Perto de mim": location → district resolved on the device; nothing sent to the server.
 - Resilience: stale/unavailable states per source must remain visible and honest.
 - Stack: Next.js 16 App Router (Cache Components), React 19, Tailwind 4, MapLibre, SWR. Hosted on Vercel (cdg1).
-- Language: European Portuguese only.
+- Languages: European Portuguese at the root (default) and British English under /en. Text from the sources (warning descriptions, place names) stays in Portuguese as published; fixed vocabulary is translated.
 
 ## Brand Commitments
 
