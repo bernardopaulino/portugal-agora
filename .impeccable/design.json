@@ -1,99 +1,118 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-04T15:27:16.756Z",
+  "generatedAt": "2026-10-05T13:16:42.691Z",
   "title": "Design System: Portugal Agora",
   "extensions": {
     "colorMeta": {
       "stage": {
         "role": "primary",
-        "displayName": "Broadcast Sea",
-        "canonical": "#0a2a4a",
+        "displayName": "Sea (Morning Sea / Night Sea)",
+        "canonical": "#dcebf5",
         "darkTheme": "#071f38",
         "tonalRamp": [
-          "#000b1d",
-          "#052544",
-          "#224163",
-          "#406084",
-          "#5f80a6",
-          "#7fa2c9",
-          "#a4c8f1",
-          "#e3f0fe"
+          "#040c13",
+          "#1b272e",
+          "#38444c",
+          "#56636c",
+          "#77858e",
+          "#99a7b1",
+          "#bdccd5",
+          "#e2f1fb"
         ]
       },
       "stage-2": {
         "role": "primary",
-        "displayName": "Deep Sea Panel",
-        "canonical": "#0f3560",
+        "displayName": "Sea Panel",
+        "canonical": "#c6dcec",
         "darkTheme": "#0b2b4c",
         "tonalRamp": [
-          "#000b1f",
-          "#00234b",
-          "#1b406c",
-          "#395f8e",
-          "#5880b0",
-          "#79a1d4",
-          "#9dc8fc",
-          "#e4f0fe"
+          "#000d17",
+          "#162733",
+          "#324552",
+          "#516472",
+          "#718594",
+          "#93a8b8",
+          "#b7cddc",
+          "#dff1ff"
         ]
       },
       "stage-ink": {
         "role": "neutral",
-        "displayName": "Stage White",
-        "canonical": "#ffffff",
+        "displayName": "Stage Ink",
+        "canonical": "#0a1d2e",
+        "darkTheme": "#ffffff",
         "tonalRamp": [
-          "#090c0d",
-          "#222427",
-          "#3d4043",
-          "#5b5e61",
-          "#7a7e80",
-          "#9b9fa2",
-          "#c1c5c7",
-          "#ebeff2"
+          "#000c1c",
+          "#142738",
+          "#304457",
+          "#4f6478",
+          "#6f859b",
+          "#91a8be",
+          "#b4cce4",
+          "#e3f0fe"
         ]
       },
       "stage-ink-2": {
         "role": "neutral",
-        "displayName": "Stage Pale Blue",
-        "canonical": "#b8cbe0",
+        "displayName": "Stage Ink Secondary",
+        "canonical": "#3a5168",
+        "darkTheme": "#b8cbe0",
         "tonalRamp": [
-          "#020c1a",
-          "#162535",
-          "#324152",
-          "#4f5f72",
-          "#6e7f92",
-          "#8ea1b5",
-          "#b3c6db",
-          "#e3f0ff"
+          "#000c1c",
+          "#11273b",
+          "#2e445a",
+          "#4c647c",
+          "#6c859e",
+          "#8ea8c2",
+          "#b2cce8",
+          "#e3f0fe"
         ]
       },
       "stage-line": {
         "role": "neutral",
         "displayName": "Stage Rule",
-        "canonical": "rgb(255 255 255 / 0.16)",
+        "canonical": "rgb(10 29 46 / 0.15)",
+        "darkTheme": "rgb(255 255 255 / 0.16)",
         "tonalRamp": [
-          "#090c0d",
-          "#222427",
-          "#3d4043",
-          "#5b5e61",
-          "#7a7e80",
-          "#9b9fa2",
-          "#c1c5c7",
-          "#ebeff2"
+          "#000c1c",
+          "#142738",
+          "#304457",
+          "#4f6478",
+          "#6f859b",
+          "#91a8be",
+          "#b4cce4",
+          "#e3f0fe"
         ]
       },
       "stage-accent": {
         "role": "secondary",
-        "displayName": "Studio Cyan",
-        "canonical": "#8fd6ff",
+        "displayName": "Stage Accent (Bulletin Blue / Studio Cyan)",
+        "canonical": "#0b5cad",
+        "darkTheme": "#8fd6ff",
         "tonalRamp": [
-          "#000d16",
-          "#01283a",
-          "#024562",
-          "#196589",
-          "#3f86ac",
-          "#62a8cf",
-          "#87cef7",
-          "#def2ff"
+          "#000b1f",
+          "#00244d",
+          "#004180",
+          "#1361b2",
+          "#3b83d8",
+          "#5fa8ff",
+          "#a5ccfe",
+          "#e4f0fe"
+        ]
+      },
+      "caption": {
+        "role": "neutral",
+        "displayName": "Caption White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#0d0b06",
+          "#27251f",
+          "#44423b",
+          "#64615a",
+          "#85827a",
+          "#a8a59d",
+          "#ccc9c1",
+          "#f1eee6"
         ]
       },
       "land-none": {
@@ -169,6 +188,52 @@
           "#91a1ad",
           "#b6c7d3",
           "#e0f1fe"
+        ]
+      },
+      "land-info": {
+        "role": "tertiary",
+        "displayName": "Information",
+        "canonical": "#8fd6ff",
+        "tonalRamp": [
+          "#000d16",
+          "#00293c",
+          "#014866",
+          "#1e698d",
+          "#458bb1",
+          "#68afd6",
+          "#8cd3fc",
+          "#def2ff"
+        ]
+      },
+      "land-dim": {
+        "role": "tertiary",
+        "displayName": "Dimmed Land",
+        "canonical": "#b5cbdd",
+        "darkTheme": "#2b4f75",
+        "tonalRamp": [
+          "#000c18",
+          "#152735",
+          "#324453",
+          "#506474",
+          "#718596",
+          "#93a8ba",
+          "#b6ccde",
+          "#e1f1fe"
+        ]
+      },
+      "fire": {
+        "role": "tertiary",
+        "displayName": "Fire",
+        "canonical": "#e2401b",
+        "tonalRamp": [
+          "#1d0100",
+          "#490900",
+          "#7a1801",
+          "#af2600",
+          "#e2401b",
+          "#ff7557",
+          "#feb4a3",
+          "#fee9e4"
         ]
       },
       "ink-on-land": {
@@ -558,7 +623,7 @@
       },
       "label": {
         "displayName": "Broadcast Label",
-        "purpose": "Bulletin stamp, section index, district picker, stage buttons, forecast day names."
+        "purpose": "Bulletin stamp, section tabs, district picker, solid buttons, map chips, forecast day names."
       },
       "body": {
         "displayName": "Reading Text",
@@ -630,7 +695,7 @@
       "refersTo": "lower-third",
       "description": "The bulletin caption bar on the stage: level block plus live caption that follows the pointed distrito.",
       "html": "<div class=\"ds-stage\"><div class=\"ds-lower-third\"><span class=\"ds-lt-level\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg>Amarelo</span><div class=\"ds-lt-caption\"><span class=\"ds-lt-name\">Faro</span><span class=\"ds-lt-line\">Aviso amarelo de tempo quente até às 20:00 de amanhã.</span></div><a class=\"ds-lt-action\" href=\"#\">Abrir Faro &rarr;</a></div></div>",
-      "css": ".ds-stage { background: var(--stage, #0a2a4a); padding: 24px; } .ds-lower-third { display: flex; align-items: stretch; min-height: 64px; overflow: hidden; border-radius: 0.25rem; background: var(--stage-ink, #fff); color: var(--ink-on-land, #0a1d2e); box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.55); animation: ds-wipe 700ms cubic-bezier(0.16, 1, 0.3, 1) 150ms both; } .ds-lt-level { display: flex; align-items: center; gap: 8px; min-width: 11rem; padding: 0 16px; background: var(--land-yellow, #f2c200); font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-weight: 700; font-size: 1.125rem; } .ds-lt-caption { display: flex; flex: 1; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 10px 16px; font-family: var(--font-sans), 'Atkinson Hyperlegible Next', sans-serif; } .ds-lt-name { font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-weight: 700; font-size: 1.5rem; } .ds-lt-action { display: flex; align-items: center; padding-right: 16px; font-weight: 700; color: var(--ink-on-land, #0a1d2e); text-decoration: underline; text-decoration-color: rgb(10 29 46 / 0.45); text-underline-offset: 0.2em; } .ds-lt-action:hover { text-decoration-thickness: 2px; } .ds-lt-action:focus-visible { outline: 3px solid var(--ink-on-land, #0a1d2e); outline-offset: 3px; border-radius: 4px; } @keyframes ds-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } } @media (prefers-reduced-motion: reduce) { .ds-lower-third { animation: none; } }"
+      "css": ".ds-stage { background: var(--stage, #dcebf5); padding: 24px; } .ds-lower-third { display: flex; align-items: stretch; min-height: 64px; overflow: hidden; border-radius: 0.25rem; background: var(--caption, #fff); color: var(--ink-on-land, #0a1d2e); box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.55); animation: ds-wipe 700ms cubic-bezier(0.16, 1, 0.3, 1) 150ms both; } .ds-lt-level { display: flex; align-items: center; gap: 8px; min-width: 11rem; padding: 0 16px; background: var(--land-yellow, #f2c200); font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-weight: 700; font-size: 1.125rem; } .ds-lt-caption { display: flex; flex: 1; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 10px 16px; font-family: var(--font-sans), 'Atkinson Hyperlegible Next', sans-serif; } .ds-lt-name { font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-weight: 700; font-size: 1.5rem; } .ds-lt-action { display: flex; align-items: center; padding-right: 16px; font-weight: 700; color: var(--ink-on-land, #0a1d2e); text-decoration: underline; text-decoration-color: rgb(10 29 46 / 0.45); text-underline-offset: 0.2em; } .ds-lt-action:hover { text-decoration-thickness: 2px; } .ds-lt-action:focus-visible { outline: 3px solid var(--ink-on-land, #0a1d2e); outline-offset: 3px; border-radius: 4px; } @keyframes ds-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } } @media (prefers-reduced-motion: reduce) { .ds-lower-third { animation: none; } }"
     },
     {
       "name": "Topic Row",
@@ -638,7 +703,7 @@
       "refersTo": "topic-row",
       "description": "One of the four bulletin lines on the stage; links to its section below.",
       "html": "<div class=\"ds-stage\"><ul class=\"ds-topics\"><li><a class=\"ds-topic\" href=\"#\"><span class=\"ds-mark\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg></span><span class=\"ds-topic-text\"><span class=\"ds-topic-label\">Avisos</span><span class=\"ds-topic-value\">3 avisos amarelos <span class=\"ds-topic-detail\">em 6 distritos</span></span></span><svg class=\"ds-arrow\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></a></li></ul></div>",
-      "css": ".ds-stage { background: var(--stage, #0a2a4a); padding: 24px; color: var(--stage-ink, #fff); } .ds-topics { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgb(255 255 255 / 0.16); } .ds-topics li { border-bottom: 1px solid rgb(255 255 255 / 0.16); } .ds-topic { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0 16px; padding: 12px 0; text-decoration: none; color: inherit; } .ds-mark { display: flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: 0.25rem; background: var(--land-yellow, #f2c200); color: var(--ink-on-land, #0a1d2e); } .ds-topic-text { display: flex; flex-direction: column; } .ds-topic-label { font-size: 0.875rem; color: var(--stage-ink-2, #b8cbe0); font-family: var(--font-sans), 'Atkinson Hyperlegible Next', sans-serif; } .ds-topic-value { font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.5rem; font-weight: 700; line-height: 1.25; } .ds-topic-detail { font-family: var(--font-sans), 'Atkinson Hyperlegible Next', sans-serif; font-size: 1rem; font-weight: 400; color: var(--stage-ink-2, #b8cbe0); } .ds-arrow { color: var(--stage-ink-2, #b8cbe0); transition: transform 200ms; } .ds-topic:hover .ds-arrow { transform: translateX(0.25rem); color: var(--stage-ink, #fff); } .ds-topic:focus-visible { outline: 3px solid var(--stage-accent, #8fd6ff); outline-offset: 3px; border-radius: 4px; }"
+      "css": ".ds-stage { background: var(--stage, #dcebf5); padding: 24px; color: var(--stage-ink, #0a1d2e); } .ds-topics { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--stage-line, rgb(10 29 46 / 0.15)); } .ds-topics li { border-bottom: 1px solid var(--stage-line, rgb(10 29 46 / 0.15)); } .ds-topic { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0 16px; padding: 12px 0; text-decoration: none; color: inherit; } .ds-mark { display: flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: 0.25rem; background: var(--land-yellow, #f2c200); color: var(--ink-on-land, #0a1d2e); } .ds-topic-text { display: flex; flex-direction: column; } .ds-topic-label { font-size: 0.875rem; color: var(--stage-ink-2, #3a5168); font-family: var(--font-sans), 'Atkinson Hyperlegible Next', sans-serif; } .ds-topic-value { font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.5rem; font-weight: 700; line-height: 1.25; } .ds-topic-detail { font-family: var(--font-sans), 'Atkinson Hyperlegible Next', sans-serif; font-size: 1rem; font-weight: 400; color: var(--stage-ink-2, #3a5168); } .ds-arrow { color: var(--stage-ink-2, #3a5168); transition: transform 200ms; } .ds-topic:hover .ds-arrow { transform: translateX(0.25rem); color: var(--stage-ink, #0a1d2e); } .ds-topic:focus-visible { outline: 3px solid var(--stage-accent, #0b5cad); outline-offset: 3px; border-radius: 4px; }"
     },
     {
       "name": "Severity Badge",
@@ -649,12 +714,20 @@
       "css": ".ds-badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 9999px; font-family: var(--font-sans), 'Atkinson Hyperlegible Next', sans-serif; font-size: 0.875rem; font-weight: 700; white-space: nowrap; } .ds-badge-yellow { background: var(--sev-yellow-bg, #fff3c7); color: var(--sev-yellow-ink, #634800); } .ds-badge-red { background: var(--sev-red-bg, #fbe0e0); color: var(--sev-red-ink, #8b1a1a); }"
     },
     {
-      "name": "Stage Button",
+      "name": "Map Chip",
+      "kind": "chip",
+      "refersTo": "map-chip",
+      "description": "Radio chips above the detailed map: layer (risk page), Hoje | Amanhã, and zone.",
+      "html": "<div class=\"ds-chips\" role=\"radiogroup\" aria-label=\"Dia\"><button class=\"ds-chip\" type=\"button\" role=\"radio\" aria-checked=\"true\">Hoje</button><button class=\"ds-chip\" type=\"button\" role=\"radio\" aria-checked=\"false\">Amanhã</button></div>",
+      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 8px; } .ds-chip { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--line, #cdd7df); border-radius: 0.25rem; background: var(--surface, #fff); color: var(--ink, #0a1d2e); font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.125rem; font-weight: 600; cursor: pointer; } .ds-chip:hover { background: var(--surface-2, #e2e9ef); } .ds-chip[aria-checked=true] { border-color: var(--ink, #0a1d2e); background: var(--ink, #0a1d2e); color: var(--bg, #eef2f5); } .ds-chip:focus-visible { outline: 3px solid var(--accent, #0b5cad); outline-offset: 3px; border-radius: 4px; }"
+    },
+    {
+      "name": "Solid Button",
       "kind": "button",
-      "refersTo": "button-stage",
-      "description": "The one solid button: sea fill, Barlow label ('Perto de mim').",
-      "html": "<button class=\"ds-btn-stage\" type=\"button\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><line x1=\"2\" x2=\"5\" y1=\"12\" y2=\"12\"/><line x1=\"19\" x2=\"22\" y1=\"12\" y2=\"12\"/><line x1=\"12\" x2=\"12\" y1=\"2\" y2=\"5\"/><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\"/><circle cx=\"12\" cy=\"12\" r=\"7\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>Perto de mim</button>",
-      "css": ".ds-btn-stage { display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 16px; border: 0; border-radius: 0.25rem; background: var(--stage, #0a2a4a); color: var(--stage-ink, #fff); font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.125rem; font-weight: 600; cursor: pointer; } .ds-btn-stage:hover { background: var(--stage-2, #0f3560); } .ds-btn-stage:focus-visible { outline: 3px solid var(--accent, #0b5cad); outline-offset: 3px; } .ds-btn-stage:disabled { opacity: 0.7; }"
+      "refersTo": "button-solid",
+      "description": "The one solid button: ink fill, bg label in Barlow, always with its text ('Perto de mim', 'Perto' under 400px).",
+      "html": "<button class=\"ds-btn-solid\" type=\"button\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><line x1=\"2\" x2=\"5\" y1=\"12\" y2=\"12\"/><line x1=\"19\" x2=\"22\" y1=\"12\" y2=\"12\"/><line x1=\"12\" x2=\"12\" y1=\"2\" y2=\"5\"/><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\"/><circle cx=\"12\" cy=\"12\" r=\"7\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>Perto de mim</button>",
+      "css": ".ds-btn-solid { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; min-width: 48px; padding: 0 16px; border: 0; border-radius: 0.25rem; background: var(--ink, #0a1d2e); color: var(--bg, #eef2f5); font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.125rem; font-weight: 600; white-space: nowrap; cursor: pointer; } .ds-btn-solid:hover { opacity: 0.9; } .ds-btn-solid:focus-visible { outline: 3px solid var(--accent, #0b5cad); outline-offset: 3px; border-radius: 4px; } .ds-btn-solid:disabled { opacity: 0.7; }"
     },
     {
       "name": "Text Button",
@@ -670,15 +743,15 @@
       "refersTo": "select-district",
       "description": "Native select in the header for distrito or região.",
       "html": "<label class=\"ds-picker\"><select><option>Todo o país</option><optgroup label=\"Continente\"><option>Lisboa</option><option>Porto</option></optgroup></select><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></label>",
-      "css": ".ds-picker { position: relative; display: inline-flex; align-items: center; } .ds-picker select { height: 48px; width: 16rem; appearance: none; padding: 0 44px 0 16px; border: 1px solid var(--line, #cdd7df); border-radius: 0.25rem; background: var(--surface, #fff); color: var(--ink, #0a1d2e); font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.125rem; font-weight: 600; cursor: pointer; } .ds-picker select:hover { border-color: var(--ink, #0a1d2e); } .ds-picker select:focus-visible { outline: 3px solid var(--accent, #0b5cad); outline-offset: 3px; } .ds-picker svg { position: absolute; right: 16px; pointer-events: none; color: var(--ink-2, #45586a); }"
+      "css": ".ds-picker { position: relative; display: inline-flex; align-items: center; } .ds-picker select { height: 48px; width: 15rem; appearance: none; padding: 0 44px 0 16px; border: 1px solid var(--line, #cdd7df); border-radius: 0.25rem; background: var(--surface, #fff); color: var(--ink, #0a1d2e); font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.125rem; font-weight: 600; cursor: pointer; } .ds-picker select:hover { border-color: var(--ink, #0a1d2e); } .ds-picker select:focus-visible { outline: 3px solid var(--accent, #0b5cad); outline-offset: 3px; } .ds-picker svg { position: absolute; right: 16px; pointer-events: none; color: var(--ink-2, #45586a); }"
     },
     {
-      "name": "Section Index",
+      "name": "Section Tabs",
       "kind": "nav",
-      "refersTo": "section-nav-link",
-      "description": "Sticky index under the stage; Barlow links with count chips.",
-      "html": "<nav class=\"ds-nav\"><a href=\"#\">Avisos <span class=\"ds-count\">3</span></a><a href=\"#\">Incêndios <span class=\"ds-count\">12</span></a><a href=\"#\">Sismos <span class=\"ds-count\">2</span></a><a href=\"#\">Risco e ar</a></nav>",
-      "css": ".ds-nav { display: flex; gap: 4px; padding: 0 16px; background: var(--bg, #eef2f5); border-bottom: 1px solid var(--line, #cdd7df); } .ds-nav a { display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 12px; border-bottom: 2px solid transparent; color: var(--ink, #0a1d2e); text-decoration: none; font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.125rem; font-weight: 600; } .ds-nav a:hover { border-bottom-color: var(--ink, #0a1d2e); } .ds-nav a:focus-visible { outline: 3px solid var(--accent, #0b5cad); outline-offset: 3px; border-radius: 4px; } .ds-count { min-width: 1.5rem; padding: 0 6px; border-radius: 0.25rem; background: var(--surface-2, #e2e9ef); color: var(--ink-2, #45586a); text-align: center; font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }"
+      "refersTo": "section-tab",
+      "description": "Page tabs under the header; 3px accent border marks the current page. Short labels under 640px.",
+      "html": "<nav class=\"ds-tabs\"><a href=\"#\">Resumo</a><a href=\"#\" aria-current=\"page\">Avisos</a><a href=\"#\">Incêndios</a><a href=\"#\">Sismos</a><a href=\"#\">Risco e ar</a></nav>",
+      "css": ".ds-tabs { display: flex; gap: 4px; padding: 0 16px; background: var(--surface, #fff); border-bottom: 1px solid var(--line, #cdd7df); overflow-x: auto; } .ds-tabs a { display: inline-flex; align-items: center; justify-content: center; height: 48px; min-width: 44px; padding: 0 12px; border-bottom: 3px solid transparent; color: var(--ink-2, #45586a); text-decoration: none; font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.125rem; font-weight: 600; white-space: nowrap; } .ds-tabs a:hover { border-bottom-color: var(--line, #cdd7df); color: var(--ink, #0a1d2e); } .ds-tabs a[aria-current=page] { border-bottom-color: var(--accent, #0b5cad); color: var(--ink, #0a1d2e); } .ds-tabs a:focus-visible { outline: 3px solid var(--accent, #0b5cad); outline-offset: 3px; border-radius: 4px; } @media (max-width: 639px) { .ds-tabs { gap: 0; padding: 0 8px; justify-content: space-between; } .ds-tabs a { padding: 0 6px; } }"
     },
     {
       "name": "Warning Group",
@@ -694,14 +767,14 @@
       "refersTo": "forecast-strip",
       "description": "Five-day forecast panel at the foot of the district stage.",
       "html": "<div class=\"ds-stage\"><ol class=\"ds-fc\"><li><span class=\"ds-fc-day\">Hoje</span><svg viewBox=\"0 0 24 24\" width=\"40\" height=\"40\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ds-fc-icon\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"/></svg><span class=\"ds-fc-t\">27°<small> 16°</small></span><span class=\"ds-fc-rain\">5%</span></li><li><span class=\"ds-fc-day\">Amanhã</span><svg viewBox=\"0 0 24 24\" width=\"40\" height=\"40\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ds-fc-icon\" aria-hidden=\"true\"><path d=\"M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z\"/></svg><span class=\"ds-fc-t\">24°<small> 15°</small></span><span class=\"ds-fc-rain\">20%</span></li></ol></div>",
-      "css": ".ds-stage { background: var(--stage, #0a2a4a); padding: 24px; color: var(--stage-ink, #fff); } .ds-fc { display: grid; grid-template-columns: repeat(2, 1fr); margin: 0; padding: 0; list-style: none; overflow: hidden; border-radius: 0.25rem; background: var(--stage-2, #0f3560); } .ds-fc li { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 12px; text-align: center; } .ds-fc li + li { border-left: 1px solid rgb(255 255 255 / 0.16); } .ds-fc-day { font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.125rem; font-weight: 600; } .ds-fc-icon { color: var(--stage-accent, #8fd6ff); } .ds-fc-t { font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.875rem; font-weight: 700; line-height: 1; } .ds-fc-t small { font-size: 1.25rem; font-weight: 600; color: var(--stage-ink-2, #b8cbe0); } .ds-fc-rain { font-family: var(--font-sans), 'Atkinson Hyperlegible Next', sans-serif; font-size: 0.875rem; color: var(--stage-ink-2, #b8cbe0); }"
+      "css": ".ds-stage { background: var(--stage, #dcebf5); padding: 24px; color: var(--stage-ink, #0a1d2e); } .ds-fc { display: grid; grid-template-columns: repeat(2, 1fr); margin: 0; padding: 0; list-style: none; overflow: hidden; border-radius: 0.25rem; background: var(--stage-2, #c6dcec); } .ds-fc li { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 12px; text-align: center; } .ds-fc li + li { border-left: 1px solid var(--stage-line, rgb(10 29 46 / 0.15)); } .ds-fc-day { font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.125rem; font-weight: 600; } .ds-fc-icon { color: var(--stage-accent, #0b5cad); } .ds-fc-t { font-family: var(--font-display), 'Barlow Semi Condensed', sans-serif; font-size: 1.875rem; font-weight: 700; line-height: 1; } .ds-fc-t small { font-size: 1.25rem; font-weight: 600; color: var(--stage-ink-2, #3a5168); } .ds-fc-rain { font-family: var(--font-sans), 'Atkinson Hyperlegible Next', sans-serif; font-size: 0.875rem; color: var(--stage-ink-2, #3a5168); }"
     }
   ],
   "narrative": {
     "northStar": "The Evening Weather Bulletin",
-    "overview": "Portugal Agora reads like the boletim meteorológico at the end of the evening news. The first viewport is a deep broadcast-blue stage (the sea) that stays blue in both themes. On it sits one flat map of the country, every distrito filled with its official IPMA level and outlined in white, with Açores and Madeira boxed as insets in the sea. Beside the map, a presenter's summary: a date-and-time stamp, one headline at display size, and four topic lines. Below the map, a light lower-third bar carries the level legend and a live caption that follows whatever distrito the visitor points at.\n\nBelow the stage the page turns into a calm, cool, light reading ground: a sticky section index, then the grouped detail (avisos, incêndios, sismos, risco e ar, distritos) set as ruled lists, not cards. Colour does almost no decorative work. The four IPMA levels carry the only saturated colour; everything else is blue-grey ink on cool paper, or white on sea.\n\nDensity is low on the stage and moderate below it. Type is large (an 18px root that honours the visitor's own font size), contrast is high, and every level is spoken three ways: colour, icon shape and word. Motion is restricted to the bulletin itself: the lower third wipes in once, the caption crossfades, and that is all.",
+    "overview": "Portugal Agora reads like the boletim meteorológico on the evening news. The first viewport is a sea-blue stage: a pale morning sea in the light theme, a deep night sea in the dark one. On it sits one flat map of the country, every distrito filled with its official IPMA level and outlined in white, with Açores and Madeira boxed as insets in the sea. Beside the map, a presenter's summary: a date-and-time stamp, one headline at display size, and four topic lines. Below the map, a white lower-third bar carries the level legend and a live caption that follows whatever distrito the visitor points at.\n\nBelow the stage the page turns into a calm, cool, light reading ground. Each topic (avisos, incêndios, sismos, risco e ar) has its own page: the detailed map of that one topic first, then the grouped detail set as ruled lists, not cards. Colour does almost no decorative work. The four IPMA levels carry the only saturated colour; everything else is blue-grey ink on cool paper, or navy ink on the pale sea (white on the night sea).\n\nDensity is low on the stage and moderate below it. Type is large (an 18px root that honours the visitor's own font size), contrast is high, and every level is spoken three ways: colour, icon shape and word. Motion is restricted to the bulletin itself: the lower third wipes in once, the caption crossfades, and that is all.",
     "keyCharacteristics": [
-      "Full-bleed broadcast-blue stage owns the first viewport, identical in light and dark.",
+      "Full-bleed sea stage owns the first viewport: pale sea-blue in the light theme, night navy in the dark one.",
       "Flat district fills in the IPMA scale with white borders; no gradients, no relief, no basemap on the stage.",
       "Condensed broadcast sans for headlines, numbers, captions and controls; a hyperlegible sans for reading text.",
       "Lower-third caption bar as the signature component, driven by pointing at the map.",
@@ -711,6 +784,11 @@
       {
         "name": "The Only Colour Is Severity Rule",
         "body": "Saturated colour appears only as an IPMA level (or the fire marker, which is a hazard of its own). Decoration, emphasis and branding stay inside the blues and greys.",
+        "section": "colors"
+      },
+      {
+        "name": "The Caption Stays White Rule",
+        "body": "The lower third uses `caption`, never `stage-ink`: `stage-ink` is navy in the light theme, so as a background it would put navy text on navy.",
         "section": "colors"
       },
       {
@@ -735,7 +813,7 @@
       },
       {
         "name": "The Flat Map Rule",
-        "body": "The bulletin map is flat fills with white borders. No relief, gradients, glows or drop shadows on districts; emphasis is a thicker outline (white for the focused distrito, cyan for the pointed one), and other distritos dim to a muted sea tone on a district page.",
+        "body": "The bulletin map is flat fills with white borders (island districts take a 5px outline in their own fill instead, so they hold up at inset scale). No relief, gradients, glows or drop shadows on districts; emphasis is a thicker outline (white for the focused distrito, `stage-accent` for the pointed one), and other distritos dim to `land-dim` on a district page.",
         "section": "elevation"
       }
     ],
@@ -743,14 +821,14 @@
       "**Do** open every hazard page with the stage: sea ground, flat level map, one display headline, the lower third.",
       "**Do** show each level with its map fill or severity triplet, its icon shape and its word.",
       "**Do** set headlines, numbers, names and controls in Barlow Semi Condensed and every sentence in Atkinson Hyperlegible Next.",
-      "**Do** keep one interaction accent per ground: Studio Cyan on the stage, Bulletin Blue on the page.",
+      "**Do** keep one interaction accent per ground: `stage-accent` on the stage, `accent` on the page.",
       "**Do** group repeated official text once and list its places, in ruled lists.",
       "**Do** keep touch targets at 44px or more and respect reduced motion."
     ],
     "donts": [
       "**Don't** use saturated colour for anything that is not a level or a hazard marker.",
       "**Don't** put `land-*` fills on the page ground or `sev-*` triplets on the stage.",
-      "**Don't** turn the stage light in the light theme; it is the sea in both.",
+      "**Don't** use `stage-ink` as a background; it flips from navy to white between themes. Fixed white surfaces on the stage use `caption`.",
       "**Don't** wrap detail in cards or columns of equal-weight boxes; use rules.",
       "**Don't** add shadows beyond the caption drop, or relief and gradients to the map.",
       "**Don't** animate anything beyond the lower-third wipe, the forecast wipe, the caption fade and short hover feedback (the topic arrow nudge)."

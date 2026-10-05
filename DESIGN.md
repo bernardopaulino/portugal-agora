@@ -92,7 +92,7 @@ spacing:
   container: "80rem"
 components:
   lower-third:
-    backgroundColor: "{colors.stage-ink}"
+    backgroundColor: "{colors.caption}"
     textColor: "{colors.ink-on-land}"
     rounded: "{rounded.sm}"
     padding: "10px 16px"
@@ -111,15 +111,13 @@ components:
     textColor: "{colors.sev-yellow-ink}"
     rounded: "{rounded.full}"
     padding: "2px 10px"
-  button-stage:
-    backgroundColor: "{colors.stage}"
-    textColor: "{colors.stage-ink}"
+  button-solid:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.bg}"
     typography: "{typography.label}"
     rounded: "{rounded.sm}"
     padding: "0 16px"
     height: "48px"
-  button-stage-hover:
-    backgroundColor: "{colors.stage-2}"
   button-text:
     textColor: "{colors.accent}"
     rounded: "{rounded.sm}"
@@ -132,17 +130,24 @@ components:
     rounded: "{rounded.sm}"
     padding: "0 44px 0 16px"
     height: "48px"
-  section-nav-link:
-    backgroundColor: "{colors.bg}"
-    textColor: "{colors.ink}"
+  section-tab:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink-2}"
     typography: "{typography.label}"
     padding: "0 12px"
     height: "48px"
-  count-chip:
-    backgroundColor: "{colors.surface-2}"
-    textColor: "{colors.ink-2}"
+  section-tab-active:
+    textColor: "{colors.ink}"
+  map-chip:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    typography: "{typography.label}"
     rounded: "{rounded.sm}"
-    padding: "0 6px"
+    padding: "0 16px"
+    height: "44px"
+  map-chip-selected:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.bg}"
   forecast-strip:
     backgroundColor: "{colors.stage-2}"
     textColor: "{colors.stage-ink}"
@@ -158,7 +163,7 @@ components:
 
 Portugal Agora reads like the boletim meteorológico on the evening news. The first viewport is a sea-blue stage: a pale morning sea in the light theme, a deep night sea in the dark one. On it sits one flat map of the country, every distrito filled with its official IPMA level and outlined in white, with Açores and Madeira boxed as insets in the sea. Beside the map, a presenter's summary: a date-and-time stamp, one headline at display size, and four topic lines. Below the map, a white lower-third bar carries the level legend and a live caption that follows whatever distrito the visitor points at.
 
-Below the stage the page turns into a calm, cool, light reading ground: a sticky section index, then the grouped detail (avisos, incêndios, sismos, risco e ar, distritos) set as ruled lists, not cards. Colour does almost no decorative work. The four IPMA levels carry the only saturated colour; everything else is blue-grey ink on cool paper, or navy ink on the pale sea (white on the night sea).
+Below the stage the page turns into a calm, cool, light reading ground. Each topic (avisos, incêndios, sismos, risco e ar) has its own page: the detailed map of that one topic first, then the grouped detail set as ruled lists, not cards. Colour does almost no decorative work. The four IPMA levels carry the only saturated colour; everything else is blue-grey ink on cool paper, or navy ink on the pale sea (white on the night sea).
 
 Density is low on the stage and moderate below it. Type is large (an 18px root that honours the visitor's own font size), contrast is high, and every level is spoken three ways: colour, icon shape and word. Motion is restricted to the bulletin itself: the lower third wipes in once, the caption crossfades, and that is all.
 
@@ -196,9 +201,9 @@ Two parallel sets of the same four levels, one per ground. Never mix them.
 
 ### Neutral
 
-- **Cool Paper** (`bg`): the page ground below the stage and the sticky section index.
-- **Card White** (`surface`): header, inputs, map overlay panels.
-- **Mist** (`surface-2`): count chips, selected list rows, quiet fills.
+- **Cool Paper** (`bg`): the page ground below the stage; also the wash over the rest of the country on a district's detailed map.
+- **Card White** (`surface`): header and section tabs, inputs, unselected map chips, map overlay panels.
+- **Mist** (`surface-2`): selected list rows, map chip hover, the map frame while it loads, quiet fills.
 - **Night Ink** (`ink`): body text and headings on the page; also the ink on map colours (`ink-on-land`).
 - **Slate Ink** (`ink-2`): secondary text, source lines, meta.
 - **Hairline** (`line`): every rule and border on the page.
@@ -228,7 +233,7 @@ Two parallel sets of the same four levels, one per ground. Never mix them.
 - **Headline** (700, 2.25rem, 1.25): section titles in the main column below the stage.
 - **Title** (700, 1.5rem, 1.25): topic values on the stage, caption names in the lower third, warning group titles, sidebar section titles, forecast heading.
 - **Title small** (700, 1.25rem, 1.25): event rows (fires, quakes).
-- **Label** (600, 1.125rem): bulletin stamp, section index links, district picker, stage buttons, forecast day names.
+- **Label** (600, 1.125rem): bulletin stamp, section tabs, district picker, solid buttons, map chips, forecast day names.
 - **Body** (400, 1rem = 18px, 1.55, tabular numerals): reading text; warning descriptions held to 70ch.
 - **Body small** (400, 0.875rem): source lines, legend, notes under the stage.
 
@@ -244,7 +249,7 @@ One centred container (80rem, gutters 1rem, 1.5rem from 640px). The stage is ful
 
 - **National stage:** at 1024px and up, a 12-column grid: map in the left 7 columns, the bulletin panel (headline, stamp, topic list, note) in the right 5, vertically centred; the lower third and legend span all 12 below. Below 1024px, headline and topic lines come first and the map follows at full width (max 380px, 440px at 640px, 480px at 1280px).
 - **District stage:** the split inverts in weight (map 5, panel 7); the forecast strip spans all 12 at the bottom.
-- **Below the stage:** a sticky section index (48px tall, horizontally scrollable), then a two-column body at 1024px: main column plus a 21rem aside that sticks under the index. Sections stack with 3.5rem between them in the main column, 3rem in the aside.
+- **Topic pages:** a stage page head (back link on district pages, display title, intro), then the detailed map first and the lists after it. From 1024px the two sit side by side in two equal columns (2.5rem gap): the map section sticks to the top of the viewport on the left while the list scrolls on the right. Below 1024px they stack, map on top. A "Saltar o mapa" skip link, visible only on keyboard focus, jumps from the map heading straight to the list. Sections in the list stack 3.5rem apart; on the risk page fire risk and air split into two columns when the list column is wide enough.
 - **Rhythm:** 2rem stage padding and gaps, 1.75rem inside the bulletin panel, 1rem to 1.25rem row padding in lists.
 
 ## Elevation & Depth
@@ -257,11 +262,11 @@ Flat. Depth comes from the two grounds (sea above, paper below) and from hairlin
 
 ### Named Rules
 
-**The Flat Map Rule.** The bulletin map is flat fills with white borders. No relief, gradients, glows or drop shadows on districts; emphasis is a thicker outline (white for the focused distrito, `stage-accent` for the pointed one), and other distritos dim to `land-dim` on a district page.
+**The Flat Map Rule.** The bulletin map is flat fills with white borders (island districts take a 5px outline in their own fill instead, so they hold up at inset scale). No relief, gradients, glows or drop shadows on districts; emphasis is a thicker outline (white for the focused distrito, `stage-accent` for the pointed one), and other distritos dim to `land-dim` on a district page.
 
 ## Shapes
 
-Small, square-ish corners everywhere (0.25rem): lower third, level marks, forecast strip, buttons, select, count chips. Legend and index chips go tighter (3px). Full rounds are reserved for things that are round by nature: the severity badge pill, fire and earthquake markers, icon-only buttons. On the map, the warning pictograms keep distinct silhouettes per level: triangle (amarelo), diamond (laranja), octagon (vermelho). The Açores and Madeira insets are plain rectangles drawn in `stage-line`.
+Small, square-ish corners everywhere (0.25rem): lower third, level marks, forecast strip, buttons, select, map chips, the detailed map frame. Legend and index chips go tighter (3px). Full rounds are reserved for things that are round by nature: the severity badge pill, fire and earthquake markers, icon-only buttons. On the map, the warning pictograms keep distinct silhouettes per level: triangle (amarelo), diamond (laranja), octagon (vermelho). The Açores and Madeira insets are plain rectangles drawn in `stage-line`, cropped tight around the islands so they render large; each is named above its frame in Barlow semibold `stage-ink-2` (30 viewBox units on phones, about 13px on a 390px screen; 24 from 1024px). Island shapes carry their own-colour outline as a halo and a wider invisible touch area.
 
 ## Components
 
@@ -283,23 +288,33 @@ The page-ground expression of a level: a pill with the soft background and reada
 
 ### Buttons
 
-- **Solid button:** `ink` fill with a `bg` label in Barlow with icon, 48px tall, small corners; hover lowers the opacity. Navy with a white label in the light theme, near-white with a navy label in the dark one. Used for "Perto de mim" in the header.
+- **Solid button:** `ink` fill with a `bg` label in Barlow with icon, 48px tall, small corners; hover lowers the opacity. Navy with a white label in the light theme, near-white with a navy label in the dark one. Used for "Perto de mim" in the header, which always shows its text label beside the icon (shortened to "Perto" under 400px; the accessible name stays "Perto de mim").
 - **Text button:** accent-blue bold body text with icon, 44px target, underline on hover ("Ver no mapa").
 - **Focus:** a 3px accent outline at 3px offset everywhere; `stage-accent` on the stage, `ink-on-land` on the lower third.
 
 ### Inputs / Fields
 
-- **District picker:** a native select, 48px, white with hairline border, Barlow label weight, chevron at right; border darkens to ink on hover. Full width on phones, 16rem from 640px.
+- **District picker:** a native select, 48px, white with hairline border, Barlow label weight, chevron at right; border darkens to ink on hover. Below 1024px it fills its row beside "Perto de mim"; from 1024px it sits in the header bar at 15rem.
 
 ### Navigation
 
-- **Header:** white bar with hairline bottom, brand mark (the mainland outline in `ink` with a dot in the national level colour) and the name in Barlow, then picker and stage button.
-- **Section index:** sticky, page ground, Barlow label links 48px tall with a 2px bottom border that turns ink on hover, each followed by a count chip in mist with tabular numerals.
+- **Header:** white bar; brand mark (the mainland outline in `ink` with a dot in the national level colour) and the name in Barlow bold at normal leading, so descenders are never clipped (below 360px only the mark shows; the name stays for screen readers). From 1024px the district picker and "Perto de mim" sit in the bar beside the theme toggle and the PT | EN switch; below 1024px they move to their own row under the logo, the picker filling the width and the button beside it.
+- **Section tabs:** a row under the header on `surface` with a hairline bottom: Resumo, Avisos, Incêndios, Sismos, Risco e ar (on a district page the same tabs lead to that district's pages). Barlow label, 48px tall, a 3px bottom border: `accent` with `ink` text on the current page, transparent with `ink-2` text otherwise, hairline and `ink` on hover. Under 640px all five fit a 360px screen: short labels ("Risco"; in English "Quakes" and "Risk"), 0.375rem side padding, no gap, spread edge to edge, and the text drops one step (currently a fixed 17px). The full name stays as the accessible name; if the row still overflows it scrolls sideways with the current tab centred.
 - **Emergency bar:** a thin ink band above the header with the 112 line; it inverts to mist in dark.
 
 ### Lists (instead of cards)
 
 Detail is set as ruled lists: a hairline above the list, a hairline under each item, no boxes. Warning groups show badge plus type at title size, the IPMA text once, and each time window with its places. Event rows add a meta line and a "Ver no mapa" text button; the selected row fills with mist. Empty states are a line of large slate text between two rules.
+
+### Detailed Map (topic pages)
+
+The interactive map on every topic page shows one layer only: that page's topic. The risk page offers fire risk or air quality as a radio pair of map chips, one at a time, and, for fire risk on the continente, a Hoje | Amanhã radio pair; national pages add a Continente / Açores / Madeira choice. Map chips are 44px, small corners, Barlow label: `ink` fill with a `bg` label when selected, `surface` with a hairline border (mist on hover) otherwise. The frame has a hairline border and small corners; it is 45vh tall on phones (at least 300px), 62vh from 640px, and at most 680px from 1024px. Under it, a legend for the shown layer only, in body small slate: round swatches for levels, square ones for the five fire-risk classes.
+
+On a district page the rest of the country is washed over with the page ground and the district is outlined in a heavy dark line; a link leads to the same topic for the whole country. Selecting a distrito, fire or quake outlines or rings it and opens a white overlay panel with the caption drop at the foot of the map; selecting the same thing again, or closing the panel, clears it and zooms back out.
+
+### Share Image
+
+The 1200 x 630 image each page shares, per locale. The light soft background of the national or district level fills the card, with a 28px bar in that level's solid colour down the left edge. Top row: the site logo as a silhouette (the mainland in ink with the level dot ringed in the background colour), "Portugal Agora" in Barlow Semi Condensed bold, the place in Atkinson. Middle: the headline in Barlow Semi Condensed bold (size steps down with length, 1.08 leading, at most four lines). Foot: the data timestamp in Atkinson bold, then the sources line in slate. No level pill: the bar, the dot and the headline carry the level. Fonts come from the project's own font files, not the network.
 
 ### Forecast Strip
 
