@@ -24,6 +24,12 @@ const csp = [
 
 const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },
+  // Dois anos, com subdomínios e pronto para a lista de preload dos browsers
+  // (hstspreload.org). Sobrepõe-se ao cabeçalho por omissão da Vercel.
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
+  },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },

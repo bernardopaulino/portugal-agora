@@ -179,3 +179,10 @@ test("API de fontes só aceita fontes conhecidas", async ({ request }) => {
     expect((await request.get(`/api/sources/${id}`)).status()).toBe(404);
   }
 });
+
+test("HSTS com subdomínios e preload", async ({ request }) => {
+  const response = await request.get("/");
+  expect(response.headers()["strict-transport-security"]).toBe(
+    "max-age=63072000; includeSubDomains; preload",
+  );
+});
