@@ -114,9 +114,11 @@ test("nas páginas de tema, o mapa vem antes da lista e pode ser saltado", async
   await page.goto("/lisboa/incendios");
   const map = page.locator("#mapa");
   const list = page.locator("#lista");
-  const mapTop = (await map.boundingBox())!.y;
-  const listTop = (await list.boundingBox())!.y;
-  expect(mapTop).toBeLessThan(listTop);
+  const mapBox = (await map.boundingBox())!;
+  const listBox = (await list.boundingBox())!;
+  // Em telemóveis o mapa fica por cima da lista; em ecrãs largos, à esquerda.
+  const before = mapBox.y < listBox.y || mapBox.x + mapBox.width <= listBox.x;
+  expect(before).toBe(true);
   // O link de saltar o mapa leva o foco para a lista.
   const skip = page.getByRole("link", { name: "Saltar o mapa" });
   await skip.focus();

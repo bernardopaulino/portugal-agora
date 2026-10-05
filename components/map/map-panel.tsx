@@ -298,7 +298,7 @@ export function MapPanel({
           ) : null}
         </div>
       ) : null}
-      <div className="relative h-[45vh] min-h-[300px] overflow-hidden rounded-sm border border-line bg-surface-2 sm:h-[62vh] sm:min-h-[360px] lg:h-[min(72vh,720px)]">
+      <div className="relative h-[45vh] min-h-[300px] overflow-hidden rounded-sm border border-line bg-surface-2 sm:h-[62vh] sm:min-h-[360px] lg:h-[min(62vh,680px)]">
         <LiveMap
           state={state}
           layer={layer}

@@ -59,47 +59,54 @@ export function TopicLayout({
             : undefined
         }
       />
-      {/* O mapa vem logo a seguir ao cabeçalho: nestes temas, "onde" é a primeira pergunta. */}
-      <section
-        id="mapa"
-        ref={mapRef}
-        aria-labelledby="mapa-titulo"
-        className="mx-auto flex max-w-7xl scroll-mt-4 flex-col gap-3 px-4 pt-8 sm:px-6"
-      >
-        <div className="flex flex-col gap-1">
-          <h2 id="mapa-titulo" className="font-display text-2xl leading-tight font-bold">
-            {district ? t.sections.mapOf(t.districtName(district)) : t.sections.map}
-          </h2>
-          <p className="max-w-[70ch] text-base text-ink-2">
-            {district ? t.sections.mapIntroDistrict(t.inPlace(district)) : t.sections.mapIntro}
-          </p>
-        </div>
-        {/* Para quem navega com o teclado ou leitor de ecrã: a lista sem passar pelo mapa. */}
-        <a
-          href="#lista"
-          className="sr-only self-start rounded-sm bg-ink px-4 py-3 font-bold text-bg focus:not-sr-only"
+      {/*
+       * O mapa vem logo a seguir ao cabeçalho: nestes temas, "onde" é a
+       * primeira pergunta. Em ecrãs largos, a lista fica ao lado e o mapa
+       * acompanha a página (sticky), em vez de ocupar a largura toda com
+       * Espanha e o mar à volta de Portugal.
+       */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-10">
+        <section
+          id="mapa"
+          ref={mapRef}
+          aria-labelledby="mapa-titulo"
+          className="flex scroll-mt-4 flex-col gap-3 pt-8 lg:sticky lg:top-0 lg:pb-4"
         >
-          {t.sections.skipMap}
-        </a>
-        <MapPanel
-          state={state}
-          views={controls.views}
-          layer={controls.layer}
-          onLayer={controls.setLayer}
-          selection={controls.selection}
-          onSelect={controls.setSelection}
-          onClearSelection={() => controls.setSelection(null)}
-          region={district ? district.region : controls.region}
-          onRegion={district ? undefined : controls.setRegion}
-          focus={district?.slug}
-        />
-      </section>
-      <div
-        id="lista"
-        tabIndex={-1}
-        className="mx-auto flex max-w-7xl scroll-mt-4 flex-col gap-14 px-4 pt-14 outline-none sm:px-6"
-      >
-        {children}
+          <div className="flex flex-col gap-1">
+            <h2 id="mapa-titulo" className="font-display text-2xl leading-tight font-bold">
+              {district ? t.sections.mapOf(t.districtName(district)) : t.sections.map}
+            </h2>
+            <p className="max-w-[70ch] text-base text-ink-2">
+              {district ? t.sections.mapIntroDistrict(t.inPlace(district)) : t.sections.mapIntro}
+            </p>
+          </div>
+          {/* Para quem navega com o teclado ou leitor de ecrã: a lista sem passar pelo mapa. */}
+          <a
+            href="#lista"
+            className="sr-only self-start rounded-sm bg-ink px-4 py-3 font-bold text-bg focus:not-sr-only"
+          >
+            {t.sections.skipMap}
+          </a>
+          <MapPanel
+            state={state}
+            views={controls.views}
+            layer={controls.layer}
+            onLayer={controls.setLayer}
+            selection={controls.selection}
+            onSelect={controls.setSelection}
+            onClearSelection={() => controls.setSelection(null)}
+            region={district ? district.region : controls.region}
+            onRegion={district ? undefined : controls.setRegion}
+            focus={district?.slug}
+          />
+        </section>
+        <div
+          id="lista"
+          tabIndex={-1}
+          className="@container flex min-w-0 scroll-mt-4 flex-col gap-14 pt-14 outline-none lg:pt-8"
+        >
+          {children}
+        </div>
       </div>
     </>
   );
@@ -212,7 +219,7 @@ export function RiskView({ initial }: { initial: CountryState }) {
       controls={controls}
       mapRef={mapRef}
     >
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-14 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-14 @3xl:grid-cols-2">
         <Section id="risco" title={t.sections.riskToday} result={state.fireRisk}>
           {state.fireRisk.data ? (
             <FireRiskSummary risk={state.fireRisk.data} />

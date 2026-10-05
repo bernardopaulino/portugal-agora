@@ -40,10 +40,14 @@ export function useMapControls(initialLayer: LayerId, initialRegion: Region = "c
   const [region, setRegion] = useState<Region>(initialRegion);
   const mapRef = useRef<HTMLElement>(null);
 
-  const scrollToMap = useCallback(
-    () => mapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-    [],
-  );
+  // Em ecrãs largos o mapa está ao lado da lista e já à vista: aí não se desce.
+  const scrollToMap = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const { top, bottom } = map.getBoundingClientRect();
+    if (top >= 0 && bottom <= window.innerHeight) return;
+    map.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const showOnMap = useCallback(
     (s: Selection) => {

@@ -154,7 +154,7 @@ export function DistrictRiskView({ district, initial }: Props) {
       mapRef={mapRef}
       district={district}
     >
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-14 lg:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-14 @3xl:grid-cols-2">
         {liveRisk.length > 0 ? (
           <Section id="risco" title={t.sections.riskByConcelho} result={state.fireRisk}>
             {notableRisk.length === 0 && !allRisk ? (
