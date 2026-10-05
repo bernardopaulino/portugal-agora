@@ -70,13 +70,34 @@ function districtSlug(name?: string | null, dico?: string | null): string | unde
   );
 }
 
+const PARTICLES = new Set(["de", "da", "do", "dos", "das", "e"]);
+
+/**
+ * O Fogos.pt escreve os nomes com todas as palavras em maiúscula
+ * ("Armação De Pêra"). As partículas passam a minúsculas, exceto na
+ * primeira palavra de cada nome ("De Cima" fica como está).
+ */
+export function tidyPlaceName(name: string): string {
+  return name
+    .split(",")
+    .map((part) =>
+      part.replace(/\S+/g, (word, offset: number) =>
+        offset > part.search(/\S/) && PARTICLES.has(word.toLowerCase()) ? word.toLowerCase() : word,
+      ),
+    )
+    .join(",");
+}
+
 export function normalizeFires(raw: FogosRaw): FireEvent[] {
   return raw.data
     .filter((f) => f.isFire !== false)
     .map((f): FireEvent => {
       const coordinates: [number, number] | undefined =
         f.lat != null && f.lng != null ? [f.lng, f.lat] : undefined;
-      const place = [f.concelho, f.freguesia].filter(Boolean).join(", ");
+      const concelho = f.concelho ? tidyPlaceName(f.concelho) : undefined;
+      const place = [concelho, f.freguesia && tidyPlaceName(f.freguesia)]
+        .filter(Boolean)
+        .join(", ");
       const severity = fireSeverity(f.statusCode, f.important === true);
       return {
         kind: "fire",
@@ -91,7 +112,7 @@ export function normalizeFires(raw: FogosRaw): FireEvent[] {
         groundUnits: f.terrain ?? 0,
         aerialUnits: f.aerial ?? 0,
         nature: f.natureza ?? "Incêndio",
-        concelho: f.concelho ?? undefined,
+        concelho,
         coordinates,
         place: {
           district: districtSlug(f.district, f.dico),
