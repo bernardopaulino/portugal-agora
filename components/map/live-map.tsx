@@ -21,7 +21,7 @@ import { riskColors } from "../cards/fire-risk";
 import { isSameSelection, type OnSelect, type Selection } from "../cards/types";
 import { useResolvedTheme } from "@/lib/hooks/external";
 import { mapColors } from "../status/severity";
-import type { LayerId } from "./layers";
+import type { LayerId, RiskDay } from "./layers";
 
 type Feature = GeoJSON.Feature<GeoJSON.Geometry, Record<string, unknown>>;
 type Collection = GeoJSON.FeatureCollection<GeoJSON.Geometry, Record<string, unknown>>;
@@ -106,6 +106,7 @@ function bboxOf(features: Feature[]): [[number, number], [number, number]] | nul
 export default function LiveMap({
   state,
   layer,
+  riskDay = "today",
   selection,
   onSelect,
   onClear,
@@ -114,6 +115,8 @@ export default function LiveMap({
 }: {
   state: CountryState;
   layer: LayerId;
+  /** Na camada de risco: hoje ou amanhã. */
+  riskDay?: RiskDay;
   selection: Selection | null;
   onSelect: OnSelect;
   /** Tira a seleção (segundo toque no mesmo distrito ou evento). */
@@ -293,7 +296,7 @@ export default function LiveMap({
         )
       : collection([]);
 
-    const risk = state.fireRisk.data?.today.byDico ?? {};
+    const risk = state.fireRisk.data?.[riskDay].byDico ?? {};
     const concelhosFc = concelhoGeo
       ? collection(
           concelhoGeo.features
@@ -354,7 +357,7 @@ export default function LiveMap({
       }),
     );
     return { districtsFc, concelhosFc, fires, quakes, air };
-  }, [state, districtGeo, concelhoGeo, focus]);
+  }, [state, districtGeo, concelhoGeo, focus, riskDay]);
 
   // (Re)criar fontes e camadas sempre que o estilo carrega.
   useEffect(() => {

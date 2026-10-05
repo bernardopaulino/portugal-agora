@@ -3,6 +3,7 @@
 import { ArrowRight, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useState } from "react";
 
 import { getDistrict, type Region } from "@/data/districts";
 import { useI18n } from "@/lib/i18n/client";
@@ -14,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { riskColors } from "../cards/fire-risk";
 import type { OnSelect, Selection } from "../cards/types";
 import { type Level, levels, SeverityBadge } from "../status/severity";
-import { layerTopic, type LayerId } from "./layers";
+import { layerTopic, type LayerId, type RiskDay } from "./layers";
 
 const LiveMap = dynamic(() => import("./live-map"), {
   ssr: false,
@@ -256,15 +257,32 @@ export function MapPanel({
   className?: string;
 }) {
   const { t, path } = useI18n();
+  // O risco de incêndio tem previsão para hoje e amanhã (só no continente).
+  const [riskDay, setRiskDay] = useState<RiskDay>("today");
+  const showRiskDay = layer === "risk" && region === "continente" && state.fireRisk.data !== null;
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      {onRegion || views.length > 1 ? (
+      {onRegion || views.length > 1 || showRiskDay ? (
         <div className="flex flex-wrap gap-x-6 gap-y-3">
           {views.length > 1 ? (
             <div role="radiogroup" aria-label={t.map.show} className="flex flex-wrap gap-2">
               {views.map((v) => (
                 <Chip key={v} role="radio" pressed={layer === v} onClick={() => onLayer(v)}>
                   {t.map.layers[v]}
+                </Chip>
+              ))}
+            </div>
+          ) : null}
+          {showRiskDay ? (
+            <div role="radiogroup" aria-label={t.map.riskDay} className="flex flex-wrap gap-2">
+              {(["today", "tomorrow"] as const).map((day) => (
+                <Chip
+                  key={day}
+                  role="radio"
+                  pressed={riskDay === day}
+                  onClick={() => setRiskDay(day)}
+                >
+                  {t.lists[day]}
                 </Chip>
               ))}
             </div>
@@ -284,6 +302,7 @@ export function MapPanel({
         <LiveMap
           state={state}
           layer={layer}
+          riskDay={riskDay}
           selection={selection}
           onSelect={onSelect}
           onClear={onClearSelection}

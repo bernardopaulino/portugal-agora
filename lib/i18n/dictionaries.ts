@@ -305,6 +305,7 @@ const pt = {
   map: {
     loading: "A carregar o mapa…",
     zone: "Zona do mapa",
+    riskDay: "Dia do risco de incêndio",
     show: "Mostrar no mapa",
     layers: {
       warnings: "Avisos",
@@ -643,6 +644,7 @@ const en: Dictionary = {
   map: {
     loading: "Loading the map…",
     zone: "Map area",
+    riskDay: "Wildfire risk day",
     show: "Show on the map",
     layers: {
       warnings: "Warnings",

@@ -32,3 +32,18 @@ describe("textos do mapa das páginas de tema", () => {
     expect([pt.skipMap, en.skipMap]).toEqual(["Saltar o mapa", "Skip the map"]);
   });
 });
+
+describe("dia do risco de incêndio no mapa", () => {
+  it("tem nome nos dois idiomas e reutiliza Hoje/Amanhã", () => {
+    expect(getDictionary("pt").map.riskDay).toBe("Dia do risco de incêndio");
+    expect(getDictionary("en").map.riskDay).toBe("Wildfire risk day");
+    expect([getDictionary("pt").lists.today, getDictionary("pt").lists.tomorrow]).toEqual([
+      "Hoje",
+      "Amanhã",
+    ]);
+    expect([getDictionary("en").lists.today, getDictionary("en").lists.tomorrow]).toEqual([
+      "Today",
+      "Tomorrow",
+    ]);
+  });
+});

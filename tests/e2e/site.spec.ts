@@ -140,6 +140,20 @@ test("o mapa mostra só o tema da página", async ({ page }) => {
   await expect(air).toHaveAttribute("aria-checked", "true");
 });
 
+test("o mapa do risco de incêndio mostra hoje ou amanhã", async ({ page }) => {
+  await page.goto("/lisboa/risco");
+  const days = page.getByRole("radiogroup", { name: "Dia do risco de incêndio" });
+  const today = days.getByRole("radio", { name: "Hoje" });
+  const tomorrow = days.getByRole("radio", { name: "Amanhã" });
+  await expect(today).toHaveAttribute("aria-checked", "true");
+  await tomorrow.click();
+  await expect(tomorrow).toHaveAttribute("aria-checked", "true");
+  await expect(today).toHaveAttribute("aria-checked", "false");
+  // Na qualidade do ar não há dia a escolher.
+  await page.getByRole("radio", { name: "Qualidade do ar", exact: true }).click();
+  await expect(days).toHaveCount(0);
+});
+
 test("versão em inglês", async ({ page }) => {
   await page.goto("/en/porto/avisos");
   await expect(page.locator("html")).toHaveAttribute("lang", "en-GB");
