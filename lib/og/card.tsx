@@ -20,8 +20,9 @@ const tint: Record<Severity | "unknown", { bar: string; bg: string }> = {
   unknown: { bar: "#7c8b94", bg: "#e6ebee" },
 };
 
-const INK = "#0d2b3a";
-const INK_2 = "#44596a";
+// Os tokens ink e ink-2 do site (DESIGN.md).
+const INK = "#0a1d2e";
+const INK_2 = "#45586a";
 
 /**
  * As letras do site, lidas do disco (assets/fonts, licença OFL) e não

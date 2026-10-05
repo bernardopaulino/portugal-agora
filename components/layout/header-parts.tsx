@@ -98,7 +98,7 @@ export function MainNav() {
                 href={path(href)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "inline-flex h-12 min-w-11 items-center justify-center border-b-[3px] px-1.5 font-display text-[17px] font-semibold no-underline sm:px-3 sm:text-lg",
+                  "inline-flex h-12 min-w-11 items-center justify-center border-b-[3px] px-1.5 font-display text-[0.945rem] font-semibold no-underline sm:px-3 sm:text-lg",
                   active
                     ? "border-accent text-ink"
                     : "border-transparent text-ink-2 hover:border-line hover:text-ink",
