@@ -186,3 +186,21 @@ test("HSTS com subdomínios e preload", async ({ request }) => {
     "max-age=63072000; includeSubDomains; preload",
   );
 });
+
+test("cada idioma partilha a sua imagem", async ({ page, request }) => {
+  const pages = {
+    pt: ["/", "/lisboa", "/avisos", "/porto/risco"],
+    en: ["/en", "/en/lisboa", "/en/avisos", "/en/porto/risco"],
+  };
+  for (const [lang, paths] of Object.entries(pages)) {
+    for (const path of paths) {
+      await page.goto(path);
+      const content = await page.locator('meta[property="og:image"]').getAttribute("content");
+      const image = new URL(content!).pathname;
+      expect(image, path).toMatch(new RegExp(`^/${lang}(/[a-z-]+)?/opengraph-image$`));
+      const response = await request.get(image);
+      expect(response.status(), image).toBe(200);
+      expect(response.headers()["content-type"]).toBe("image/png");
+    }
+  }
+});
