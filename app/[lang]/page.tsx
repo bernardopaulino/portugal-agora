@@ -27,6 +27,7 @@ export default async function Home(props: PageProps<"/[lang]">) {
     url: `${site.url}${localePath(locale, "/")}`,
     description: getDictionary(locale).site.description,
     inLanguage: intlLocale[locale],
+    author: { "@type": "Person", name: site.author },
   };
   return (
     <>

@@ -167,6 +167,13 @@ test("versão em inglês", async ({ page }) => {
   await expect(pageTitle(page)).toHaveText("Avisos no Porto");
 });
 
+test("as páginas indicam o autor (o LinkedIn mostra-o)", async ({ page }) => {
+  for (const path of ["/", "/en/lisboa"]) {
+    await page.goto(path);
+    await expect(page.locator("meta[name=author]")).toHaveAttribute("content", "Bernardo Paulino");
+  }
+});
+
 test("página de fontes explica os níveis", async ({ page }) => {
   await page.goto("/fontes");
   await expect(page.locator("#niveis")).toBeVisible();

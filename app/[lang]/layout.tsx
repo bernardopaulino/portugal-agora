@@ -31,6 +31,8 @@ export async function generateMetadata(props: LayoutProps<"/[lang]">): Promise<M
     },
     description: t.site.description,
     applicationName: site.name,
+    authors: [{ name: site.author }],
+    creator: site.author,
     openGraph: {
       type: "website",
       locale: lang === "pt" ? "pt_PT" : "en_GB",

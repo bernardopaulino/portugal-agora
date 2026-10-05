@@ -6,6 +6,8 @@ export const site = {
   locale: "pt_PT",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://portugalagora.pt",
   repo: "https://github.com/bernardopaulino/portugal-agora",
+  /** Autor do site: vai para <meta name="author"> (o LinkedIn mostra-o) e para o JSON-LD. */
+  author: "Bernardo Paulino",
 } as const;
 
 /**
