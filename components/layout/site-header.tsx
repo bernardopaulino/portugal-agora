@@ -23,14 +23,21 @@ export async function SiteHeader() {
             <div className="hidden lg:block">
               <DistrictPicker />
             </div>
-            <NearMeButton />
+            <NearMeButton className="hidden lg:block" />
             <ThemeToggle />
             <LanguageSwitch />
           </div>
         </div>
-        {/* Em telemóveis e tablets, a escolha do distrito tem a sua linha. */}
-        <div className="mx-auto max-w-7xl px-4 pb-3 sm:px-6 lg:hidden">
-          <DistrictPicker />
+        {/*
+         * Em telemóveis e tablets, a escolha do distrito e o "Perto de mim"
+         * têm a sua linha: assim o botão leva sempre o texto, que não cabe
+         * na linha do logótipo a 360 px.
+         */}
+        <div className="mx-auto flex max-w-7xl gap-2 px-4 pb-3 sm:px-6 lg:hidden">
+          <div className="min-w-0 flex-1">
+            <DistrictPicker />
+          </div>
+          <NearMeButton />
         </div>
       </header>
       <MainNav />

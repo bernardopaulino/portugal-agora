@@ -59,6 +59,8 @@ const pt = {
     mainland: "Continente",
     autonomous: "Regiões autónomas",
     nearMe: "Perto de mim",
+    /** Abaixo de 400 px, para a escolha do distrito caber ao lado. */
+    nearMeShort: "Perto",
     locating: "A localizar…",
     geoUnsupported:
       "Este dispositivo não permite obter a localização. Escolha o distrito na lista.",
@@ -410,6 +412,7 @@ const en: Dictionary = {
     mainland: "Mainland",
     autonomous: "Autonomous regions",
     nearMe: "Near me",
+    nearMeShort: "Near me",
     locating: "Locating…",
     geoUnsupported: "This device can't share its location. Choose your district from the list.",
     geoOutside: "You seem to be outside Portugal. Choose a district from the list.",

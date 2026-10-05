@@ -7,6 +7,7 @@ import { useState } from "react";
 import { districtAt, type DistrictFeature } from "@/lib/geo/geometry";
 import { writeStorage } from "@/lib/hooks/external";
 import { useI18n } from "@/lib/i18n/client";
+import { cn } from "@/lib/utils";
 
 export const MY_DISTRICT_KEY = "pa:distrito";
 
@@ -16,7 +17,7 @@ type Status = "idle" | "locating" | "error";
  * Descobre o distrito a partir da localização do browser. O cálculo é
  * feito aqui, no dispositivo: a localização nunca é enviada ao servidor.
  */
-export function NearMeButton() {
+export function NearMeButton({ className }: { className?: string }) {
   const router = useRouter();
   const { t, path } = useI18n();
   const [status, setStatus] = useState<Status>("idle");
@@ -62,22 +63,36 @@ export function NearMeButton() {
   }
 
   return (
-    <div className="relative">
+    <div className={cn("relative", className)}>
+      {/*
+       * O texto está sempre visível (o ícone sozinho não se percebe). Abaixo
+       * de 400 px fica "Perto", para o nome do distrito caber ao lado; o
+       * nome acessível é sempre "Perto de mim".
+       */}
       <button
         type="button"
         onClick={locate}
         disabled={status === "locating"}
-        aria-label={t.header.nearMe}
-        className="inline-flex h-12 min-w-12 items-center justify-center gap-2 rounded-sm bg-ink px-3 font-display text-lg font-semibold whitespace-nowrap text-bg hover:opacity-90 disabled:opacity-70 sm:px-4"
+        aria-busy={status === "locating"}
+        className="inline-flex h-12 min-w-12 items-center justify-center gap-2 rounded-sm bg-ink px-4 font-display text-lg font-semibold whitespace-nowrap text-bg hover:opacity-90 disabled:opacity-70"
       >
         <LocateFixed aria-hidden className="size-5" />
-        <span className="hidden sm:inline">
-          {status === "locating" ? t.header.locating : t.header.nearMe}
-        </span>
+        {status === "locating" ? (
+          t.header.locating
+        ) : t.header.nearMeShort === t.header.nearMe ? (
+          t.header.nearMe
+        ) : (
+          <>
+            <span aria-hidden className="min-[400px]:hidden">
+              {t.header.nearMeShort}
+            </span>
+            <span className="max-[399px]:sr-only">{t.header.nearMe}</span>
+          </>
+        )}
       </button>
       <div role="status" aria-live="polite">
         {message ? (
-          <p className="mt-2 max-w-xs text-sm text-ink sm:absolute sm:top-14 sm:right-0 sm:z-30 sm:mt-0 sm:w-72 sm:rounded-sm sm:border sm:border-line sm:bg-surface sm:p-3 sm:shadow-[0_10px_30px_-12px_rgb(0_0_0/0.35)]">
+          <p className="absolute top-14 right-0 z-30 w-72 max-w-[calc(100vw-2rem)] rounded-sm border border-line bg-surface p-3 text-sm text-ink shadow-[0_10px_30px_-12px_rgb(0_0_0/0.35)]">
             {message}
           </p>
         ) : null}

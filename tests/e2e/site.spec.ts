@@ -85,6 +85,31 @@ test("os cinco separadores cabem num telemóvel de 360 px", async ({ page }) => 
   }
 });
 
+test("'Perto de mim' mostra texto e o distrito cabe ao lado a 360 px", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  for (const [path, name] of [
+    ["/", "Perto de mim"],
+    ["/en", "Near me"],
+  ] as const) {
+    await page.goto(path);
+    const button = page.getByRole("button", { name, exact: true });
+    await expect(button).toBeVisible();
+    await expect(button).toContainText(name === "Perto de mim" ? "Perto" : name);
+    const box = (await button.boundingBox())!;
+    expect(box.x + box.width).toBeLessThanOrEqual(360);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    // O seletor ao lado tem espaço para o nome mais comprido.
+    const select = picker(page, path === "/" ? undefined : "Choose a district or region");
+    await select.selectOption("viana-do-castelo");
+    await expect(page).toHaveURL(/viana-do-castelo$/);
+    const fits = await picker(
+      page,
+      path === "/" ? undefined : "Choose a district or region",
+    ).evaluate((el) => el.scrollWidth <= el.clientWidth);
+    expect(fits).toBe(true);
+  }
+});
+
 test("o mapa mostra só o tema da página", async ({ page }) => {
   // Num tema de distrito: sem botões de camadas, com ligação para o país.
   await page.goto("/lisboa/incendios");
