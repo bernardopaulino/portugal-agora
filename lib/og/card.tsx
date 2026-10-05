@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { unstable_rethrow } from "next/navigation";
 import { ImageResponse } from "next/og";
 
 import { logoOutline } from "@/data/map-shapes";
@@ -24,38 +25,57 @@ const tint: Record<Severity | "unknown", { bar: string; bg: string }> = {
 const INK = "#0a1d2e";
 const INK_2 = "#45586a";
 
+type Fonts = NonNullable<ConstructorParameters<typeof ImageResponse>[1]>["fonts"];
+
 /**
  * As letras do site, lidas do disco (assets/fonts, licença OFL) e não
  * pedidas à rede: Barlow Semi Condensed nos títulos, Atkinson Hyperlegible
  * Next no texto. O ImageResponse precisa de TTF/OTF estáticos.
+ *
+ * Lidas uma vez, ao carregar o módulo (top-level await, como na
+ * documentação do Next para opengraph-image), e não durante a geração da
+ * imagem. Antes eram lidas na primeira imagem de cada instância: com Cache
+ * Components, ler um ficheiro a meio da geração é IO sem cache, e numa
+ * instância fria (a primeira imagem depois de a função estar parada) o Next
+ * abortava com "used IO that was not cached" e a imagem dava 500.
+ * Se a leitura falhar, as imagens saem com a letra por omissão do next/og.
  */
-let fonts:
-  Promise<NonNullable<ConstructorParameters<typeof ImageResponse>[1]>["fonts"]> | undefined;
-function loadFonts() {
-  fonts ??= Promise.all([
+async function loadFonts(): Promise<Fonts | undefined> {
+  return Promise.all([
     readFile(join(process.cwd(), "assets/fonts/BarlowSemiCondensed-Bold.ttf")),
     readFile(join(process.cwd(), "assets/fonts/AtkinsonHyperlegibleNext-Regular.ttf")),
     readFile(join(process.cwd(), "assets/fonts/AtkinsonHyperlegibleNext-Bold.ttf")),
-  ]).then(([barlow, atkinson, atkinsonBold]) => [
-    { name: "Barlow Semi Condensed", data: barlow, weight: 700 as const, style: "normal" as const },
-    {
-      name: "Atkinson Hyperlegible Next",
-      data: atkinson,
-      weight: 400 as const,
-      style: "normal" as const,
-    },
-    {
-      name: "Atkinson Hyperlegible Next",
-      data: atkinsonBold,
-      weight: 700 as const,
-      style: "normal" as const,
-    },
-  ]);
-  return fonts;
+  ])
+    .then(([barlow, atkinson, atkinsonBold]) => [
+      {
+        name: "Barlow Semi Condensed",
+        data: barlow,
+        weight: 700 as const,
+        style: "normal" as const,
+      },
+      {
+        name: "Atkinson Hyperlegible Next",
+        data: atkinson,
+        weight: 400 as const,
+        style: "normal" as const,
+      },
+      {
+        name: "Atkinson Hyperlegible Next",
+        data: atkinsonBold,
+        weight: 700 as const,
+        style: "normal" as const,
+      },
+    ])
+    .catch((error: unknown) => {
+      console.error("[og] não foi possível ler as letras; uso a letra por omissão", error);
+      return undefined;
+    });
 }
 
+const fonts = await loadFonts();
+
 /** Imagem de partilha com o estado atual: é o que aparece no WhatsApp ou no LinkedIn. */
-export async function statusCard({
+export function statusCard({
   level,
   place,
   headline,
@@ -130,6 +150,67 @@ export async function statusCard({
         </div>
       </div>
     </div>,
-    { ...ogSize, fonts: await loadFonts() },
+    { ...ogSize, fonts },
   );
+}
+
+/**
+ * Imagem genérica (marca, sem estado), para quando a do estado falha. Usa
+ * só a letra por omissão do next/og e nenhum dado, para não depender do que
+ * pode ter falhado.
+ */
+export function fallbackCard(locale: Locale = "pt") {
+  const t = getDictionary(locale);
+  return new ImageResponse(
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        gap: 28,
+        width: "100%",
+        height: "100%",
+        padding: "0 96px",
+        background: "#e6ebee",
+        color: INK,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
+        <svg width={64} height={112} viewBox={`-3 -2 ${logoOutline.width + 18} 104`}>
+          <path d={logoOutline.d} fill={INK} />
+        </svg>
+        <span style={{ fontSize: 88, fontWeight: 700 }}>Portugal Agora</span>
+      </div>
+      <span style={{ fontSize: 44, color: INK_2 }}>{t.site.tagline}</span>
+      <span style={{ fontSize: 28, color: INK_2 }}>portugalagora.pt</span>
+    </div>,
+    ogSize,
+  );
+}
+
+/** Desenha já o PNG: o ImageResponse só desenha quando a resposta é lida. */
+async function render(image: ImageResponse): Promise<Response> {
+  const body = await image.arrayBuffer();
+  // Os mesmos cabeçalhos (tipo e cache) que o ImageResponse definiu.
+  return new Response(body, { status: image.status, headers: image.headers });
+}
+
+/**
+ * A imagem de partilha nunca dá erro: se montar a do estado falhar (dados,
+ * letras ou desenho), regista o erro e devolve a imagem genérica, com o
+ * mesmo tamanho e tipo. Uma pré-visualização genérica no WhatsApp ou no
+ * LinkedIn é melhor do que nenhuma. Os erros internos do Next (que ele
+ * próprio trata) seguem o seu caminho.
+ */
+export async function safeOgImage(
+  build: () => ImageResponse | Promise<ImageResponse>,
+  locale: Locale = "pt",
+): Promise<Response> {
+  try {
+    return await render(await build());
+  } catch (error) {
+    unstable_rethrow(error);
+    console.error("[og] falhou a imagem de partilha; uso a genérica", error);
+    return render(fallbackCard(locale));
+  }
 }
