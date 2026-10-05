@@ -88,7 +88,8 @@ app/                    rotas de API, sitemap, robots, manifest, ícones
     fontes/ privacidade/ sobre/
   api/state/            estado agregado do país
   api/sources/[id]/     dados normalizados de uma fonte (transparência/depuração)
-  api/health/           estado do serviço
+  api/health/           estado do serviço (sempre 200 se o servidor responde)
+  api/health/sources/   frescura de cada fonte: 200 ou 503, para a monitorização
 proxy.ts                idioma na raiz (pt) ou em /en
 components/
   boletim/              boletim nacional e do distrito, mapa SVG, previsão, cabeçalho das páginas
@@ -150,8 +151,9 @@ Os ficheiros em `public/geo/` foram gerados a partir dos GeoPackages oficiais da
 2. Adicionar **Upstash Redis** a partir do Vercel Marketplace (cria `KV_REST_API_URL` e `KV_REST_API_TOKEN`).
 3. Variáveis de ambiente: `NEXT_PUBLIC_SITE_URL`, `CONTACT_EMAIL` e, quando chegar, `FOGOS_API_KEY`.
 4. Em _Settings → Domains_, adicionar `portugalagora.pt` e `www.portugalagora.pt` e seguir as instruções de DNS no registo do domínio. Escolher um como principal (o outro redireciona) e usar **esse mesmo endereço** em `NEXT_PUBLIC_SITE_URL`: é o que aparece nos endereços canónicos, no sitemap e no `robots.txt`.
-5. Confirmar em `https://portugalagora.pt/api/health`.
-6. No [Google Search Console](https://search.google.com/search-console), validar o domínio e submeter o `sitemap.xml`.
+5. Confirmar em `https://portugalagora.pt/api/health` e `https://portugalagora.pt/api/health/sources`.
+6. Criar um monitor (ex.: UptimeRobot, gratuito) para `/api/health/sources` a cada 5 minutos, com alerta por email. Responde 503 quando uma fonte está em baixo ou com dados mais antigos do que o seu limite (`lib/state/health.ts`), por isso o monitor não precisa de ler o corpo da resposta.
+7. No [Google Search Console](https://search.google.com/search-console), validar o domínio e submeter o `sitemap.xml`.
 
 ## Licença
 
