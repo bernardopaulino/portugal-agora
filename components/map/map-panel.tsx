@@ -286,6 +286,7 @@ export function MapPanel({
           layer={layer}
           selection={selection}
           onSelect={onSelect}
+          onClear={onClearSelection}
           region={region}
           focus={focus}
         />

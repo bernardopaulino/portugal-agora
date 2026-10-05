@@ -18,7 +18,7 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { CountryState } from "@/lib/state/aggregate";
 
 import { riskColors } from "../cards/fire-risk";
-import type { OnSelect, Selection } from "../cards/types";
+import { isSameSelection, type OnSelect, type Selection } from "../cards/types";
 import { useResolvedTheme } from "@/lib/hooks/external";
 import { mapColors } from "../status/severity";
 import type { LayerId } from "./layers";
@@ -108,6 +108,7 @@ export default function LiveMap({
   layer,
   selection,
   onSelect,
+  onClear,
   focus,
   region,
 }: {
@@ -115,6 +116,8 @@ export default function LiveMap({
   layer: LayerId;
   selection: Selection | null;
   onSelect: OnSelect;
+  /** Tira a seleção (segundo toque no mesmo distrito ou evento). */
+  onClear: () => void;
   /**
    * Slug do distrito da página (páginas de distrito): o mapa abre
    * enquadrado nele, só mostra o que é dele e esbate o resto do país.
@@ -136,12 +139,19 @@ export default function LiveMap({
   // enquanto não mexer, o mapa volta a enquadrar quando muda de tamanho.
   const fitTarget = useRef<((duration: number) => void) | null>(null);
   const userMoved = useRef(false);
+  // Para o clique (registado uma vez) saber o que está selecionado agora.
+  const selectionRef = useRef(selection);
+  const onClearRef = useRef(onClear);
+  // Havia uma seleção? Quando sai, o mapa volta ao enquadramento inicial.
+  const hadSelection = useRef(false);
   const theme = useResolvedTheme();
   const colors = mapColors[theme];
 
   useEffect(() => {
     onSelectRef.current = onSelect;
-  }, [onSelect]);
+    onClearRef.current = onClear;
+    selectionRef.current = selection;
+  }, [onSelect, onClear, selection]);
 
   // Limites dos distritos (sempre) e dos concelhos (só na camada de risco).
   useEffect(() => {
@@ -209,19 +219,22 @@ export default function LiveMap({
       })[0];
       if (!hit) return;
       const p = hit.properties as Record<string, string>;
+      let next: Selection | null = null;
       if (p.eventId && hit.geometry.type === "Point") {
         const [lon, lat] = hit.geometry.coordinates as [number, number];
-        onSelectRef.current({
+        next = {
           type: "event",
           id: p.eventId,
           coordinates: [lon, lat],
           region: (p.region as Region) ?? "continente",
-        });
-      } else if (p.slug) {
-        onSelectRef.current({ type: "district", slug: p.slug });
-      } else if (p.district) {
-        onSelectRef.current({ type: "district", slug: p.district });
+        };
+      } else if (p.slug || p.district) {
+        next = { type: "district", slug: p.slug || p.district! };
       }
+      if (!next) return;
+      // Segundo toque no que já está selecionado: tira a seleção (e o mapa afasta).
+      if (isSameSelection(selectionRef.current, next)) onClearRef.current();
+      else onSelectRef.current(next);
     });
 
     // O primeiro enquadramento pode acontecer antes de o contentor ter a
@@ -569,8 +582,16 @@ export default function LiveMap({
     if (!selection) {
       map.setFilter("selected-district", ["==", ["get", "slug"], ""]);
       selected?.setData(collection([]));
+      // A seleção saiu (segundo toque ou o botão de fechar): volta à vista
+      // inicial, o país (ou a região), ou o distrito numa página de distrito.
+      if (hadSelection.current) {
+        hadSelection.current = false;
+        userMoved.current = false;
+        fitTarget.current?.(700);
+      }
       return;
     }
+    hadSelection.current = true;
     // A pessoa pediu para ver este evento: mudar de tamanho já não reenquadra.
     userMoved.current = true;
     if (selection.type === "district") {
