@@ -11,7 +11,7 @@ Projeto **sem fins lucrativos**: sem publicidade, sem donativos, sem monetizaç�
 ## Funcionalidades
 
 - **Boletim:** a página inicial abre como um boletim meteorológico de televisão. Um mapa de Portugal com o nível de aviso de cada distrito, um título em português simples ("Aviso amarelo em 6 distritos.") e uma linha por tema (avisos, incêndios, sismos, risco de incêndio). Apontar para um distrito mostra o seu resumo na barra por baixo do mapa.
-- **Uma página por tema**, para não ter tudo numa só página: `/avisos`, `/incendios`, `/sismos` e `/risco` (risco de incêndio e qualidade do ar). Cada uma tem a lista e um mapa detalhado só com esse tema.
+- **Uma página por tema**, para não ter tudo numa só página: `/avisos`, `/incendios`, `/sismos` e `/risco` (risco de incêndio e qualidade do ar). Cada uma abre com um mapa detalhado só com esse tema e, por baixo, a lista.
 - **Páginas por distrito** (18 distritos + Açores + Madeira), com a mesma divisão:
   - `/lisboa`: o boletim do distrito e a previsão a 5 dias.
   - `/lisboa/avisos`, `/lisboa/incendios`, `/lisboa/sismos` e `/lisboa/risco` (risco de incêndio por concelho, hoje e amanhã, qualidade do ar e UV), com o mapa enquadrado no distrito.

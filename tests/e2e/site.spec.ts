@@ -110,6 +110,21 @@ test("'Perto de mim' mostra texto e o distrito cabe ao lado a 360 px", async ({ 
   }
 });
 
+test("nas páginas de tema, o mapa vem antes da lista e pode ser saltado", async ({ page }) => {
+  await page.goto("/lisboa/incendios");
+  const map = page.locator("#mapa");
+  const list = page.locator("#lista");
+  const mapTop = (await map.boundingBox())!.y;
+  const listTop = (await list.boundingBox())!.y;
+  expect(mapTop).toBeLessThan(listTop);
+  // O link de saltar o mapa leva o foco para a lista.
+  const skip = page.getByRole("link", { name: "Saltar o mapa" });
+  await skip.focus();
+  await expect(skip).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(list).toBeFocused();
+});
+
 test("o mapa mostra só o tema da página", async ({ page }) => {
   // Num tema de distrito: sem botões de camadas, com ligação para o país.
   await page.goto("/lisboa/incendios");

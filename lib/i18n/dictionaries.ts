@@ -200,9 +200,10 @@ const pt = {
     allDistricts: "Todos os distritos",
     map: "Mapa",
     mapOf: (name: string) => `Mapa de ${name}`,
-    mapIntro: "Aproxime para ver cada evento e toque num deles para ver o detalhe.",
+    mapIntro: "Aproxime e toque num evento para ver o detalhe.",
     mapIntroDistrict: (inPlace: string) =>
-      `Mostra só o que acontece ${inPlace}. Aproxime para ver cada evento e toque num deles para ver o detalhe.`,
+      `Só o que acontece ${inPlace}. Aproxime e toque num evento para ver o detalhe.`,
+    skipMap: "Saltar o mapa",
   },
   pages: {
     warningsList: "Em vigor e previstos",
@@ -542,9 +543,10 @@ const en: Dictionary = {
     allDistricts: "All districts",
     map: "Map",
     mapOf: (name) => `Map of ${name}`,
-    mapIntro: "Zoom in to see each event and tap one for details.",
+    mapIntro: "Zoom in and tap an event for details.",
     mapIntroDistrict: (inPlace) =>
-      `Shows only what is happening ${inPlace}. Zoom in to see each event and tap one for details.`,
+      `Only what is happening ${inPlace}. Zoom in and tap an event for details.`,
+    skipMap: "Skip the map",
   },
   pages: {
     warningsList: "In force and forecast",

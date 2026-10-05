@@ -19,8 +19,8 @@ import { EmptyState, Section } from "./status/section";
 
 /*
  * As páginas de cada tema (avisos, incêndios, sismos, risco e ar). Cada
- * uma tem o cabeçalho, a lista e, por baixo, o mapa detalhado só com a
- * camada desse tema. A página inicial fica só com o boletim.
+ * uma tem o cabeçalho, o mapa detalhado só com a camada desse tema e,
+ * por baixo, a lista. A página inicial fica só com o boletim.
  * Com `district`, é a página do tema num distrito (/lisboa/avisos): leva
  * a ligação de volta ao distrito e o mapa fica no distrito, só com o que
  * é dele, como a lista (o menu do cabeçalho passa a mostrar os temas do
@@ -59,21 +59,28 @@ export function TopicLayout({
             : undefined
         }
       />
-      <div className="mx-auto flex max-w-7xl flex-col gap-14 px-4 pt-10 sm:px-6">{children}</div>
+      {/* O mapa vem logo a seguir ao cabeçalho: nestes temas, "onde" é a primeira pergunta. */}
       <section
         id="mapa"
         ref={mapRef}
         aria-labelledby="mapa-titulo"
-        className="mx-auto mt-16 flex max-w-7xl scroll-mt-4 flex-col gap-4 px-4 sm:px-6"
+        className="mx-auto flex max-w-7xl scroll-mt-4 flex-col gap-3 px-4 pt-8 sm:px-6"
       >
-        <div className="flex flex-col gap-1.5">
-          <h2 id="mapa-titulo" className="font-display text-4xl leading-tight font-bold">
+        <div className="flex flex-col gap-1">
+          <h2 id="mapa-titulo" className="font-display text-2xl leading-tight font-bold">
             {district ? t.sections.mapOf(t.districtName(district)) : t.sections.map}
           </h2>
           <p className="max-w-[70ch] text-base text-ink-2">
             {district ? t.sections.mapIntroDistrict(t.inPlace(district)) : t.sections.mapIntro}
           </p>
         </div>
+        {/* Para quem navega com o teclado ou leitor de ecrã: a lista sem passar pelo mapa. */}
+        <a
+          href="#lista"
+          className="sr-only self-start rounded-sm bg-ink px-4 py-3 font-bold text-bg focus:not-sr-only"
+        >
+          {t.sections.skipMap}
+        </a>
         <MapPanel
           state={state}
           views={controls.views}
@@ -87,6 +94,13 @@ export function TopicLayout({
           focus={district?.slug}
         />
       </section>
+      <div
+        id="lista"
+        tabIndex={-1}
+        className="mx-auto flex max-w-7xl scroll-mt-4 flex-col gap-14 px-4 pt-14 outline-none sm:px-6"
+      >
+        {children}
+      </div>
     </>
   );
 }

@@ -18,3 +18,17 @@ describe("nomes curtos dos separadores", () => {
     expect(getDictionary("en").nav.short).toMatchObject({ quakes: "Quakes", riskAir: "Risk" });
   });
 });
+
+describe("textos do mapa das páginas de tema", () => {
+  it("dizem que o mapa é só do distrito e oferecem saltá-lo, nos dois idiomas", () => {
+    const pt = getDictionary("pt").sections;
+    const en = getDictionary("en").sections;
+    expect(pt.mapIntroDistrict("em Lisboa")).toBe(
+      "Só o que acontece em Lisboa. Aproxime e toque num evento para ver o detalhe.",
+    );
+    expect(en.mapIntroDistrict("in Lisboa")).toBe(
+      "Only what is happening in Lisboa. Zoom in and tap an event for details.",
+    );
+    expect([pt.skipMap, en.skipMap]).toEqual(["Saltar o mapa", "Skip the map"]);
+  });
+});
