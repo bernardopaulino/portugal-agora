@@ -1,24 +1,15 @@
 import { getRedis } from "@/lib/cache/redis";
+import { checkRedis } from "@/lib/cache/redis-health";
 import { features } from "@/lib/env";
 
 /**
  * Verificação rápida da configuração em produção:
  * GET /api/health → que funcionalidades estão ativas e se o Redis responde.
- * Não expõe segredos, só booleanos.
+ * Não expõe segredos, só booleanos. O PING ao Redis é reutilizado 30 s.
  */
 export async function GET() {
   const enabled = features();
-  let redis: "ok" | "not-configured" | "error" = "not-configured";
-
-  const client = getRedis();
-  if (client) {
-    try {
-      await client.ping();
-      redis = "ok";
-    } catch {
-      redis = "error";
-    }
-  }
+  const redis = await checkRedis(getRedis());
 
   return Response.json(
     {
