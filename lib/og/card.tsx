@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { unstable_rethrow } from "next/navigation";
 import { ImageResponse } from "next/og";
 
-import { logoOutline } from "@/data/map-shapes";
+import { logoOutline, MAP_VIEWBOX, mapFrames, mapShapes } from "@/data/map-shapes";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/locales";
 import type { Severity } from "@/lib/sources/types";
@@ -13,17 +13,26 @@ import { dataStamp, headlineSize } from "./text";
 
 export const ogSize = { width: 1200, height: 630 };
 
-const tint: Record<Severity | "unknown", { bar: string; bg: string }> = {
-  none: { bar: "#2e7d4f", bg: "#e2f1e7" },
-  yellow: { bar: "#e8b000", bg: "#fff3c7" },
-  orange: { bar: "#e0661b", bg: "#fde5d3" },
-  red: { bar: "#c62828", bg: "#fbe0e0" },
-  unknown: { bar: "#7c8b94", bg: "#e6ebee" },
-};
+/*
+ * Cores do "palco" do boletim no tema escuro e das terras do mapa
+ * (tokens de app/globals.css / DESIGN.md). Escuro de propósito: no feed
+ * branco do LinkedIn, um cartão claro passava despercebido.
+ */
+const STAGE = "#071f38";
+const STAGE_2 = "#0b2b4c";
+const STAGE_INK = "#ffffff";
+const STAGE_INK_2 = "#b8cbe0";
+const LAND_DIM = "#2b4f75";
 
-// Os tokens ink e ink-2 do site (DESIGN.md).
-const INK = "#0a1d2e";
-const INK_2 = "#45586a";
+export type MapLevel = Severity | "unknown";
+
+const land: Record<MapLevel, string> = {
+  none: "#4f9d63",
+  yellow: "#f2c200",
+  orange: "#f07f1a",
+  red: "#d7262b",
+  unknown: "#8797a3",
+};
 
 type Fonts = NonNullable<ConstructorParameters<typeof ImageResponse>[1]>["fonts"];
 
@@ -74,6 +83,77 @@ async function loadFonts(): Promise<Fonts | undefined> {
 
 const fonts = await loadFonts();
 
+/** O logótipo: o contorno do continente com o ponto na cor do nível. */
+function Logo({ dot, size = 64 }: { dot?: string; size?: number }) {
+  const width = logoOutline.width + 18;
+  return (
+    <svg width={(size * width) / 104} height={size} viewBox={`-3 -2 ${width} 104`}>
+      <path d={logoOutline.d} fill={STAGE_INK} />
+      {dot ? (
+        <circle
+          cx={logoOutline.width - 4}
+          cy="49"
+          r="11.5"
+          fill={dot}
+          stroke={STAGE}
+          strokeWidth="4.5"
+        />
+      ) : null}
+    </svg>
+  );
+}
+
+/**
+ * O mapa do boletim (continente e as caixas dos Açores e da Madeira) com
+ * a cor do nível de cada distrito. Numa página de distrito, os outros
+ * ficam esbatidos, como no site.
+ */
+function BulletinMap({
+  levels,
+  focus,
+  height,
+}: {
+  levels?: Record<string, MapLevel>;
+  focus?: string;
+  height: number;
+}) {
+  return (
+    <svg width={(height * 840) / 1000} height={height} viewBox={MAP_VIEWBOX}>
+      {(["acores", "madeira"] as const).map((region) => {
+        const [x, y, w, h] = mapFrames[region];
+        return (
+          <rect
+            key={region}
+            x={x}
+            y={y}
+            width={w}
+            height={h}
+            fill="none"
+            stroke={STAGE_INK_2}
+            strokeOpacity={0.35}
+            strokeWidth={2}
+          />
+        );
+      })}
+      {mapShapes.map((shape) => {
+        const islands = shape.region !== "continente";
+        const color =
+          focus && focus !== shape.slug ? LAND_DIM : land[levels?.[shape.slug] ?? "unknown"];
+        return (
+          <path
+            key={shape.slug}
+            d={shape.d}
+            fill={color}
+            stroke={islands ? color : STAGE}
+            strokeWidth={islands ? 5 : 2.5}
+            strokeLinejoin="round"
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
 /** Imagem de partilha com o estado atual: é o que aparece no WhatsApp ou no LinkedIn. */
 export function statusCard({
   level,
@@ -81,54 +161,58 @@ export function statusCard({
   headline,
   generatedAt,
   locale = "pt",
+  levels,
+  focus,
 }: {
-  level: Severity | "unknown";
+  level: MapLevel;
   place: string;
   headline: string;
   /** Hora dos dados (state.generatedAt). */
   generatedAt: string;
   locale?: Locale;
+  /** Nível de cada distrito, para o mapa. */
+  levels: Record<string, MapLevel>;
+  /** Na imagem de um distrito: os outros ficam esbatidos no mapa. */
+  focus?: string;
 }) {
   const t = getDictionary(locale);
-  const colors = tint[level];
   return new ImageResponse(
     <div
       style={{
         display: "flex",
         width: "100%",
         height: "100%",
-        background: colors.bg,
+        backgroundImage: `linear-gradient(135deg, ${STAGE} 0%, ${STAGE} 55%, ${STAGE_2} 100%)`,
         fontFamily: "Atkinson Hyperlegible Next",
-        color: INK,
+        color: STAGE_INK,
       }}
     >
-      <div style={{ width: 28, height: "100%", background: colors.bar }} />
+      {/* A faixa na cor do nível, como a barra de rodapé do boletim. */}
+      <div style={{ width: 20, height: "100%", background: land[level] }} />
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "56px 72px 52px",
-          flex: 1,
+          width: 700,
+          padding: "52px 40px 48px 60px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          {/* O logótipo do site: o contorno do continente com o ponto do nível. */}
-          <svg width={40} height={70} viewBox={`-3 -2 ${logoOutline.width + 18} 104`}>
-            <path d={logoOutline.d} fill={INK} />
-            <circle
-              cx={logoOutline.width - 4}
-              cy="49"
-              r="11.5"
-              fill={colors.bar}
-              stroke={colors.bg}
-              strokeWidth="4.5"
-            />
-          </svg>
-          <span style={{ fontFamily: "Barlow Semi Condensed", fontSize: 44, fontWeight: 700 }}>
-            Portugal Agora
-          </span>
-          <span style={{ fontSize: 34, color: INK_2 }}>{place}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <Logo dot={land[level]} size={62} />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span
+              style={{
+                fontFamily: "Barlow Semi Condensed",
+                fontSize: 42,
+                fontWeight: 700,
+                lineHeight: 1,
+              }}
+            >
+              Portugal Agora
+            </span>
+            <span style={{ fontSize: 26, color: STAGE_INK_2, marginTop: 6 }}>{place}</span>
+          </div>
         </div>
 
         <div
@@ -137,17 +221,28 @@ export function statusCard({
             fontFamily: "Barlow Semi Condensed",
             fontSize: headlineSize(headline),
             fontWeight: 700,
-            lineHeight: 1.08,
-            lineClamp: 4,
+            lineHeight: 1.06,
+            lineClamp: 5,
           }}
         >
           {headline}
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <span style={{ fontSize: 30, fontWeight: 700 }}>{dataStamp(generatedAt, locale, t)}</span>
-          <span style={{ fontSize: 24, color: INK_2 }}>{t.site.ogSources}</span>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <span style={{ fontSize: 28, fontWeight: 700 }}>{dataStamp(generatedAt, locale, t)}</span>
+          <span style={{ fontSize: 22, color: STAGE_INK_2 }}>{t.site.ogSources}</span>
         </div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingRight: 32,
+        }}
+      >
+        <BulletinMap levels={levels} focus={focus} height={540} />
       </div>
     </div>,
     { ...ogSize, fonts },
@@ -156,8 +251,8 @@ export function statusCard({
 
 /**
  * Imagem genérica (marca, sem estado), para quando a do estado falha. Usa
- * só a letra por omissão do next/og e nenhum dado, para não depender do que
- * pode ter falhado.
+ * só a letra por omissão do next/og e nenhum dado ao vivo (o mapa sai sem
+ * níveis), para não depender do que pode ter falhado.
  */
 export function fallbackCard(locale: Locale = "pt") {
   const t = getDictionary(locale);
@@ -165,24 +260,40 @@ export function fallbackCard(locale: Locale = "pt") {
     <div
       style={{
         display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        gap: 28,
         width: "100%",
         height: "100%",
-        padding: "0 96px",
-        background: "#e6ebee",
-        color: INK,
+        background: STAGE,
+        color: STAGE_INK,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-        <svg width={64} height={112} viewBox={`-3 -2 ${logoOutline.width + 18} 104`}>
-          <path d={logoOutline.d} fill={INK} />
-        </svg>
-        <span style={{ fontSize: 88, fontWeight: 700 }}>Portugal Agora</span>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          gap: 24,
+          width: 720,
+          padding: "0 64px 0 80px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <Logo size={96} />
+          <span style={{ fontSize: 64, whiteSpace: "nowrap" }}>Portugal Agora</span>
+        </div>
+        <span style={{ fontSize: 40, color: STAGE_INK_2 }}>{t.site.tagline}</span>
+        <span style={{ fontSize: 26, color: STAGE_INK_2 }}>portugalagora.pt</span>
       </div>
-      <span style={{ fontSize: 44, color: INK_2 }}>{t.site.tagline}</span>
-      <span style={{ fontSize: 28, color: INK_2 }}>portugalagora.pt</span>
+      <div
+        style={{
+          display: "flex",
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingRight: 32,
+        }}
+      >
+        <BulletinMap height={540} />
+      </div>
     </div>,
     ogSize,
   );

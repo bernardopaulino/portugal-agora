@@ -66,6 +66,7 @@ describe("imagens de partilha: nunca dão erro", () => {
         headline: "Yellow warning in Lisbon.",
         generatedAt: "2026-10-05T10:00:00.000Z",
         locale: "en",
+        levels: { lisboa: "yellow", acores: "none" },
       }),
     );
     await expectPng(response);
@@ -87,6 +88,7 @@ describe("imagens de partilha: nunca dão erro", () => {
         headline: "No weather warnings in the Azores.",
         generatedAt: "2026-10-05T10:00:00.000Z",
         locale: "en",
+        levels: { lisboa: "yellow", acores: "none" },
       }),
     );
     await expectPng(response);

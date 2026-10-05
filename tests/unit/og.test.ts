@@ -5,17 +5,17 @@ import { dataStamp, headlineSize } from "@/lib/og/text";
 
 describe("headlineSize", () => {
   it("desce com o comprimento do título", () => {
-    expect(headlineSize("Sem avisos meteorológicos.")).toBe(72);
-    expect(headlineSize("Aviso laranja em Beja. Aviso amarelo em 13 distritos.")).toBe(60);
+    expect(headlineSize("Sem avisos meteorológicos.")).toBe(66);
+    expect(headlineSize("Aviso laranja em Beja. Aviso amarelo em 13 distritos.")).toBe(58);
     const long =
       "Aviso laranja de agitação marítima e vento em Viana do Castelo. Aviso amarelo de precipitação e trovoada.";
-    expect(headlineSize(long)).toBe(50);
-    expect(headlineSize(long + long)).toBe(42);
+    expect(headlineSize(long)).toBe(48);
+    expect(headlineSize(long + long)).toBe(40);
   });
 
-  it("um título de 4 linhas no tamanho mais pequeno cabe na altura disponível", () => {
+  it("um título de 5 linhas no tamanho mais pequeno cabe na altura disponível", () => {
     // 630 px menos o cabeçalho (~70), o rodapé (~80) e as margens (~108).
-    expect(42 * 1.08 * 4).toBeLessThan(630 - 70 - 80 - 108);
+    expect(40 * 1.06 * 5).toBeLessThan(630 - 70 - 80 - 100);
   });
 });
 

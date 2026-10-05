@@ -5,6 +5,7 @@ import { safeOgImage, statusCard } from "@/lib/og/card";
 import { districtHeadline } from "@/lib/state/bulletin";
 import { districtLevel } from "@/lib/state/district";
 import { getState } from "@/lib/state/get-state";
+import { levelsByDistrict } from "@/lib/og/text";
 
 export const alt = "Portugal Agora";
 export const size = { width: 1200, height: 630 };
@@ -31,6 +32,8 @@ export default async function Image({
       headline: districtHeadline(district, state.warnings.data ?? [], state.levelKnown, t),
       generatedAt: state.generatedAt,
       locale,
+      levels: levelsByDistrict(state),
+      focus: district.slug,
     });
   }, locale);
 }

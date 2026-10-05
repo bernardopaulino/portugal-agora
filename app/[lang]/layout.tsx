@@ -35,10 +35,15 @@ export async function generateMetadata(props: LayoutProps<"/[lang]">): Promise<M
       type: "website",
       locale: lang === "pt" ? "pt_PT" : "en_GB",
       siteName: site.name,
-      title: site.name,
+      // O LinkedIn mostra este título por baixo da imagem: só "Portugal Agora" dizia pouco.
+      title: `${site.name}: ${t.site.tagline}`,
       description: t.site.description,
     },
-    twitter: { card: "summary_large_image" },
+    twitter: {
+      card: "summary_large_image",
+      title: `${site.name}: ${t.site.tagline}`,
+      description: t.site.description,
+    },
     robots: { index: true, follow: true },
     formatDetection: { telephone: false },
     // O site tem as suas versões em português e inglês: sem tradução automática do
