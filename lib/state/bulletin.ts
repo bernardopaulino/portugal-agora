@@ -224,12 +224,10 @@ export function nationalTopics(state: CountryState, t: Dictionary): Topic[] {
   if (risk) {
     const values = Object.values(risk);
     const top = values.length ? Math.max(...values) : 0;
-    const count = values.filter((v) => v === top).length;
     topics.push({
       id: "risco",
       label: T.riskToday,
-      value: top ? T.riskUpTo(t.term(fireRiskLabels[top] ?? "")) : T.noData,
-      detail: top ? T.riskWhere(count) : undefined,
+      ...(top ? riskSummary(values, t, "country") : { value: T.noData }),
       level: riskLevel(top),
     });
   }
@@ -333,14 +331,11 @@ export function districtTopics(state: CountryState, slug: string, t: Dictionary)
       .filter(([dico]) => concelhoByDico(dico)?.district === slug)
       .map(([, v]) => v);
     if (values.length > 0) {
-      const top = Math.max(...values);
-      const count = values.filter((v) => v === top).length;
       topics.push({
         id: "risco",
         label: T.riskTodayDistrict,
-        value: T.riskUpTo(t.term(fireRiskLabels[top] ?? "")),
-        detail: T.riskWhereDistrict(count),
-        level: riskLevel(top),
+        ...riskSummary(values, t, "district"),
+        level: riskLevel(Math.max(...values)),
       });
     }
   }
@@ -359,6 +354,33 @@ export function districtTopics(state: CountryState, slug: string, t: Dictionary)
   }
 
   return topics;
+}
+
+/**
+ * A linha do risco de incêndio. Com níveis diferentes, o mais alto e em
+ * quantos concelhos: "Até elevado, em 3 concelhos". Com todos iguais,
+ * "Reduzido em todos os 16 concelhos" ("Até reduzido" lia-se mal).
+ */
+export function riskSummary(
+  values: number[],
+  t: Dictionary,
+  scope: "country" | "district",
+): { value: string; detail: string } {
+  const T = t.topics;
+  const top = Math.max(...values);
+  const label = t.term(fireRiskLabels[top] ?? "");
+  if (values.every((v) => v === top)) {
+    const n = values.length;
+    return {
+      value: label,
+      detail: scope === "country" ? T.riskEverywhere(n) : T.riskEverywhereDistrict(n),
+    };
+  }
+  const count = values.filter((v) => v === top).length;
+  return {
+    value: T.riskUpTo(label),
+    detail: scope === "country" ? T.riskWhere(count) : T.riskWhereDistrict(count),
+  };
 }
 
 /**
