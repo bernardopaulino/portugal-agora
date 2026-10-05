@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { getDistrict, type Region } from "@/data/districts";
 import { useI18n } from "@/lib/i18n/client";
-import { fireRiskLabels } from "@/lib/sources/ipma-rcm";
+import { fireRiskLabels } from "@/lib/sources/labels";
 import type { CountryState } from "@/lib/state/aggregate";
 import { capitalize, formatDayTime, formatNumber } from "@/lib/time/format";
 import { cn } from "@/lib/utils";

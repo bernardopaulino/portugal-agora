@@ -1,3 +1,5 @@
+import "server-only";
+
 import { z } from "zod";
 
 import type { FireRisk } from "./types";
@@ -13,15 +15,6 @@ export const ipmaRcmSchema = z.object({
 });
 
 export type IpmaRcmRaw = z.infer<typeof ipmaRcmSchema>;
-
-/** Níveis do IPMA para o risco de incêndio rural. */
-export const fireRiskLabels: Record<number, string> = {
-  1: "Reduzido",
-  2: "Moderado",
-  3: "Elevado",
-  4: "Muito elevado",
-  5: "Máximo",
-};
 
 function byDico(raw: IpmaRcmRaw): Record<string, number> {
   return Object.fromEntries(

@@ -1,7 +1,7 @@
-import { concelhoByDico } from "@/data/dico";
+import { districtOfDico } from "@/data/dico-district";
 import { getDistrict, type District } from "@/data/districts";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { fireRiskLabels } from "@/lib/sources/ipma-rcm";
+import { fireRiskLabels } from "@/lib/sources/labels";
 import { severityRank, type Severity, type WarningEvent } from "@/lib/sources/types";
 import { formatNumber, formatRange } from "@/lib/time/format";
 
@@ -328,7 +328,7 @@ export function districtTopics(state: CountryState, slug: string, t: Dictionary)
   const byDico = state.fireRisk.data?.today.byDico;
   if (byDico) {
     const values = Object.entries(byDico)
-      .filter(([dico]) => concelhoByDico(dico)?.district === slug)
+      .filter(([dico]) => districtOfDico(dico) === slug)
       .map(([, v]) => v);
     if (values.length > 0) {
       topics.push({

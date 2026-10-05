@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n/client";
-import { fireRiskLabels } from "@/lib/sources/ipma-rcm";
+import { fireRiskLabels } from "@/lib/sources/labels";
 import type { ConcelhoRisk } from "@/lib/state/district";
 
 import { riskColors } from "./fire-risk";

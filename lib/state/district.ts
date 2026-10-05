@@ -1,6 +1,6 @@
 import { concelhoByDico } from "@/data/dico";
 import type { District } from "@/data/districts";
-import { fireRiskLabels } from "@/lib/sources/ipma-rcm";
+import { fireRiskLabels } from "@/lib/sources/labels";
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import { maxSeverity, type Severity, type WarningEvent } from "@/lib/sources/types";
 
