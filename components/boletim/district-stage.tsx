@@ -80,11 +80,15 @@ export function DistrictStage({
 
         <div className="lg:col-span-12">
           {forecast.data ? (
-            <ForecastStrip days={forecast.data} reference={reference} capital={district.capital} />
+            <ForecastStrip
+              days={forecast.data}
+              reference={reference}
+              capital={t.capitalName(district)}
+            />
           ) : (
             <section aria-labelledby="previsao-titulo" className="flex flex-col gap-2">
               <h2 id="previsao-titulo" className="font-display text-2xl font-bold">
-                {t.stage.forecastFor(district.capital)}
+                {t.stage.forecastFor(t.capitalName(district))}
               </h2>
               <p className="text-stage-ink-2">
                 {t.stage.forecastNone} <a href="https://www.ipma.pt">ipma.pt</a>.

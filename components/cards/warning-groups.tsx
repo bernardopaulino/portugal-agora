@@ -30,7 +30,7 @@ function windowsOf(group: WarningGroup, reference: Date, t: Dictionary, locale: 
   }
   return [...merged.entries()].map(([label, items]) => ({
     label,
-    items: items.sort((a, b) => a.place.label.localeCompare(b.place.label, "pt")),
+    items: items.sort((a, b) => t.areaName(a.area).localeCompare(t.areaName(b.area), "pt")),
   }));
 }
 
@@ -43,9 +43,9 @@ function Places({ items }: { items: WarningEvent[] }) {
         return (
           <span key={w.id}>
             {district ? (
-              <Link href={path(`/${district.slug}`)}>{w.place.label}</Link>
+              <Link href={path(`/${district.slug}`)}>{t.areaName(w.area)}</Link>
             ) : (
-              w.place.label
+              t.areaName(w.area)
             )}
             {i < items.length - 2 ? ", " : i === items.length - 2 ? ` ${t.and} ` : "."}
           </span>

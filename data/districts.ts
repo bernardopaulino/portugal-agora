@@ -10,6 +10,11 @@ export interface District {
   name: string;
   /** Preposição correta em português: "em Lisboa", "no Porto", "nos Açores". */
   inName: string;
+  /**
+   * Formas em inglês, só onde há um nome inglês estabelecido (exónimo):
+   * Lisbon, the Azores. Os outros nomes ficam em português, com acentos.
+   */
+  en?: { name: string; inName?: string; capital?: string };
   region: Region;
   /** Códigos de área dos avisos IPMA (idAreaAviso). */
   ipmaAreas: string[];
@@ -134,6 +139,7 @@ export const districts: District[] = [
   {
     slug: "lisboa",
     name: "Lisboa",
+    en: { name: "Lisbon", capital: "Lisbon" },
     inName: "em Lisboa",
     region: "continente",
     ipmaAreas: ["LSB"],
@@ -223,6 +229,7 @@ export const districts: District[] = [
     slug: "acores",
     name: "Açores",
     inName: "nos Açores",
+    en: { name: "Azores", inName: "in the Azores" },
     region: "acores",
     ipmaAreas: ["AOC", "ACE", "AOR"],
     globalIdLocal: 3420300,
@@ -251,6 +258,17 @@ export const ipmaAreaNames: Record<string, string> = {
   MCN: "Madeira, costa norte",
   MCS: "Madeira, costa sul",
   MRM: "Madeira, regiões montanhosas",
+  MPS: "Porto Santo",
+};
+
+/** As mesmas áreas em inglês (o resto dos avisos usa o nome do distrito). */
+export const ipmaAreaNamesEn: Record<string, string> = {
+  AOC: "Azores, Western Group",
+  ACE: "Azores, Central Group",
+  AOR: "Azores, Eastern Group",
+  MCN: "Madeira, north coast",
+  MCS: "Madeira, south coast",
+  MRM: "Madeira, mountain areas",
   MPS: "Porto Santo",
 };
 

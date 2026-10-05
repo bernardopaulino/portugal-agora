@@ -25,11 +25,11 @@ export async function generateMetadata(
     ...(district.region === "continente"
       ? {
           title: t.districtPages.riskTitle(inPlace),
-          description: t.districtPages.riskIntro(district.capital),
+          description: t.districtPages.riskIntro(t.capitalName(district)),
         }
       : {
           title: t.districtPages.airTitle(inPlace),
-          description: t.districtPages.airIntro(district.capital),
+          description: t.districtPages.airIntro(t.capitalName(district)),
         }),
     alternates: alternates(lang, `/${district.slug}/risco`),
   };

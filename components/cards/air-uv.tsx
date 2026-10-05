@@ -17,16 +17,19 @@ export function AirQualitySummary({ readings }: { readings: AirQualityReading[] 
     return <EmptyState>{t.empty.airAllGood(readings.length)}</EmptyState>;
   return (
     <ul className="flex flex-col border-t border-line">
-      {concerning.map((r) => (
-        <li
-          key={r.district}
-          className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line py-3"
-        >
-          <SeverityBadge level={r.severity} label={t.term(r.label)} />
-          <span className="text-lg font-bold">{getDistrict(r.district)?.capital}</span>
-          <span className="text-ink-2">{t.lists.airIndex(r.eaqi, r.pollutant)}</span>
-        </li>
-      ))}
+      {concerning.map((r) => {
+        const district = getDistrict(r.district);
+        return (
+          <li
+            key={r.district}
+            className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line py-3"
+          >
+            <SeverityBadge level={r.severity} label={t.term(r.label)} />
+            <span className="text-lg font-bold">{district ? t.capitalName(district) : null}</span>
+            <span className="text-ink-2">{t.lists.airIndex(r.eaqi, r.pollutant)}</span>
+          </li>
+        );
+      })}
     </ul>
   );
 }

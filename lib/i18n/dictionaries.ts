@@ -1,4 +1,10 @@
-import type { District } from "@/data/districts";
+import { concelhoNameEn } from "@/data/concelho-names-en";
+import {
+  districtForIpmaArea,
+  ipmaAreaLabel,
+  ipmaAreaNamesEn,
+  type District,
+} from "@/data/districts";
 
 import type { Locale } from "./locales";
 import { translateTerm } from "./terms";
@@ -106,6 +112,12 @@ const pt = {
   districtName: (d: District) => d.name,
   /** "em Lisboa", "no Porto", "nos Açores". */
   inPlace: (d: District) => d.inName,
+  /** Capital do distrito (previsão, ar e UV). */
+  capitalName: (d: District) => d.capital,
+  /** Área de aviso do IPMA: o distrito, ou a zona das ilhas ("Açores, Grupo Central"). */
+  areaName: (area: string) => ipmaAreaLabel(area),
+  /** Nome de um concelho (tabela do risco de incêndio). */
+  concelhoName: (_dico: string, name: string) => name,
   join: joinWith("e"),
   and: "e",
   plural,
@@ -377,7 +389,8 @@ const pt = {
 
 export type Dictionary = typeof pt;
 
-const enDistrictName = (d: District) => (d.slug === "acores" ? "the Azores" : d.name);
+/** Em inglês, os exónimos estabelecidos (Lisbon, the Azores) vêm de data/districts.ts. */
+const enDistrictName = (d: District) => d.en?.name ?? d.name;
 
 const en: Dictionary = {
   locale: "en",
@@ -450,8 +463,14 @@ const en: Dictionary = {
     unknown: "No data",
   },
   levelAdjective: { none: "green", yellow: "yellow", orange: "orange", red: "red" },
-  districtName: (d) => (d.slug === "acores" ? "Azores" : d.name),
-  inPlace: (d) => `in ${enDistrictName(d)}`,
+  districtName: enDistrictName,
+  inPlace: (d) => d.en?.inName ?? `in ${enDistrictName(d)}`,
+  capitalName: (d) => d.en?.capital ?? d.capital,
+  areaName: (area) => {
+    const district = districtForIpmaArea(area);
+    return ipmaAreaNamesEn[area] ?? (district ? enDistrictName(district) : area);
+  },
+  concelhoName: concelhoNameEn,
   join: joinWith("and"),
   and: "and",
   plural,

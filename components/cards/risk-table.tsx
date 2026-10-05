@@ -50,7 +50,7 @@ export function RiskTable({ rows }: { rows: ConcelhoRisk[] }) {
           {rows.map((r) => (
             <tr key={r.dico} className="border-b border-line last:border-0">
               <th scope="row" className="px-4 py-2.5 font-normal">
-                {r.name}
+                {t.concelhoName(r.dico, r.name)}
               </th>
               <td className="px-4 py-2.5">
                 <RiskCell level={r.today} />

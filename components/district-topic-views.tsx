@@ -146,8 +146,8 @@ export function DistrictRiskView({ district, initial }: Props) {
       title={hasRisk ? t.districtPages.riskTitle(inPlace) : t.districtPages.airTitle(inPlace)}
       intro={
         hasRisk
-          ? t.districtPages.riskIntro(district.capital)
-          : t.districtPages.airIntro(district.capital)
+          ? t.districtPages.riskIntro(t.capitalName(district))
+          : t.districtPages.airIntro(t.capitalName(district))
       }
       state={state}
       controls={controls}
@@ -177,7 +177,7 @@ export function DistrictRiskView({ district, initial }: Props) {
 
         <Section id="ar" title={t.sections.airUv} result={state.airQuality}>
           <AirAndUv air={air} uv={uv} />
-          <p className="text-sm text-ink-2">{t.lists.airNoteDistrict(district.capital)}</p>
+          <p className="text-sm text-ink-2">{t.lists.airNoteDistrict(t.capitalName(district))}</p>
         </Section>
       </div>
     </TopicLayout>
