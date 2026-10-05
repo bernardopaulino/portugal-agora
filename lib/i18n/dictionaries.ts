@@ -29,6 +29,10 @@ const pt = {
       "Avisos meteorológicos, sismos, incêndios e qualidade do ar em Portugal, num só sítio, a partir de fontes oficiais.",
     ogAlt: "Estado atual de Portugal: avisos, incêndios e sismos",
     wholeCountry: "Todo o país",
+    /** Imagem de partilha: a hora dos dados e a linha das fontes. */
+    ogDataFrom: (day: string, month: string, time: string) =>
+      `Dados de ${day} de ${month}, às ${time}`,
+    ogSources: "portugalagora.pt. Dados do IPMA, Fogos.pt e Open-Meteo.",
   },
   nav: {
     label: "Secções",
@@ -376,6 +380,8 @@ const en: Dictionary = {
       "Weather warnings, earthquakes, wildfires and air quality in Portugal, in one place, from official sources.",
     ogAlt: "Current state of Portugal: warnings, wildfires and earthquakes",
     wholeCountry: "Whole country",
+    ogDataFrom: (day, month, time) => `Data as of ${day} ${month}, ${time}`,
+    ogSources: "portugalagora.pt. Data from IPMA, Fogos.pt and Open-Meteo.",
   },
   nav: {
     label: "Sections",

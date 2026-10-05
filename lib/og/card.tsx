@@ -1,110 +1,134 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+
 import { ImageResponse } from "next/og";
 
+import { logoOutline } from "@/data/map-shapes";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/locales";
 import type { Severity } from "@/lib/sources/types";
 
+import { dataStamp, headlineSize } from "./text";
+
 export const ogSize = { width: 1200, height: 630 };
 
-const tint: Record<Severity | "unknown", { bar: string; bg: string; label: string }> = {
-  none: { bar: "#2e7d4f", bg: "#e2f1e7", label: "Sem avisos" },
-  yellow: { bar: "#e8b000", bg: "#fff3c7", label: "Aviso amarelo" },
-  orange: { bar: "#e0661b", bg: "#fde5d3", label: "Aviso laranja" },
-  red: { bar: "#c62828", bg: "#fbe0e0", label: "Aviso vermelho" },
-  unknown: { bar: "#7c8b94", bg: "#e6ebee", label: "Sem dados do IPMA" },
+const tint: Record<Severity | "unknown", { bar: string; bg: string }> = {
+  none: { bar: "#2e7d4f", bg: "#e2f1e7" },
+  yellow: { bar: "#e8b000", bg: "#fff3c7" },
+  orange: { bar: "#e0661b", bg: "#fde5d3" },
+  red: { bar: "#c62828", bg: "#fbe0e0" },
+  unknown: { bar: "#7c8b94", bg: "#e6ebee" },
 };
 
-const labelEn: Record<Severity | "unknown", string> = {
-  none: "No warnings",
-  yellow: "Yellow warning",
-  orange: "Orange warning",
-  red: "Red warning",
-  unknown: "No IPMA data",
-};
+const INK = "#0d2b3a";
+const INK_2 = "#44596a";
+
+/**
+ * As letras do site, lidas do disco (assets/fonts, licença OFL) e não
+ * pedidas à rede: Barlow Semi Condensed nos títulos, Atkinson Hyperlegible
+ * Next no texto. O ImageResponse precisa de TTF/OTF estáticos.
+ */
+let fonts:
+  Promise<NonNullable<ConstructorParameters<typeof ImageResponse>[1]>["fonts"]> | undefined;
+function loadFonts() {
+  fonts ??= Promise.all([
+    readFile(join(process.cwd(), "assets/fonts/BarlowSemiCondensed-Bold.ttf")),
+    readFile(join(process.cwd(), "assets/fonts/AtkinsonHyperlegibleNext-Regular.ttf")),
+    readFile(join(process.cwd(), "assets/fonts/AtkinsonHyperlegibleNext-Bold.ttf")),
+  ]).then(([barlow, atkinson, atkinsonBold]) => [
+    { name: "Barlow Semi Condensed", data: barlow, weight: 700 as const, style: "normal" as const },
+    {
+      name: "Atkinson Hyperlegible Next",
+      data: atkinson,
+      weight: 400 as const,
+      style: "normal" as const,
+    },
+    {
+      name: "Atkinson Hyperlegible Next",
+      data: atkinsonBold,
+      weight: 700 as const,
+      style: "normal" as const,
+    },
+  ]);
+  return fonts;
+}
 
 /** Imagem de partilha com o estado atual: é o que aparece no WhatsApp ou no LinkedIn. */
-export function statusCard({
+export async function statusCard({
   level,
   place,
   headline,
+  generatedAt,
   locale = "pt",
 }: {
   level: Severity | "unknown";
   place: string;
   headline: string;
+  /** Hora dos dados (state.generatedAt). */
+  generatedAt: string;
   locale?: Locale;
 }) {
-  const t = { ...tint[level], label: locale === "en" ? labelEn[level] : tint[level].label };
+  const t = getDictionary(locale);
+  const colors = tint[level];
   return new ImageResponse(
-    <div style={{ display: "flex", width: "100%", height: "100%", background: t.bg }}>
-      <div style={{ width: 28, height: "100%", background: t.bar }} />
+    <div
+      style={{
+        display: "flex",
+        width: "100%",
+        height: "100%",
+        background: colors.bg,
+        fontFamily: "Atkinson Hyperlegible Next",
+        color: INK,
+      }}
+    >
+      <div style={{ width: 28, height: "100%", background: colors.bar }} />
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "64px 72px",
+          padding: "56px 72px 52px",
           flex: 1,
         }}
       >
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          {/* O logótipo do site: o contorno do continente com o ponto do nível. */}
+          <svg width={40} height={70} viewBox={`-3 -2 ${logoOutline.width + 18} 104`}>
+            <path d={logoOutline.d} fill={INK} />
+            <circle
+              cx={logoOutline.width - 4}
+              cy="49"
+              r="11.5"
+              fill={colors.bar}
+              stroke={colors.bg}
+              strokeWidth="4.5"
+            />
+          </svg>
+          <span style={{ fontFamily: "Barlow Semi Condensed", fontSize: 44, fontWeight: 700 }}>
+            Portugal Agora
+          </span>
+          <span style={{ fontSize: 34, color: INK_2 }}>{place}</span>
+        </div>
+
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 18,
-            color: "#0d2b3a",
-            fontSize: 34,
-            fontWeight: 800,
+            display: "block",
+            fontFamily: "Barlow Semi Condensed",
+            fontSize: headlineSize(headline),
+            fontWeight: 700,
+            lineHeight: 1.08,
+            lineClamp: 4,
           }}
         >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 44,
-              background: "#0d2b3a",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <div style={{ width: 18, height: 18, borderRadius: 18, background: "#2e7d4f" }} />
-          </div>
-          <span>Portugal Agora</span>
-          <span style={{ color: "#44596a", fontWeight: 400 }}>{place}</span>
+          {headline}
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          <div
-            style={{
-              display: "flex",
-              alignSelf: "flex-start",
-              background: "#ffffff",
-              color: "#0d2b3a",
-              borderRadius: 999,
-              padding: "10px 26px",
-              fontSize: 30,
-              fontWeight: 700,
-            }}
-          >
-            {t.label}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              fontSize: headline.length > 90 ? 50 : 62,
-              fontWeight: 800,
-              color: "#0d2b3a",
-              lineHeight: 1.12,
-              letterSpacing: -1,
-            }}
-          >
-            {headline}
-          </div>
-        </div>
-        <div style={{ display: "flex", fontSize: 26, color: "#44596a" }}>
-          portugalagora.pt. Dados do IPMA, Fogos.pt e Open-Meteo.
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <span style={{ fontSize: 30, fontWeight: 700 }}>{dataStamp(generatedAt, locale, t)}</span>
+          <span style={{ fontSize: 24, color: INK_2 }}>{t.site.ogSources}</span>
         </div>
       </div>
     </div>,
-    ogSize,
+    { ...ogSize, fonts: await loadFonts() },
   );
 }

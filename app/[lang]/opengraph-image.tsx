@@ -21,6 +21,7 @@ export default async function Image({ params }: { params: Promise<{ lang: string
     level: state.levelKnown ? state.level : "unknown",
     place: t.site.wholeCountry,
     headline: countryHeadline(state.levelKnown, state.districts, t),
+    generatedAt: state.generatedAt,
     locale,
   });
 }

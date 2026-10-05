@@ -28,6 +28,7 @@ export default async function Image({
     level: state.levelKnown ? districtLevel(state, district.slug) : "unknown",
     place: t.districtName(district),
     headline: districtHeadline(district, state.warnings.data ?? [], state.levelKnown, t),
+    generatedAt: state.generatedAt,
     locale,
   });
 }
