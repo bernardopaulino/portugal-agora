@@ -70,6 +70,21 @@ test("regiões autónomas têm página própria", async ({ page }) => {
   await expect(pageTitle(page)).toHaveText("Ar e raios UV nos Açores");
 });
 
+test("os cinco separadores cabem num telemóvel de 360 px", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  for (const path of ["/lisboa/risco", "/en/lisboa/risco"]) {
+    await page.goto(path);
+    const tabs = page.getByRole("navigation").first().getByRole("link");
+    await expect(tabs).toHaveCount(5);
+    for (const tab of await tabs.all()) {
+      const box = (await tab.boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(360);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+    }
+  }
+});
+
 test("o mapa mostra só o tema da página", async ({ page }) => {
   // Num tema de distrito: sem botões de camadas, com ligação para o país.
   await page.goto("/lisboa/incendios");

@@ -37,6 +37,14 @@ const pt = {
     fires: "Incêndios",
     quakes: "Sismos",
     riskAir: "Risco e ar",
+    /** Nomes curtos dos separadores em telemóveis, para os cinco caberem a 360 px. */
+    short: {
+      overview: "Resumo",
+      warnings: "Avisos",
+      fires: "Incêndios",
+      quakes: "Sismos",
+      riskAir: "Risco",
+    },
     skip: "Saltar para o conteúdo",
     home: "Portugal Agora, página inicial",
     pageSections: "Secções da página",
@@ -376,6 +384,13 @@ const en: Dictionary = {
     fires: "Wildfires",
     quakes: "Earthquakes",
     riskAir: "Risk and air",
+    short: {
+      overview: "Overview",
+      warnings: "Warnings",
+      fires: "Wildfires",
+      quakes: "Quakes",
+      riskAir: "Risk",
+    },
     skip: "Skip to content",
     home: "Portugal Agora, home page",
     pageSections: "Sections on this page",
