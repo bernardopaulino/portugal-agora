@@ -131,12 +131,12 @@ export function BulletinMap({
               stroke="var(--stage-line)"
               strokeWidth="1.5"
             />
+            {/* Em unidades do viewBox: 30 dá cerca de 13 px num telemóvel de 390 px. */}
             <text
               x={x + 2}
-              y={y - 10}
+              y={y - 12}
               fill="var(--stage-ink-2)"
-              className="font-display"
-              fontSize="20"
+              className="font-display text-[30px] lg:text-[24px]"
               fontWeight="600"
             >
               {region === "acores" ? t.stage.acores : t.stage.madeira}
@@ -150,6 +150,8 @@ export function BulletinMap({
         const district = getDistrict(shape.slug);
         const name = district ? t.districtName(district) : shape.slug;
         const dim = focus !== undefined && focus !== shape.slug;
+        const islands = shape.region !== "continente";
+        const color = dim ? "var(--land-dim)" : fill[level];
         return (
           <a
             key={shape.slug}
@@ -167,16 +169,32 @@ export function BulletinMap({
             }}
             className="outline-none"
           >
+            {/*
+             * As ilhas levam um contorno da própria cor (ficam mais visíveis a
+             * esta escala) e uma área de toque invisível mais larga à volta.
+             */}
             <path
               d={shape.d}
-              fill={dim ? "var(--land-dim)" : fill[level]}
+              fill={color}
               fillOpacity={1}
-              stroke="#fff"
-              strokeOpacity={dim ? 0.35 : 0.95}
-              strokeWidth="1.6"
+              stroke={islands ? color : "#fff"}
+              strokeOpacity={islands ? 1 : dim ? 0.35 : 0.95}
+              strokeWidth={islands ? 5 : 1.6}
               strokeLinejoin="round"
               className="cursor-pointer transition-[fill-opacity] duration-150"
             />
+            {islands ? (
+              <path
+                d={shape.d}
+                fill="none"
+                stroke="#000"
+                strokeOpacity={0}
+                strokeWidth="26"
+                strokeLinejoin="round"
+                pointerEvents="stroke"
+                className="cursor-pointer"
+              />
+            ) : null}
           </a>
         );
       })}

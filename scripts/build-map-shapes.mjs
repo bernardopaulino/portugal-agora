@@ -9,31 +9,58 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 const geo = JSON.parse(readFileSync("public/geo/distritos.json", "utf8"));
 
-/** Molduras: extensão geográfica e caixa de destino no viewBox (unidades SVG). */
+/**
+ * Molduras: extensão geográfica e caixa de destino no viewBox (unidades SVG).
+ * `gaps`: troços de mar [de, até, nova largura] (em graus de longitude) que
+ * encolhem. Nos Açores, os três grupos ficam mais perto uns dos outros,
+ * como nos mapas da televisão: cada ilha mantém a forma, mas o arquipélago
+ * cabe na caixa com as ilhas maiores. Os limites dos troços caem no mar.
+ */
 const frames = {
   continente: { lon: [-9.6, -6.1], lat: [36.9, 42.2], box: [330, 0, 500, 1000] },
-  acores: { lon: [-31.65, -24.75], lat: [36.75, 39.95], box: [0, 430, 320, 200], pad: 22 },
-  madeira: { lon: [-17.35, -16.2], lat: [32.33, 33.17], box: [104, 720, 216, 170], pad: 18 },
+  acores: {
+    lon: [-31.32, -24.98],
+    lat: [36.9, 39.76],
+    box: [0, 300, 320, 320],
+    pad: 8,
+    gaps: [
+      [-30.95, -28.95, 0.3],
+      [-26.95, -25.95, 0.3],
+    ],
+  },
+  madeira: { lon: [-17.3, -16.25], lat: [32.37, 33.13], box: [30, 690, 290, 240], pad: 14 },
 };
+
+/** Longitude com os troços de mar encolhidos (contínua e crescente). */
+function squeeze(lon, gaps = []) {
+  let shift = 0;
+  for (const [a, b, w] of gaps) {
+    if (lon <= a) break;
+    if (lon < b) return lon - shift - (lon - a) * (1 - w / (b - a));
+    shift += b - a - w;
+  }
+  return lon - shift;
+}
 
 /**
  * Equirretangular com correção do cosseno da latitude média; centrada na
  * caixa, com margem interior (pad) para as ilhas não tocarem na moldura.
  */
-function projector({ lon, lat, box, pad = 0 }) {
+function projector({ lon, lat, box, pad = 0, gaps = [] }) {
   const k = Math.cos((((lat[0] + lat[1]) / 2) * Math.PI) / 180);
-  const w = (lon[1] - lon[0]) * k;
+  const lon0 = squeeze(lon[0], gaps);
+  const w = (squeeze(lon[1], gaps) - lon0) * k;
   const h = lat[1] - lat[0];
   const s = Math.min((box[2] - 2 * pad) / w, (box[3] - 2 * pad) / h);
   const ox = box[0] + (box[2] - w * s) / 2;
   const oy = box[1] + (box[3] - h * s) / 2;
-  return { k, s, ox, oy, lon0: lon[0], lat1: lat[1] };
+  return { k, s, ox, oy, lon0, lat1: lat[1], gaps };
 }
 
 const proj = Object.fromEntries(Object.entries(frames).map(([r, f]) => [r, projector(f)]));
 
 function project(p, [lon, lat]) {
-  return [p.ox + (lon - p.lon0) * p.k * p.s, p.oy + (p.lat1 - lat) * p.s];
+  return [p.ox + (squeeze(lon, p.gaps) - p.lon0) * p.k * p.s, p.oy + (p.lat1 - lat) * p.s];
 }
 
 function perpendicular(p, a, b) {
@@ -201,14 +228,28 @@ export const mapFrames: Record<Region, [number, number, number, number]> = ${JSO
   Object.fromEntries(Object.entries(frames).map(([r, f]) => [r, f.box])),
 )};
 
-const projections: Record<Region, { k: number; s: number; ox: number; oy: number; lon0: number; lat1: number }> = ${JSON.stringify(
-  proj,
-)};
+type Gap = [number, number, number];
+
+const projections: Record<
+  Region,
+  { k: number; s: number; ox: number; oy: number; lon0: number; lat1: number; gaps: Gap[] }
+> = ${JSON.stringify(proj)};
+
+/** Longitude com os troços de mar encolhidos (nos Açores, os grupos ficam mais perto). */
+export function squeeze(lon: number, gaps: Gap[]): number {
+  let shift = 0;
+  for (const [a, b, w] of gaps) {
+    if (lon <= a) break;
+    if (lon < b) return lon - shift - (lon - a) * (1 - w / (b - a));
+    shift += b - a - w;
+  }
+  return lon - shift;
+}
 
 /** Converte [longitude, latitude] para coordenadas do mapa do boletim. */
 export function projectPoint([lon, lat]: [number, number], region: Region): [number, number] {
   const p = projections[region];
-  return [p.ox + (lon - p.lon0) * p.k * p.s, p.oy + (p.lat1 - lat) * p.s];
+  return [p.ox + (squeeze(lon, p.gaps) - p.lon0) * p.k * p.s, p.oy + (p.lat1 - lat) * p.s];
 }
 
 export const mapShapes: MapShape[] = ${JSON.stringify(out)};
