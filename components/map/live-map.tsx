@@ -132,6 +132,10 @@ export default function LiveMap({
   const styleReady = useRef(false);
   const [districtGeo, setDistrictGeo] = useState<Collection | null>(null);
   const [concelhoGeo, setConcelhoGeo] = useState<Collection | null>(null);
+  // Enquadramento atual (região ou distrito) e se a pessoa já mexeu no mapa:
+  // enquanto não mexer, o mapa volta a enquadrar quando muda de tamanho.
+  const fitTarget = useRef<((duration: number) => void) | null>(null);
+  const userMoved = useRef(false);
   const theme = useResolvedTheme();
   const colors = mapColors[theme];
 
@@ -220,8 +224,25 @@ export default function LiveMap({
       }
     });
 
+    // O primeiro enquadramento pode acontecer antes de o contentor ter a
+    // largura final (em ecrãs largos, Portugal ficava encostado à esquerda).
+    // A cada mudança de tamanho, o mapa ajusta-se e volta a enquadrar, até a
+    // pessoa arrastar ou ampliar (só esses movimentos trazem originalEvent).
+    const initialBounds = regionBounds[focusFeatureBounds?.region ?? region];
+    fitTarget.current = (duration) =>
+      map.fitBounds(initialBounds, { padding: FIT_PADDING, duration });
+    map.on("movestart", (e) => {
+      if ((e as { originalEvent?: Event }).originalEvent) userMoved.current = true;
+    });
+    const observer = new ResizeObserver(() => {
+      map.resize();
+      if (!userMoved.current) fitTarget.current?.(0);
+    });
+    observer.observe(container.current);
+
     mapRef.current = map;
     return () => {
+      observer.disconnect();
       map.remove();
       mapRef.current = null;
     };
@@ -550,6 +571,8 @@ export default function LiveMap({
       selected?.setData(collection([]));
       return;
     }
+    // A pessoa pediu para ver este evento: mudar de tamanho já não reenquadra.
+    userMoved.current = true;
     if (selection.type === "district") {
       map.setFilter("selected-district", ["==", ["get", "slug"], selection.slug]);
       selected?.setData(collection([]));
@@ -577,7 +600,10 @@ export default function LiveMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || focus) return;
-    map.fitBounds(regionBounds[region], { padding: FIT_PADDING, duration: 600 });
+    userMoved.current = false;
+    fitTarget.current = (duration) =>
+      map.fitBounds(regionBounds[region], { padding: FIT_PADDING, duration });
+    fitTarget.current(600);
   }, [region, focus]);
 
   // Enquadrar o distrito em foco quando os limites chegam.
@@ -585,7 +611,9 @@ export default function LiveMap({
     const map = mapRef.current;
     if (!map || !focus || !districtGeo) return;
     const bounds = bboxOf(districtGeo.features.filter((f) => f.properties.slug === focus));
-    if (bounds) map.fitBounds(bounds, { padding: 32, duration: 0 });
+    if (!bounds) return;
+    fitTarget.current = (duration) => map.fitBounds(bounds, { padding: 32, duration });
+    if (!userMoved.current) fitTarget.current(0);
   }, [focus, districtGeo]);
 
   return (
