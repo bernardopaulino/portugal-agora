@@ -15,7 +15,7 @@ export async function SiteHeader() {
           <HomeLink>
             <LogoMark level={state.levelKnown ? state.level : "unknown"} className="h-9 sm:h-10" />
             {/* Abaixo de 360 px só cabe o logótipo; o nome fica para leitores de ecrã. */}
-            <span className="truncate font-display text-base leading-none font-bold whitespace-nowrap max-[359px]:sr-only sm:text-2xl">
+            <span className="truncate font-display text-base leading-normal font-bold whitespace-nowrap max-[359px]:sr-only sm:text-2xl">
               Portugal Agora
             </span>
           </HomeLink>
