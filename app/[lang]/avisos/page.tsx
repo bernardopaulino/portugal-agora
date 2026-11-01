@@ -5,7 +5,7 @@ import { WarningsView } from "@/components/topic-views";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { alternates } from "@/lib/i18n/metadata";
-import { getState } from "@/lib/state/get-state";
+import { getPageState } from "@/lib/state/get-state";
 
 export async function generateMetadata(props: PageProps<"/[lang]/avisos">): Promise<Metadata> {
   const { lang } = await props.params;
@@ -21,6 +21,6 @@ export async function generateMetadata(props: PageProps<"/[lang]/avisos">): Prom
 export default async function AvisosPage(props: PageProps<"/[lang]/avisos">) {
   const { lang } = await props.params;
   if (!isLocale(lang)) notFound();
-  const state = await getState();
+  const state = await getPageState();
   return <WarningsView initial={state} />;
 }

@@ -5,7 +5,7 @@ import { site } from "@/lib/config/site";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { intlLocale, isLocale, localePath } from "@/lib/i18n/locales";
 import { alternates } from "@/lib/i18n/metadata";
-import { getState } from "@/lib/state/get-state";
+import { getPageState } from "@/lib/state/get-state";
 
 export async function generateMetadata(props: PageProps<"/[lang]">): Promise<Metadata> {
   const { lang } = await props.params;
@@ -16,7 +16,7 @@ export async function generateMetadata(props: PageProps<"/[lang]">): Promise<Met
 export default async function Home(props: PageProps<"/[lang]">) {
   const { lang } = await props.params;
   const locale = isLocale(lang) ? lang : "pt";
-  const state = await getState();
+  const state = await getPageState();
   // Dados estruturados (schema.org): o Google usa-os para mostrar o nome do
   // site nos resultados. Um <script> de dados não é executado, por isso pode
   // ser desenhado pelo React sem problema.

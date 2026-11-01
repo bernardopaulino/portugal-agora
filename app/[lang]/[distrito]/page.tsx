@@ -8,7 +8,7 @@ import { isLocale } from "@/lib/i18n/locales";
 import { alternates } from "@/lib/i18n/metadata";
 import { getForecast } from "@/lib/sources/registry";
 import { districtHeadline } from "@/lib/state/bulletin";
-import { getState } from "@/lib/state/get-state";
+import { getPageState } from "@/lib/state/get-state";
 
 export function generateStaticParams() {
   return districts.map((d) => ({ distrito: d.slug }));
@@ -19,7 +19,7 @@ export async function generateMetadata(props: PageProps<"/[lang]/[distrito]">): 
   const district = getDistrict(distrito);
   if (!district || !isLocale(lang)) return {};
   const t = getDictionary(lang);
-  const state = await getState();
+  const state = await getPageState();
   const headline = districtHeadline(district, state.warnings.data ?? [], state.levelKnown, t);
   return {
     ...t.districtMeta(t.districtName(district), headline, t.inPlace(district)),
@@ -31,6 +31,9 @@ export default async function DistrictPage(props: PageProps<"/[lang]/[distrito]"
   const { lang, distrito } = await props.params;
   const district = getDistrict(distrito);
   if (!district || !isLocale(lang)) notFound();
-  const [state, forecast] = await Promise.all([getState(), getForecast(district.globalIdLocal)]);
+  const [state, forecast] = await Promise.all([
+    getPageState(),
+    getForecast(district.globalIdLocal),
+  ]);
   return <DistrictView district={district} initial={state} forecast={forecast} />;
 }

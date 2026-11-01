@@ -6,7 +6,7 @@ import { districts, getDistrict } from "@/data/districts";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { alternates } from "@/lib/i18n/metadata";
-import { getState } from "@/lib/state/get-state";
+import { getPageState } from "@/lib/state/get-state";
 
 export function generateStaticParams() {
   return districts.map((d) => ({ distrito: d.slug }));
@@ -31,6 +31,6 @@ export default async function DistrictSismosPage(props: PageProps<"/[lang]/[dist
   const { lang, distrito } = await props.params;
   const district = getDistrict(distrito);
   if (!district || !isLocale(lang)) notFound();
-  const state = await getState();
+  const state = await getPageState();
   return <DistrictQuakesView district={district} initial={state} />;
 }

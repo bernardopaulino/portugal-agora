@@ -4,7 +4,7 @@ import { isLocale } from "@/lib/i18n/locales";
 import { safeOgImage, statusCard } from "@/lib/og/card";
 import { districtHeadline } from "@/lib/state/bulletin";
 import { districtLevel } from "@/lib/state/district";
-import { getState } from "@/lib/state/get-state";
+import { getPageState } from "@/lib/state/get-state";
 import { levelsByDistrict } from "@/lib/og/text";
 
 export const alt = "Portugal Agora";
@@ -25,7 +25,7 @@ export default async function Image({
   const t = getDictionary(locale);
   const district = getDistrict(distrito) ?? getDistrict("lisboa")!;
   return safeOgImage(async () => {
-    const state = await getState();
+    const state = await getPageState();
     return statusCard({
       level: state.levelKnown ? districtLevel(state, district.slug) : "unknown",
       place: t.districtName(district),

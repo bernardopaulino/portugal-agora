@@ -2,7 +2,7 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale, locales } from "@/lib/i18n/locales";
 import { safeOgImage, statusCard } from "@/lib/og/card";
 import { countryHeadline } from "@/lib/state/bulletin";
-import { getState } from "@/lib/state/get-state";
+import { getPageState } from "@/lib/state/get-state";
 import { levelsByDistrict } from "@/lib/og/text";
 
 export const alt = "Portugal Agora";
@@ -18,7 +18,7 @@ export default async function Image({ params }: { params: Promise<{ lang: string
   const locale = isLocale(lang) ? lang : "pt";
   const t = getDictionary(locale);
   return safeOgImage(async () => {
-    const state = await getState();
+    const state = await getPageState();
     return statusCard({
       level: state.levelKnown ? state.level : "unknown",
       place: t.site.wholeCountry,

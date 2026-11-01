@@ -1,4 +1,4 @@
-import { getState } from "@/lib/state/get-state";
+import { getPageState } from "@/lib/state/get-state";
 
 import { DistrictPicker } from "./district-picker";
 import { HomeLink, LanguageSwitch, MainNav } from "./header-parts";
@@ -7,7 +7,7 @@ import { NearMeButton } from "./near-me";
 import { ThemeToggle } from "./theme";
 
 export async function SiteHeader() {
-  const state = await getState();
+  const state = await getPageState();
   return (
     <>
       <header className="bg-surface">

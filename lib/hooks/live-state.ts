@@ -15,13 +15,17 @@ const fetcher = async (url: string): Promise<CountryState> => {
   return response.json();
 };
 
-/** O estado do país, renovado a cada minuto a partir do que veio do servidor. */
+/**
+ * O estado do país, renovado a cada minuto a partir do que veio do servidor.
+ * O HTML das páginas pode ter até ~15 min (ver getPageState), por isso
+ * pede-se logo o estado atual ao abrir a página (/api/state, em cache na CDN).
+ */
 export function useLiveState(initial: CountryState): CountryState {
   const { data } = useSWR("/api/state", fetcher, {
     fallbackData: initial,
     refreshInterval: 60_000,
     revalidateOnFocus: true,
-    revalidateOnMount: false,
+    revalidateOnMount: true,
     keepPreviousData: true,
   });
   return data ?? initial;
