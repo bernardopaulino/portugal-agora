@@ -85,7 +85,7 @@ export function MainNav() {
     >
       <ul
         ref={listRef}
-        className="mx-auto flex max-w-7xl [scrollbar-width:none] overflow-x-auto px-2 max-sm:justify-between sm:gap-1 sm:px-4"
+        className="mx-auto flex max-w-7xl [scrollbar-width:none] overflow-x-auto px-1 max-sm:justify-between sm:gap-1 sm:px-4"
       >
         {tabs.map((tab) => {
           const href = base + tab.path || "/";
@@ -98,7 +98,7 @@ export function MainNav() {
                 href={path(href)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "inline-flex h-12 min-w-11 items-center justify-center border-b-[3px] px-1.5 font-display text-[0.945rem] font-semibold no-underline sm:px-3 sm:text-lg",
+                  "inline-flex h-12 min-w-11 items-center justify-center border-b-[3px] px-1 font-display text-[0.945rem] font-semibold no-underline sm:px-3 sm:text-lg",
                   active
                     ? "border-accent text-ink"
                     : "border-transparent text-ink-2 hover:border-line hover:text-ink",
