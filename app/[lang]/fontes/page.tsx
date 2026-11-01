@@ -3,26 +3,21 @@ import { notFound } from "next/navigation";
 
 import { ProsePage } from "@/components/layout/prose-page";
 import { SeverityBadge } from "@/components/status/severity";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
-import { alternates } from "@/lib/i18n/metadata";
+import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
 
 export async function generateMetadata(props: PageProps<"/[lang]/fontes">): Promise<Metadata> {
   const { lang } = await props.params;
   if (!isLocale(lang)) return {};
-  return {
-    ...(lang === "en"
-      ? {
-          title: "Sources and how we read the data",
-          description:
-            "Where Portugal Agora gets its data, how often it is updated and how it is classified.",
-        }
-      : {
-          title: "Fontes e como lemos os dados",
-          description:
-            "De onde vêm os dados do Portugal Agora, de quanto em quanto tempo são atualizados e como são classificados.",
-        }),
-    alternates: alternates(lang, "/fontes"),
-  };
+  const t = getDictionary(lang);
+  return pageMetadata({
+    locale: lang,
+    path: "/fontes",
+    title: t.meta.sourcesTitle,
+    description: t.meta.sourcesDescription,
+    image: inheritedOgImage(lang, t.site.ogAlt),
+  });
 }
 
 export default async function FontesPage(props: PageProps<"/[lang]/fontes">) {

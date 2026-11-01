@@ -385,6 +385,36 @@ const pt = {
     title: `${name}: avisos, incêndios e sismos agora`,
     description: `${headline} Previsão, risco de incêndio, qualidade do ar e UV ${inPlace}.`,
   }),
+  /**
+   * Títulos para o Google (<title> e partilha), com as palavras que as pessoas
+   * pesquisam ("hoje", "em tempo real", "IPMA"). Os títulos visíveis das páginas
+   * (pages, districtPages) ficam como estão.
+   */
+  meta: {
+    homeTitle: "Portugal Agora: avisos, incêndios e sismos em tempo real",
+    /** Linha por cima do título da página inicial, que muda com o estado do país. */
+    homeKicker: "Avisos, incêndios e sismos em Portugal, em tempo real",
+    warningsTitle: "Avisos meteorológicos do IPMA hoje",
+    firesTitle: "Incêndios hoje em Portugal, em tempo real",
+    quakesTitle: "Sismos em Portugal: últimos 7 dias",
+    riskTitle: "Risco de incêndio e qualidade do ar hoje",
+    districtWarningsTitle: (inPlace: string) => `Avisos meteorológicos ${inPlace} hoje`,
+    districtFiresTitle: (inPlace: string) => `Incêndios ${inPlace} hoje, em tempo real`,
+    districtQuakesTitle: (inPlace: string) => `Sismos ${inPlace}: últimos 7 dias`,
+    districtRiskTitle: (inPlace: string) => `Risco de incêndio, ar e UV ${inPlace} hoje`,
+    districtAirTitle: (inPlace: string) => `Qualidade do ar e UV ${inPlace} hoje`,
+    sourcesTitle: "Fontes e como lemos os dados",
+    sourcesDescription:
+      "De onde vêm os dados do Portugal Agora, de quanto em quanto tempo são atualizados e como são classificados.",
+    privacyTitle: "Privacidade",
+    privacyDescription:
+      "O Portugal Agora não recolhe dados pessoais: não há contas, publicidade nem cookies, e a localização nunca sai do seu dispositivo.",
+    aboutTitle: "Sobre o projeto",
+    aboutDescription:
+      "Um projeto pessoal, sem fins lucrativos e de código aberto, que junta num só sítio os avisos e os sismos do IPMA, os incêndios do Fogos.pt e a qualidade do ar.",
+    /** Primeiro nível das migalhas (BreadcrumbList). */
+    breadcrumbHome: "Portugal",
+  },
 };
 
 export type Dictionary = typeof pt;
@@ -732,6 +762,29 @@ const en: Dictionary = {
     title: `${name}: warnings, wildfires and earthquakes now`,
     description: `${headline} Forecast, wildfire risk, air quality and UV ${inPlace}.`,
   }),
+  meta: {
+    homeTitle: "Portugal Agora: weather warnings, wildfires and earthquakes live",
+    homeKicker: "Weather warnings, wildfires and earthquakes in Portugal, live",
+    warningsTitle: "IPMA weather warnings in Portugal today",
+    firesTitle: "Wildfires in Portugal today, live",
+    quakesTitle: "Earthquakes in Portugal: last 7 days",
+    riskTitle: "Wildfire risk and air quality in Portugal today",
+    districtWarningsTitle: (inPlace) => `Weather warnings ${inPlace} today`,
+    districtFiresTitle: (inPlace) => `Wildfires ${inPlace} today, live`,
+    districtQuakesTitle: (inPlace) => `Earthquakes ${inPlace}: last 7 days`,
+    districtRiskTitle: (inPlace) => `Wildfire risk, air and UV ${inPlace} today`,
+    districtAirTitle: (inPlace) => `Air quality and UV ${inPlace} today`,
+    sourcesTitle: "Sources and how we read the data",
+    sourcesDescription:
+      "Where Portugal Agora gets its data, how often it is updated and how it is classified.",
+    privacyTitle: "Privacy",
+    privacyDescription:
+      "Portugal Agora collects no personal data: there are no accounts, ads or cookies, and your location never leaves your device.",
+    aboutTitle: "About the project",
+    aboutDescription:
+      "A personal, non-profit, open-source project that brings IPMA warnings and earthquakes, Fogos.pt wildfires and air quality together in one place.",
+    breadcrumbHome: "Portugal",
+  },
 };
 
 function capitalizeEn(text: string) {

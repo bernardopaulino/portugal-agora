@@ -107,6 +107,9 @@ export function NationalStage({ state }: { state: CountryState }) {
       <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-8 px-4 pt-8 pb-8 sm:px-6 lg:grid-cols-12 lg:pt-10">
         <div className="flex flex-col gap-7 lg:col-span-5 lg:self-center">
           <div className="flex flex-col gap-3">
+            {/* Linha fixa por cima do título, que muda com o estado do país: diz ao
+                Google (e a quem chega pela primeira vez) do que trata a página. */}
+            <p className="text-base font-semibold text-stage-ink-2">{t.meta.homeKicker}</p>
             <h1 id="boletim-titulo" className="font-display text-display font-bold text-balance">
               {countryHeadline(state.levelKnown, state.districts, t)}
             </h1>

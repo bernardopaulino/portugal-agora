@@ -3,16 +3,21 @@ import { notFound } from "next/navigation";
 
 import { ProsePage } from "@/components/layout/prose-page";
 import { site } from "@/lib/config/site";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
-import { alternates } from "@/lib/i18n/metadata";
+import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
 
 export async function generateMetadata(props: PageProps<"/[lang]/sobre">): Promise<Metadata> {
   const { lang } = await props.params;
   if (!isLocale(lang)) return {};
-  return {
-    title: lang === "en" ? "About the project" : "Sobre o projeto",
-    alternates: alternates(lang, "/sobre"),
-  };
+  const t = getDictionary(lang);
+  return pageMetadata({
+    locale: lang,
+    path: "/sobre",
+    title: t.meta.aboutTitle,
+    description: t.meta.aboutDescription,
+    image: inheritedOgImage(lang, t.site.ogAlt),
+  });
 }
 
 export default async function SobrePage(props: PageProps<"/[lang]/sobre">) {

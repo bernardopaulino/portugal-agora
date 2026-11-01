@@ -2,16 +2,21 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ProsePage } from "@/components/layout/prose-page";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
-import { alternates } from "@/lib/i18n/metadata";
+import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
 
 export async function generateMetadata(props: PageProps<"/[lang]/privacidade">): Promise<Metadata> {
   const { lang } = await props.params;
   if (!isLocale(lang)) return {};
-  return {
-    title: lang === "en" ? "Privacy" : "Privacidade",
-    alternates: alternates(lang, "/privacidade"),
-  };
+  const t = getDictionary(lang);
+  return pageMetadata({
+    locale: lang,
+    path: "/privacidade",
+    title: t.meta.privacyTitle,
+    description: t.meta.privacyDescription,
+    image: inheritedOgImage(lang, t.site.ogAlt),
+  });
 }
 
 export default async function PrivacidadePage(props: PageProps<"/[lang]/privacidade">) {

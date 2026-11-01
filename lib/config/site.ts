@@ -8,6 +8,9 @@ export const site = {
   repo: "https://github.com/bernardopaulino/portugal-agora",
   /** Autor do site: vai para <meta name="author"> (o LinkedIn mostra-o) e para o JSON-LD. */
   author: "Bernardo Paulino",
+  /** Perfis públicos do autor (JSON-LD `sameAs`). */
+  authorUrl: "https://www.linkedin.com/in/bernardopaulino",
+  authorGithub: "https://github.com/bernardopaulino",
 } as const;
 
 /**
