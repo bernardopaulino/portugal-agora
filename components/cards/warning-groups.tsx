@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 
 import { getDistrict } from "@/data/districts";
+import { useHighlightNew } from "@/lib/hooks/live-highlight";
 import { useI18n } from "@/lib/i18n/client";
 import type { Locale } from "@/lib/i18n/locales";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -73,12 +75,22 @@ export function WarningGroups({
 }) {
   const { t, locale } = useI18n();
   const groups = groupWarnings(warnings.filter((w) => w.severity !== "none"));
+  // A chave inclui o nível: um aviso que passa de amarelo a laranja conta como novo.
+  const listRef = useRef<HTMLUListElement>(null);
+  useHighlightNew(
+    groups.map((g) => g.key),
+    listRef,
+  );
   if (groups.length === 0) return <EmptyState>{emptyText ?? t.empty.warnings}</EmptyState>;
 
   return (
-    <ul className="flex flex-col border-t border-line">
+    <ul ref={listRef} className="flex flex-col border-t border-line">
       {groups.map((g) => (
-        <li key={g.key} className="flex flex-col gap-3 border-b border-line py-5">
+        <li
+          key={g.key}
+          data-live-key={g.key}
+          className="flex flex-col gap-3 border-b border-line py-5"
+        >
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
             <SeverityBadge level={g.severity} />
             <h3 className="font-display text-2xl leading-tight font-bold">

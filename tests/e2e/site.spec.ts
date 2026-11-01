@@ -46,6 +46,9 @@ test("o seletor leva à página do distrito", async ({ page }) => {
   await expect(page).toHaveURL(/\/porto$/);
   await expect(pageTitle(page)).toContainText("Porto");
   await expect(page.getByRole("heading", { name: "Previsão para Porto" })).toBeVisible();
+  // Durante a view transition da mudança de página (~350 ms) o React tira o <title>
+  // antigo e só põe o novo no fim; espera-se pelo título antes da auditoria.
+  await expect(page).toHaveTitle(/^Porto/);
   await expectAccessible(page);
 });
 

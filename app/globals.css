@@ -289,6 +289,55 @@
   animation: caption-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/*
+ * Mudança de página (components/motion/page-transition.tsx): a antiga sai
+ * depressa, a nova entra devagar e sobe 6 px. O traço do separador ativo
+ * desliza para o novo separador. Cliques durante a animação chegam à página.
+ */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(.page-out) {
+  animation: page-out 120ms ease-in both;
+}
+::view-transition-new(.page-in) {
+  animation: page-in 240ms cubic-bezier(0.16, 1, 0.3, 1) 60ms both;
+}
+::view-transition-group(nav-indicator) {
+  animation-duration: 280ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/*
+ * Novidade numa lista (lib/hooks/live-highlight.ts): um fundo que se
+ * desvanece uma vez, com um filete à esquerda. Sem pulsar nem piscar.
+ */
+@keyframes live-new {
+  /* As sombras alargam o fundo 12 px para cada lado (sem mexer no layout) e põem o filete por fora. */
+  from {
+    background-color: var(--live-tint);
+    box-shadow:
+      -12px 0 0 var(--live-tint),
+      12px 0 0 var(--live-tint),
+      -15px 0 0 var(--accent);
+  }
+}
+.live-new {
+  --live-tint: color-mix(in srgb, var(--accent) 14%, transparent);
+  animation: live-new 2400ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -297,6 +346,15 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+  /* Só cor, sem movimento: a novidade continua a ser assinalada. */
+  .live-new {
+    animation-duration: 2400ms !important;
   }
 }
 

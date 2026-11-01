@@ -165,7 +165,7 @@ Portugal Agora reads like the boletim meteorológico on the evening news. The fi
 
 Below the stage the page turns into a calm, cool, light reading ground. Each topic (avisos, incêndios, sismos, risco e ar) has its own page: the detailed map of that one topic first, then the grouped detail set as ruled lists, not cards. Colour does almost no decorative work. The four IPMA levels carry the only saturated colour; everything else is blue-grey ink on cool paper, or navy ink on the pale sea (white on the night sea).
 
-Density is low on the stage and moderate below it. Type is large (an 18px root that honours the visitor's own font size), contrast is high, and every level is spoken three ways: colour, icon shape and word. Motion is restricted to the bulletin itself: the lower third wipes in once, the caption crossfades, and that is all.
+Density is low on the stage and moderate below it. Type is large (an 18px root that honours the visitor's own font size), contrast is high, and every level is spoken three ways: colour, icon shape and word. Motion only ever carries information: the lower third wipes in once, the caption crossfades, pages hand over to each other with a short fade, the current-tab rule slides to the new tab, and a list item that arrived in the last refresh is tinted once. Nothing loops, pulses or blinks.
 
 **Key Characteristics:**
 
@@ -299,7 +299,7 @@ The page-ground expression of a level: a pill with the soft background and reada
 ### Navigation
 
 - **Header:** white bar; brand mark (the mainland outline in `ink` with a dot in the national level colour) and the name in Barlow bold at normal leading, so descenders are never clipped (below 360px only the mark shows; the name stays for screen readers). From 1024px the district picker and "Perto de mim" sit in the bar beside the theme toggle and the PT | EN switch; below 1024px they move to their own row under the logo, the picker filling the width and the button beside it.
-- **Section tabs:** a row under the header on `surface` with a hairline bottom: Resumo, Avisos, Incêndios, Sismos, Risco e ar (on a district page the same tabs lead to that district's pages). Barlow label, 48px tall, a 3px bottom border: `accent` with `ink` text on the current page, transparent with `ink-2` text otherwise, hairline and `ink` on hover. Under 640px all five fit a 360px screen: short labels ("Risco"; in English "Quakes" and "Risk"), 0.375rem side padding, no gap, spread edge to edge, and the text drops one step (0.945rem, 17px at the default size). The full name stays as the accessible name; if the row still overflows it scrolls sideways with the current tab centred.
+- **Section tabs:** a row under the header on `surface` with a hairline bottom: Resumo, Avisos, Incêndios, Sismos, Risco e ar (on a district page the same tabs lead to that district's pages). Barlow label, 48px tall, a 3px bottom rule: `accent` with `ink` text on the current page (drawn as its own element named `nav-indicator` so it slides to the new tab during the page handover, 280ms expo-out; `CanvasText` in forced colours), transparent with `ink-2` text otherwise, hairline and `ink` on hover. Under 640px all five fit a 360px screen: short labels ("Risco"; in English "Quakes" and "Risk"), 0.375rem side padding, no gap, spread edge to edge, and the text drops one step (0.945rem, 17px at the default size). The full name stays as the accessible name; if the row still overflows it scrolls sideways with the current tab centred.
 - **Emergency bar:** a thin ink band above the header with the 112 line; it inverts to mist in dark.
 
 ### Lists (instead of cards)
@@ -342,4 +342,4 @@ A two-column ruled list of every distrito and região, sorted by level then name
 - **Don't** use `stage-ink` as a background; it flips from navy to white between themes. Fixed white surfaces on the stage use `caption`.
 - **Don't** wrap detail in cards or columns of equal-weight boxes; use rules.
 - **Don't** add shadows beyond the caption drop, or relief and gradients to the map.
-- **Don't** animate anything beyond the lower-third wipe, the forecast wipe, the caption fade and short hover feedback (the topic arrow nudge).
+- **Don't** animate anything beyond the lower-third wipe, the forecast wipe, the caption fade, the page handover, the tab-rule slide, the one-off "new" tint on list items and short hover feedback (the topic arrow nudge). Never pulse, blink or loop, least of all on the red and orange levels.

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
+import { useHighlightNew } from "@/lib/hooks/live-highlight";
 import { useI18n } from "@/lib/i18n/client";
 import type { FireEvent } from "@/lib/sources/types";
 import { formatDayTime } from "@/lib/time/format";
@@ -23,6 +24,11 @@ export function FireList({
 }) {
   const { t, locale } = useI18n();
   const [showAll, setShowAll] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+  useHighlightNew(
+    fires.map((f) => f.id),
+    listRef,
+  );
   const relevant = fires.filter((f) => f.severity !== "none");
   const others = fires.filter((f) => f.severity === "none");
 
@@ -30,7 +36,7 @@ export function FireList({
 
   const visible = showAll ? fires : relevant;
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={listRef} className="flex flex-col gap-3">
       {relevant.length === 0 ? <EmptyState>{t.empty.firesNoneActive}</EmptyState> : null}
       {visible.length > 0 ? (
         <ul className="flex flex-col border-t border-line">

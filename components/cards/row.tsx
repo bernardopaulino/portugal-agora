@@ -36,6 +36,7 @@ export function EventRow({
   return (
     <li
       id={id}
+      data-live-key={id}
       className={cn(
         "flex scroll-mt-24 flex-col gap-3 border-b border-line py-4 sm:flex-row sm:items-start sm:gap-6",
         selected && "bg-surface-2",

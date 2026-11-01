@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
+import { useHighlightNew } from "@/lib/hooks/live-highlight";
 import { useI18n } from "@/lib/i18n/client";
 import type { EarthquakeEvent } from "@/lib/sources/types";
 import { isNotableQuake } from "@/lib/state/bulletin";
@@ -31,6 +32,11 @@ export function QuakeList({
 }) {
   const { t, locale } = useI18n();
   const [expanded, setExpanded] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+  useHighlightNew(
+    quakes.map((q) => q.id),
+    listRef,
+  );
   if (quakes.length === 0) return <EmptyState>{emptyText ?? t.empty.quakesNone}</EmptyState>;
   // Por omissão: só os sismos sentidos ou em território português (os de Espanha e do
   // Atlântico ficam no botão).
@@ -38,7 +44,7 @@ export function QuakeList({
   const visible = expanded ? quakes : notable.slice(0, initial);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div ref={listRef} className="flex flex-col gap-3">
       {visible.length > 0 ? (
         <ul className="flex flex-col border-t border-line">
           {visible.map((q) => (

@@ -98,12 +98,17 @@ export function MainNav() {
                 href={path(href)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "inline-flex h-12 min-w-11 items-center justify-center border-b-[3px] px-1 font-display text-[0.945rem] font-semibold no-underline sm:px-3 sm:text-lg",
-                  active
-                    ? "border-accent text-ink"
-                    : "border-transparent text-ink-2 hover:border-line hover:text-ink",
+                  "relative inline-flex h-12 min-w-11 items-center justify-center border-b-[3px] border-transparent px-1 font-display text-[0.945rem] font-semibold no-underline sm:px-3 sm:text-lg",
+                  active ? "text-ink" : "text-ink-2 hover:border-line hover:text-ink",
                 )}
               >
+                {/* O traço do separador ativo tem nome de view transition: ao mudar de página desliza para o novo separador. */}
+                {active ? (
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-0 -bottom-[3px] h-[3px] bg-accent [view-transition-name:nav-indicator] forced-colors:bg-[CanvasText]"
+                  />
+                ) : null}
                 {short === full ? (
                   full
                 ) : (
