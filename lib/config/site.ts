@@ -1,5 +1,7 @@
 export const site = {
   name: "Portugal Agora",
+  /** Outras formas do nome (JSON-LD `alternateName`): ajudam o Google a escolher o nome do site. */
+  alternateNames: ["PortugalAgora", "portugalagora.pt"],
   tagline: "O estado do país, agora.",
   description:
     "Avisos meteorológicos, sismos, incêndios e qualidade do ar em Portugal, num só sítio, a partir de fontes oficiais.",

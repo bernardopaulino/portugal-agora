@@ -32,6 +32,7 @@ export function websiteJsonLd(locale: Locale, description: string) {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: site.name,
+    alternateName: site.alternateNames,
     url: `${site.url}${localePath(locale, "/")}`,
     description,
     inLanguage: intlLocale[locale],
