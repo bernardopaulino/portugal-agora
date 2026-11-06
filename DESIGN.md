@@ -196,9 +196,9 @@ Motion is cinematic once, then still: entrances happen once, the camera only mov
 
 One centred container (80rem; 1rem gutters, 1.5rem from 640px).
 
-- **Header:** a glass bar. From 1280px one row (logo, nav pills, district picker, "Perto de mim", theme, language), sticky. From 1024px two rows (nav below). Below 1024px three rows (district and "Perto de mim" get their own row, then the nav) and it scrolls away with the page.
-- **Home:** the scene is fixed behind the whole page. A full-height hero: on wide screens the bulletin panel on the left (6 of 12 columns) with the country on the right; on phones the country fills the top and the panel rises from the bottom. Then one stop per topic (92% of the viewport each), panel on the left, and finally all the distritos.
-- **District page:** the same, with the camera on the distrito and the forecast below.
+- **Header:** a glass bar. From 1440px one row (logo, nav pills, district picker, "Perto de mim", theme, language), sticky; below that the nav pills (in English especially) do not fit between the logo and the controls. From 1024px two rows (nav below), sticky. Below 1024px three rows (district and "Perto de mim" get their own row, then the nav) and it scrolls away with the page.
+- **Home:** the scene is fixed behind the whole page. A full-height hero: on wide screens the bulletin panel on the left (6 of 12 columns) with the country on the right; on phones and tablets (below 1024px) the panels take the full width, so the country gets its own space between the header and the panel (`data-scene-frame`: at most 22rem, less on short screens so the headline shows on the first screen, and none below 600px of height, where the headline comes first). Then one stop per topic: on wide screens 92% of the viewport each, panel on the left; on phones a 42svh space above each panel where the camera frames that topic, then the panel scrolls over it. Finally all the distritos. Without the scene (loading, no WebGL, Save-Data) the flat SVG map sits in the hero space and the topic panels follow each other with no empty spaces.
+- **District page:** the same, with the camera on the distrito (on phones, framed in the space above the panel) and the forecast below.
 - **Topic pages:** title block, then the map (sticky under the header on wide screens) beside the lists in glass panels.
 
 ## Elevation & Depth
@@ -219,7 +219,7 @@ Kicker with a static cyan live dot ("Boletim nacional · ao vivo"), the headline
 
 ### Caption Bar (lower third)
 
-`glass-strong`, a rounded level block (map fill, icon, word) and the caption: distrito name in Geist, one sentence in Atkinson, an "Abrir [distrito]" link. Pointing at a distrito on the scene swaps it; a floating glass tag with the name and level also appears above that distrito.
+`glass-strong`, a rounded level block (map fill, icon, word) and the caption: distrito name in Geist, one sentence in Atkinson, an "Abrir [distrito]" link. Pointing at a distrito on the scene swaps it; a floating glass tag with the name and level also appears above that distrito. With a finger there is no pointing: the first tap shows the tag, with an "Abrir [distrito]" line, and the second tap (or a tap on the tag) opens the distrito; a tap on the sea clears it. The flat map works the same way.
 
 ### Topic Stop
 
@@ -278,7 +278,7 @@ The 1200 x 630 image each page shares, per locale. The light soft background of 
 
 Cinematic once, then still. Every transform is a perspective rotation or a move in depth, eased with expo-out (`cubic-bezier(0.16, 1, 0.3, 1)`) unless noted.
 
-- **Home and district scene:** fades in over the flat SVG map that painted first; the camera comes down from overhead, further out and turned, to its first view while the distritos rise to their heights (1.6s). Then it moves only with the visitor: each section on the home page has a camera position, and the camera blends between them as the page scrolls (damped, never ahead of the scroll); the mouse tilts it a few degrees; pointing a distrito lifts it. In the risk stop the distritos recolour and re-extrude to the risk class; the fire columns and quake rings brighten in their own stops.
+- **Home and district scene:** fades in over the flat SVG map that painted first; the camera comes down from overhead, further out and turned, to its first view while the distritos rise to their heights (1.6s). Then it moves only with the visitor: each section on the home page has a camera position, and the camera blends between them as the page scrolls (damped, never ahead of the scroll). On wide screens the country centres in the space under the sticky header; on phones each section's subject (the whole country, the mainland, the north, the Açores) is fitted to the space above its panel, with the target in the middle of that space (a lens shift, so the perspective does not change) and the fog pushed back as the camera pulls out. The island labels only show inside that space. The mouse tilts the camera a few degrees; pointing a distrito lifts it. In the risk stop the distritos recolour and re-extrude to the risk class; the fire columns and quake rings brighten in their own stops.
 - **Titles:** tilt up into place (1000ms); only the transform moves, so the text reads from the first frame.
 - **Caption bar:** flips up from its bottom edge while wiping open (950ms, 350ms delay); a caption change turns down into place like a split-flap board (340ms).
 - **Topic rows and forecast days:** turn into place one after another (rows 800ms, 90ms apart; days from their left edge, 80ms apart).
