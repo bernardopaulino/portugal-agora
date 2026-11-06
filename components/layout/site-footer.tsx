@@ -11,10 +11,10 @@ const footerLink = "inline-flex min-h-11 items-center self-start";
 export function SiteFooter() {
   const { t, path } = useI18n();
   return (
-    <footer className="mt-16 border-t border-line bg-surface">
+    <footer className="relative z-10 mt-24 border-t border-line bg-bg-2/85 backdrop-blur-xl">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr]">
         <div className="flex flex-col gap-3">
-          <p className="font-display text-xl font-bold">{site.name}</p>
+          <p className="font-display text-2xl font-semibold tracking-[-0.02em]">{site.name}</p>
           <p className="max-w-md text-ink-2">{t.footer.about}</p>
           <p className="text-sm text-ink-2">
             {t.footer.data}:{" "}

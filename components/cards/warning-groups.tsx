@@ -95,7 +95,7 @@ export function WarningGroups({
         >
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
             <SeverityBadge level={g.severity} />
-            <h3 className="font-display text-2xl leading-tight font-bold">
+            <h3 className="font-display text-2xl leading-tight font-semibold tracking-[-0.02em]">
               {capitalize(t.term(g.type))}
             </h3>
           </div>

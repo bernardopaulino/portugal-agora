@@ -29,18 +29,18 @@ export function DistrictIndex({ state }: { state: CountryState }) {
     );
 
   return (
-    <ul className="grid grid-cols-2 gap-x-4 border-t border-line">
+    <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
       {rows.map(({ district, level }) => {
         const Icon = levels[level].icon;
         return (
-          <li key={district.slug} ref={reveal} className="border-b border-line">
+          <li key={district.slug} ref={reveal}>
             <a
               href={path(`/${district.slug}`)}
-              className="flex min-h-11 items-center gap-2.5 py-1.5 text-base text-ink no-underline hover:underline"
+              className="flex min-h-12 items-center gap-2.5 rounded-xl border border-glass-line bg-[var(--stage-2)] px-3 py-2 text-base text-ink no-underline transition-colors hover:border-[color-mix(in_srgb,var(--accent)_50%,transparent)] hover:bg-surface-2"
             >
               <span
                 className={cn(
-                  "flex size-6 shrink-0 items-center justify-center rounded-[3px]",
+                  "flex size-6 shrink-0 items-center justify-center rounded-md",
                   levelBlock[level],
                 )}
               >

@@ -40,7 +40,7 @@ export function LanguageSwitch() {
       lang={other === "pt" ? "pt-PT" : "en"}
       aria-label={t.header.otherLanguage}
       title={t.header.otherLanguage}
-      className="flex h-12 min-w-12 shrink-0 items-center justify-center rounded-sm border border-line px-2 font-display text-lg font-semibold text-ink no-underline hover:border-ink"
+      className="flex h-11 min-w-11 shrink-0 items-center justify-center rounded-full glass-button px-2 font-mono text-sm font-medium tracking-[0.08em] no-underline"
     >
       {t.header.otherLanguageShort}
     </a>
@@ -79,13 +79,10 @@ export function MainNav() {
   }, [current]);
 
   return (
-    <nav
-      aria-label={district ? t.districtPages.menu(t.districtName(district)) : t.nav.label}
-      className="border-b border-line bg-surface"
-    >
+    <nav aria-label={district ? t.districtPages.menu(t.districtName(district)) : t.nav.label}>
       <ul
         ref={listRef}
-        className="mx-auto flex max-w-7xl [scrollbar-width:none] overflow-x-auto px-1 max-sm:justify-between sm:gap-1 sm:px-4"
+        className="flex [scrollbar-width:none] overflow-x-auto rounded-full border border-glass-line bg-[var(--stage-2)] p-0.5 max-lg:justify-between sm:p-1 lg:inline-flex lg:gap-0.5"
       >
         {tabs.map((tab) => {
           const href = base + tab.path || "/";
@@ -98,15 +95,15 @@ export function MainNav() {
                 href={path(href)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative inline-flex h-12 min-w-11 items-center justify-center border-b-[3px] border-transparent px-1 font-display text-[0.945rem] font-semibold no-underline sm:px-3 sm:text-lg",
-                  active ? "text-ink" : "text-ink-2 hover:border-line hover:text-ink",
+                  "relative isolate inline-flex h-11 min-w-11 items-center justify-center rounded-full px-1 font-display text-[0.84rem] font-medium tracking-[-0.015em] no-underline min-[400px]:px-1.5 min-[400px]:text-[0.9rem] sm:px-3.5 sm:text-base",
+                  active ? "text-ink" : "text-ink-2 hover:text-ink",
                 )}
               >
-                {/* O traço do separador ativo tem nome de view transition: ao mudar de página desliza para o novo separador. */}
+                {/* A pílula do separador ativo tem nome de view transition: ao mudar de página desliza para o novo separador. */}
                 {active ? (
                   <span
                     aria-hidden
-                    className="absolute inset-x-0 -bottom-[3px] h-[3px] bg-accent [view-transition-name:nav-indicator] forced-colors:bg-[CanvasText]"
+                    className="absolute inset-0 -z-10 rounded-full border border-[color-mix(in_srgb,var(--accent)_45%,transparent)] bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] shadow-[0_0_24px_-6px_var(--glow)] [view-transition-name:nav-indicator] forced-colors:border-[CanvasText]"
                   />
                 ) : null}
                 {short === full ? (

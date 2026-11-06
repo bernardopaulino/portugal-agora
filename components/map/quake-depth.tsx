@@ -840,7 +840,7 @@ export default function QuakeDepth({
             aria-label={b.label}
             title={b.label}
             onClick={() => rig.current && b.run(rig.current)}
-            className="flex size-11 items-center justify-center rounded-sm border border-line bg-surface text-ink hover:bg-surface-2"
+            className="flex size-11 items-center justify-center rounded-full glass-button"
           >
             <b.icon aria-hidden className="size-5" />
           </button>

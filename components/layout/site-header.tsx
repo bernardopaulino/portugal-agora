@@ -6,41 +6,49 @@ import { LogoMark } from "./logo";
 import { NearMeButton } from "./near-me";
 import { ThemeToggle } from "./theme";
 
+/**
+ * Cabeçalho flutuante de vidro, fixo no topo. Em ecrãs largos tudo cabe
+ * numa linha (logótipo, separadores em pílula, distrito e controlos); em
+ * telemóveis e tablets o distrito e o "Perto de mim" têm a sua linha e os
+ * separadores a seguinte (ver .header-grid em globals.css).
+ */
 export async function SiteHeader() {
   const state = await getPageState();
   return (
-    <>
-      <header className="bg-surface">
-        <div className="mx-auto flex max-w-7xl items-center gap-1.5 px-4 py-2.5 sm:gap-3 sm:px-6">
+    <header className="relative z-40 rounded-none border-x-0 border-t-0 shadow-none glass-strong lg:sticky lg:top-0">
+      <div className="header-grid mx-auto max-w-7xl px-4 py-2.5 sm:px-6">
+        <div className="[grid-area:logo]">
           <HomeLink>
-            <LogoMark level={state.levelKnown ? state.level : "unknown"} className="h-9 sm:h-10" />
+            <LogoMark level={state.levelKnown ? state.level : "unknown"} className="h-8 sm:h-9" />
             {/* Abaixo de 360 px só cabe o logótipo; o nome fica para leitores de ecrã. */}
-            <span className="truncate font-display text-base leading-normal font-bold whitespace-nowrap max-[359px]:sr-only sm:text-2xl">
+            <span className="truncate font-display text-lg leading-normal font-semibold tracking-[-0.02em] whitespace-nowrap max-[359px]:sr-only sm:text-xl">
               Portugal Agora
             </span>
           </HomeLink>
-          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <div className="hidden lg:block">
-              <DistrictPicker />
-            </div>
-            <NearMeButton className="hidden lg:block" />
-            <ThemeToggle />
-            <LanguageSwitch />
+        </div>
+        <div className="min-w-0 [grid-area:nav] xl:flex xl:justify-center">
+          <MainNav />
+        </div>
+        <div className="flex shrink-0 items-center justify-end gap-1.5 [grid-area:tools] sm:gap-2">
+          <div className="hidden lg:block">
+            <DistrictPicker />
           </div>
+          <NearMeButton className="hidden lg:block" />
+          <ThemeToggle />
+          <LanguageSwitch />
         </div>
         {/*
          * Em telemóveis e tablets, a escolha do distrito e o "Perto de mim"
          * têm a sua linha: assim o botão leva sempre o texto, que não cabe
          * na linha do logótipo a 360 px.
          */}
-        <div className="mx-auto flex max-w-7xl gap-2 px-4 pb-3 sm:px-6 lg:hidden">
+        <div className="flex gap-2 [grid-area:picker] lg:hidden">
           <div className="min-w-0 flex-1">
             <DistrictPicker />
           </div>
           <NearMeButton />
         </div>
-      </header>
-      <MainNav />
-    </>
+      </div>
+    </header>
   );
 }

@@ -34,7 +34,7 @@ export function LogoMark({
         cy="49"
         r="11.5"
         fill={dotFill[level]}
-        stroke="var(--surface)"
+        stroke="var(--bg)"
         strokeWidth="4.5"
       />
     </svg>

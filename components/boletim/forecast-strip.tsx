@@ -57,7 +57,7 @@ export function ForecastStrip({
       <h2 id="previsao-titulo" className="font-display text-2xl font-bold">
         {t.stage.forecastFor(capital)}
       </h2>
-      <ol className="flip-in grid grid-cols-5 overflow-hidden rounded-sm bg-stage-2">
+      <ol className="flip-in grid grid-cols-5 overflow-hidden rounded-2xl glass">
         {days.slice(0, 5).map((d, i) => {
           const Icon = weatherIcon(d.weatherId);
           return (

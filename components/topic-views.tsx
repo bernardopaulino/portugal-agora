@@ -70,10 +70,13 @@ export function TopicLayout({
           id="mapa"
           ref={mapRef}
           aria-labelledby="mapa-titulo"
-          className="flex scroll-mt-4 flex-col gap-3 pt-8 lg:sticky lg:top-0 lg:pb-4"
+          className="flex scroll-mt-4 flex-col gap-3 pt-8 lg:sticky lg:top-36 lg:pb-4 xl:top-24"
         >
           <div className="flex flex-col gap-1">
-            <h2 id="mapa-titulo" className="font-display text-2xl leading-tight font-bold">
+            <h2
+              id="mapa-titulo"
+              className="font-display text-2xl leading-tight font-semibold tracking-[-0.02em]"
+            >
               {district ? t.sections.mapOf(t.districtName(district)) : t.sections.map}
             </h2>
             <p className="max-w-[70ch] text-base text-ink-2">
@@ -103,7 +106,7 @@ export function TopicLayout({
         <div
           id="lista"
           tabIndex={-1}
-          className="@container flex min-w-0 scroll-mt-4 flex-col gap-14 pt-14 outline-none lg:pt-8"
+          className="@container flex min-w-0 scroll-mt-4 flex-col gap-8 pt-10 outline-none lg:pt-8"
         >
           {children}
         </div>

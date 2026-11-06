@@ -375,6 +375,32 @@ const pt = {
     ariaLabel: "Mapa interativo. A mesma informação está nas listas desta página.",
     boundaries: "Limites",
   },
+  /** A página inicial imersiva: o país em 3D e um painel por tema, ao longo do scroll. */
+  home: {
+    kicker: "Boletim nacional · ao vivo",
+    scroll: "Desça para percorrer o país",
+    step: (i: number, n: number) => `${String(i).padStart(2, "0")} / ${String(n).padStart(2, "0")}`,
+    cta: {
+      avisos: "Abrir os avisos",
+      incendios: "Abrir os incêndios",
+      sismos: "Abrir os sismos",
+      risco: "Abrir o risco de incêndio",
+      ar: "Abrir a qualidade do ar",
+    },
+    legend: {
+      avisos: "No mapa, a cor e a altura de cada distrito repetem o nível do aviso.",
+      incendios: "Cada coluna de luz é um incêndio em curso: quanto mais alta, mais operacionais.",
+      sismos: "Cada anel é um sismo sentido nos últimos 7 dias: quanto maior, maior a magnitude.",
+      risco:
+        "No mapa, cada distrito toma a cor e a altura do risco de incêndio mais alto de hoje num dos seus concelhos.",
+      ar: "Estimativa de modelo para a capital de cada distrito (Copernicus CAMS).",
+    },
+    warnedNone: "Nenhum distrito com aviso.",
+    firesNone: "Nenhum incêndio em curso.",
+    quakesNone: "Nenhum sismo de destaque esta semana.",
+    people: (n: number) => plural(n, "operacional", "operacionais"),
+    more: (n: number) => `e mais ${n}`,
+  },
   /** Vista 3D opcional dos mapas de tema (sismos, incêndios, risco de incêndio). */
   view3d: {
     group: "Vista do mapa",
@@ -783,6 +809,31 @@ const en: Dictionary = {
     twoFingers: "Use two fingers to move the map",
     ariaLabel: "Interactive map. The same information is in the lists on this page.",
     boundaries: "Boundaries",
+  },
+  home: {
+    kicker: "National bulletin · live",
+    scroll: "Scroll to travel the country",
+    step: (i, n) => `${String(i).padStart(2, "0")} / ${String(n).padStart(2, "0")}`,
+    cta: {
+      avisos: "Open warnings",
+      incendios: "Open wildfires",
+      sismos: "Open earthquakes",
+      risco: "Open wildfire risk",
+      ar: "Open air quality",
+    },
+    legend: {
+      avisos: "On the map, each district's colour and height repeat its warning level.",
+      incendios: "Each column of light is an active wildfire: the taller, the more firefighters.",
+      sismos: "Each ring is an earthquake felt in the last 7 days: the bigger, the stronger.",
+      risco:
+        "On the map, each district takes the colour and height of today's highest wildfire risk in any of its municipalities.",
+      ar: "Model estimate for each district capital (Copernicus CAMS).",
+    },
+    warnedNone: "No district under a warning.",
+    firesNone: "No active wildfires.",
+    quakesNone: "No notable earthquakes this week.",
+    people: (n) => plural(n, "firefighter", "firefighters"),
+    more: (n) => `and ${n} more`,
   },
   view3d: {
     group: "Map view",

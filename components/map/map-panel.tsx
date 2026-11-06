@@ -75,10 +75,10 @@ function Chip({
       aria-checked={role ? pressed : undefined}
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-11 items-center gap-2 rounded-sm border px-4 font-display text-lg font-semibold",
+        "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 font-display text-base font-medium tracking-[-0.01em] transition-colors",
         pressed
-          ? "border-ink bg-ink text-bg"
-          : "border-line bg-surface text-ink enabled:hover:bg-surface-2",
+          ? "border-[color-mix(in_srgb,var(--accent)_55%,transparent)] bg-[color-mix(in_srgb,var(--accent)_16%,transparent)] text-ink shadow-[0_0_24px_-8px_var(--glow)]"
+          : "glass-button",
         "disabled:cursor-not-allowed disabled:border-dashed disabled:text-ink-2",
       )}
     >
@@ -182,7 +182,7 @@ function Detail({
   if (!body) return null;
 
   return (
-    <div className="absolute inset-x-3 bottom-3 z-10 flex gap-3 rounded-sm border border-line bg-surface p-4 shadow-[0_10px_30px_-12px_rgb(0_0_0/0.45)] sm:right-auto sm:max-w-md">
+    <div className="absolute inset-x-3 bottom-3 z-10 flex gap-3 rounded-2xl p-4 glass-strong sm:right-auto sm:max-w-md">
       <div className="flex min-w-0 flex-1 flex-col gap-2">{body}</div>
       <button
         type="button"
@@ -391,7 +391,7 @@ export function MapPanel({
       {mode3d && !can3d ? (
         <p className="text-sm text-ink-2">{lost ? t.view3d.lost : t.view3d.unavailable}</p>
       ) : null}
-      <div className="relative h-[45vh] min-h-[300px] overflow-hidden rounded-sm border border-line bg-surface-2 sm:h-[62vh] sm:min-h-[360px] lg:h-[min(62vh,680px)]">
+      <div className="relative h-[45vh] min-h-[300px] overflow-hidden rounded-2xl glass sm:h-[62vh] sm:min-h-[360px] lg:h-[min(66vh,720px)]">
         {active3d === "depth" ? (
           <QuakeDepth
             quakes={quakes}

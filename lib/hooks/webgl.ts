@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 /**
  * O browser consegue desenhar WebGL2? (As vistas 3D precisam: o three
@@ -37,4 +37,25 @@ export function prefersReducedMotion(): boolean {
 /** Duração das viagens da câmara nas vistas 3D (0 com "reduzir movimento"). */
 export function cameraDuration(): number {
   return prefersReducedMotion() ? 0 : 600;
+}
+
+/**
+ * Vale a pena carregar uma cena 3D? Só com WebGL2 e sem "poupar dados", e
+ * só quando o browser está livre (o que vem do servidor aparece primeiro).
+ */
+export function useWebGLEnhancement(): boolean {
+  const webgl = useWebGL();
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+      ?.saveData;
+    if (!webgl || saveData) return;
+    if ("requestIdleCallback" in window) {
+      const id = requestIdleCallback(() => setOn(true), { timeout: 1200 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = setTimeout(() => setOn(true), 200);
+    return () => clearTimeout(id);
+  }, [webgl]);
+  return on;
 }

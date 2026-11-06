@@ -23,14 +23,18 @@ export function Section({
   size?: "lg" | "md";
 }) {
   return (
-    <section aria-labelledby={`${id}-titulo`} id={id} className="flex scroll-mt-16 flex-col gap-4">
+    <section
+      aria-labelledby={`${id}-titulo`}
+      id={id}
+      className="flex scroll-mt-28 flex-col gap-5 rounded-2xl p-5 glass sm:p-7"
+    >
       <div className="flex flex-col gap-1.5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
           <h2
             id={`${id}-titulo`}
             className={cn(
-              "font-display leading-tight font-bold",
-              size === "lg" ? "text-4xl" : "text-2xl",
+              "font-display leading-tight font-semibold tracking-[-0.03em]",
+              size === "lg" ? "text-title" : "text-2xl",
             )}
           >
             {title}
@@ -45,5 +49,9 @@ export function Section({
 }
 
 export function EmptyState({ children }: { children: ReactNode }) {
-  return <p className="border-y border-line py-4 text-lg text-ink-2">{children}</p>;
+  return (
+    <p className="rounded-xl border border-dashed border-line px-4 py-4 text-lg text-ink-2">
+      {children}
+    </p>
+  );
 }

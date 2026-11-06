@@ -11,11 +11,14 @@ export { useResolvedTheme } from "@/lib/hooks/external";
 export type ThemeChoice = "system" | "light" | "dark";
 const KEY = "pa:tema";
 
+/** O tema da casa é o escuro (a cena 3D é a luz da página); claro e automático ficam à escolha. */
+export const DEFAULT_THEME: ThemeChoice = "dark";
+
 /**
  * Script executado antes da pintura para evitar o "flash" de tema
- * errado: lê a escolha guardada (ou o sistema) e define data-theme.
+ * errado: lê a escolha guardada (ou o tema da casa) e define data-theme.
  */
-export const themeScript = `(function(){try{var c=localStorage.getItem("${KEY}")||"system";var d=c==="dark"||(c==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=d?"dark":"light";}catch(e){}})();`;
+export const themeScript = `(function(){try{var c=localStorage.getItem("${KEY}")||"${DEFAULT_THEME}";var d=c==="dark"||(c==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=d?"dark":"light";}catch(e){}})();`;
 
 function apply(choice: ThemeChoice) {
   const dark =
@@ -25,15 +28,15 @@ function apply(choice: ThemeChoice) {
 }
 
 const icons: Record<ThemeChoice, typeof Sun> = { system: Monitor, light: Sun, dark: Moon };
-const order: ThemeChoice[] = ["system", "light", "dark"];
+const order: ThemeChoice[] = ["dark", "light", "system"];
 
 /**
  * Botão do tema no cabeçalho: cada clique passa para o seguinte
- * (automático → claro → escuro). O ícone mostra o tema escolhido.
+ * (escuro → claro → automático). O ícone mostra o tema escolhido.
  */
 export function ThemeToggle() {
   const { t } = useI18n();
-  const choice = (useStoredValue(KEY) as ThemeChoice | null) ?? "system";
+  const choice = (useStoredValue(KEY) as ThemeChoice | null) ?? DEFAULT_THEME;
 
   // Em "Automático", acompanhar mudanças do sistema.
   useEffect(() => {
@@ -58,7 +61,7 @@ export function ThemeToggle() {
       onClick={cycle}
       aria-label={label}
       title={label}
-      className="flex size-12 shrink-0 items-center justify-center rounded-sm border border-line text-ink hover:border-ink"
+      className="flex size-11 shrink-0 items-center justify-center rounded-full glass-button"
     >
       <Icon aria-hidden className="size-5" />
     </button>

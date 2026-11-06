@@ -74,7 +74,7 @@ export function NearMeButton({ className }: { className?: string }) {
         onClick={locate}
         disabled={status === "locating"}
         aria-busy={status === "locating"}
-        className="inline-flex h-12 min-w-12 items-center justify-center gap-2 rounded-sm bg-ink px-4 font-display text-lg font-semibold whitespace-nowrap text-bg hover:opacity-90 disabled:opacity-70"
+        className="inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-full bg-accent px-4 font-display text-base font-semibold whitespace-nowrap text-accent-ink shadow-[0_0_28px_-6px_var(--glow)] hover:brightness-110 disabled:opacity-70"
       >
         <LocateFixed aria-hidden className="size-5" />
         {status === "locating" ? (
@@ -92,7 +92,7 @@ export function NearMeButton({ className }: { className?: string }) {
       </button>
       <div role="status" aria-live="polite">
         {message ? (
-          <p className="absolute top-14 right-0 z-30 w-72 max-w-[calc(100vw-2rem)] rounded-sm border border-line bg-surface p-3 text-sm text-ink shadow-[0_10px_30px_-12px_rgb(0_0_0/0.35)]">
+          <p className="absolute top-14 right-0 z-30 w-72 max-w-[calc(100vw-2rem)] rounded-lg p-3 text-sm text-ink glass-strong">
             {message}
           </p>
         ) : null}

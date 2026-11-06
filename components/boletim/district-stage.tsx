@@ -1,19 +1,27 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useI18n } from "@/lib/i18n/client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import type { District } from "@/data/districts";
+import { useWebGLEnhancement } from "@/lib/hooks/webgl";
+import { useI18n } from "@/lib/i18n/client";
 import type { ForecastDay } from "@/lib/sources/ipma-forecast";
 import type { SourceResult } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
 import { districtHeadline, districtTopics, type TopicId } from "@/lib/state/bulletin";
+import { cn } from "@/lib/utils";
 
+import { districtRisk, sceneMarkers } from "../home/immersive-home";
 import { BulletinMap } from "./bulletin-map";
 import { ForecastStrip } from "./forecast-strip";
 import { BulletinStamp, mapLevels, mapMarkers } from "./national-stage";
 import { MapLegend, TopicList } from "./parts";
+
+const PortugalScene = dynamic(() => import("../scene/portugal-scene"), { ssr: false });
 
 /** Página de cada linha do boletim do distrito (o ar e UV estão na do risco). */
 const districtTopicPage: Record<TopicId, string> = {
@@ -25,8 +33,9 @@ const districtTopicPage: Record<TopicId, string> = {
 };
 
 /**
- * O boletim de um distrito: o país com o distrito em destaque, o título
- * com os avisos, as linhas do distrito e a previsão a 5 dias.
+ * O boletim de um distrito: o país em 3D atrás da página, com a câmara no
+ * distrito e os outros esbatidos; por cima, o painel com o título, a hora
+ * e os temas do distrito, e a previsão a 5 dias.
  */
 export function DistrictStage({
   district,
@@ -38,68 +47,113 @@ export function DistrictStage({
   forecast: SourceResult<ForecastDay[]>;
 }) {
   const { t, path } = useI18n();
+  const router = useRouter();
   const reference = new Date(state.generatedAt);
+  const enhance = useWebGLEnhancement();
+  const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [pointed, setPointed] = useState<string | null>(null);
+  const scene = enhance && !failed;
+  const levels = mapLevels(state);
+  const { fires, quakes } = sceneMarkers(state, district.slug);
 
   return (
-    <section
-      aria-labelledby="boletim-titulo"
-      className="on-stage overflow-hidden bg-stage text-stage-ink"
-    >
-      <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-8 px-4 pt-6 pb-8 sm:px-6 lg:grid-cols-12 lg:pt-8">
-        <div className="flex flex-col gap-6 lg:col-span-7 lg:self-center">
+    <div className="relative">
+      {scene ? (
+        <div
+          aria-hidden
+          data-scene-ready={ready ? "on" : "off"}
+          className={cn(
+            "fixed inset-0 z-0 transition-opacity duration-700",
+            ready ? "opacity-100" : "opacity-0",
+          )}
+        >
+          <PortugalScene
+            levels={levels}
+            risk={districtRisk(state)}
+            fires={fires}
+            quakes={quakes}
+            focus={district.slug}
+            pointed={pointed}
+            onPoint={setPointed}
+            onOpen={(slug) => router.push(path(`/${slug}`))}
+            onReady={() => setReady(true)}
+            onFailed={() => setFailed(true)}
+            regionLabels={{ acores: t.stage.acores, madeira: t.stage.madeira }}
+          />
+        </div>
+      ) : null}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(120%_90%_at_75%_40%,transparent_35%,var(--bg)_100%)] max-lg:bg-[linear-gradient(to_bottom,transparent_30%,var(--bg)_92%)]"
+      />
+
+      <section
+        aria-labelledby="boletim-titulo"
+        className="pointer-events-none relative z-10 mx-auto grid min-h-[calc(100svh-8rem)] max-w-7xl items-end gap-6 px-4 pt-[34svh] pb-8 sm:px-6 lg:grid-cols-12 lg:items-center lg:pt-10"
+      >
+        <div className="pointer-events-auto flex flex-col gap-5 rounded-3xl p-6 glass sm:p-8 lg:col-span-6 xl:col-span-5">
           <Link
             href={path("/")}
-            className="inline-flex min-h-11 items-center gap-2 self-start text-base font-bold no-underline hover:underline"
+            className="inline-flex min-h-11 items-center gap-2 self-start font-display font-medium no-underline hover:underline"
           >
             <ArrowLeft aria-hidden className="size-4" /> {t.stage.back}
           </Link>
-          <div className="flex flex-col gap-3">
-            <h1
-              id="boletim-titulo"
-              className="title-in font-display text-display font-bold text-balance"
-            >
-              {districtHeadline(district, state.warnings.data ?? [], state.levelKnown, t)}
-            </h1>
-            <BulletinStamp iso={state.generatedAt} />
-          </div>
+          <h1
+            id="boletim-titulo"
+            className="title-in font-display text-[clamp(2.1rem,1.1rem+2.6vw,3.6rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance"
+          >
+            {districtHeadline(district, state.warnings.data ?? [], state.levelKnown, t)}
+          </h1>
+          <BulletinStamp iso={state.generatedAt} />
           <TopicList
             topics={districtTopics(state, district.slug, t)}
             hrefFor={(id) => path(`/${district.slug}${districtTopicPage[id]}`)}
+            compact
           />
-          <p className="text-sm text-stage-ink-2">
+          <p className="text-sm text-ink-2">
             <Link href={path("/fontes#niveis")}>{t.stage.howWeRead}</Link>
           </p>
         </div>
 
-        <div className="flex flex-col items-center gap-4 lg:order-first lg:col-span-5">
-          <BulletinMap
-            levels={mapLevels(state)}
-            markers={mapMarkers(state, district.slug)}
-            focus={district.slug}
-            className="max-w-[300px] sm:max-w-[400px]"
-          />
+        {/* Sem a cena (sem WebGL, a carregar ou a poupar dados), o mapa plano. */}
+        {!ready ? (
+          <div className="pointer-events-auto hidden flex-col items-center gap-4 lg:col-span-6 lg:flex xl:col-span-7">
+            <BulletinMap
+              levels={levels}
+              markers={mapMarkers(state, district.slug)}
+              focus={district.slug}
+              className="max-w-[400px]"
+            />
+          </div>
+        ) : null}
+
+        <div className="pointer-events-auto lg:col-span-12">
           <MapLegend showMarkers={false} />
         </div>
+      </section>
 
-        <div className="lg:col-span-12">
-          {forecast.data ? (
-            <ForecastStrip
-              days={forecast.data}
-              reference={reference}
-              capital={t.capitalName(district)}
-            />
-          ) : (
-            <section aria-labelledby="previsao-titulo" className="flex flex-col gap-2">
-              <h2 id="previsao-titulo" className="font-display text-2xl font-bold">
-                {t.stage.forecastFor(t.capitalName(district))}
-              </h2>
-              <p className="text-stage-ink-2">
-                {t.stage.forecastNone} <a href="https://www.ipma.pt">ipma.pt</a>.
-              </p>
-            </section>
-          )}
-        </div>
+      <div className="relative z-10 mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+        {forecast.data ? (
+          <ForecastStrip
+            days={forecast.data}
+            reference={reference}
+            capital={t.capitalName(district)}
+          />
+        ) : (
+          <section
+            aria-labelledby="previsao-titulo"
+            className="flex flex-col gap-2 rounded-2xl p-6 glass"
+          >
+            <h2 id="previsao-titulo" className="font-display text-2xl font-semibold">
+              {t.stage.forecastFor(t.capitalName(district))}
+            </h2>
+            <p className="text-ink-2">
+              {t.stage.forecastNone} <a href="https://www.ipma.pt">ipma.pt</a>.
+            </p>
+          </section>
+        )}
       </div>
-    </section>
+    </div>
   );
 }

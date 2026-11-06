@@ -26,8 +26,8 @@ export function PageHead({
   children?: ReactNode;
 }) {
   return (
-    <section aria-labelledby="pagina-titulo" className="on-stage bg-stage text-stage-ink">
-      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 pt-6 pb-8 sm:px-6 lg:pt-8">
+    <section aria-labelledby="pagina-titulo" className="on-stage relative text-stage-ink">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 pt-10 pb-4 sm:px-6 lg:pt-14">
         {back ? (
           <Link
             href={back.href}
@@ -38,11 +38,11 @@ export function PageHead({
         ) : null}
         <h1
           id="pagina-titulo"
-          className="title-in font-display text-display font-bold text-balance"
+          className="title-in max-w-[18ch] font-display text-display font-semibold text-balance"
         >
           {title}
         </h1>
-        <p className="max-w-[60ch] text-lg">{intro}</p>
+        <p className="max-w-[60ch] text-lg text-stage-ink-2">{intro}</p>
         <BulletinStamp iso={generatedAt} />
         {children}
       </div>

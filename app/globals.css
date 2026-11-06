@@ -6,60 +6,70 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /*
- * Tokens do Portugal Agora: o boletim meteorológico.
- * O "palco" é o mar à volta do mapa: azul-claro de dia, azul-noite no
- * tema escuro. A cor viva é só a severidade (os quatro níveis do IPMA).
+ * Tokens do Portugal Agora: "Mission Control". O escuro é o tema da casa:
+ * um fundo quase preto onde o país em 3D é a única luz, com painéis de
+ * vidro por cima. O tema "Dia" é a mesma composição em claro. A cor viva
+ * continua a ser a severidade (os quatro níveis do IPMA); o ciano é só
+ * interação.
  */
 :root {
-  --bg: #eef2f5;
-  --surface: #ffffff;
-  --surface-2: #e2e9ef;
-  --ink: #0a1d2e;
-  --ink-2: #45586a;
-  --line: #cdd7df;
-  --accent: #0b5cad;
+  --bg: #05080f;
+  --bg-2: #0a111d;
+  --surface: #0e1726;
+  --surface-2: #17243a;
+  --ink: #eef3f9;
+  --ink-2: #9cadc0;
+  --line: rgb(255 255 255 / 0.11);
+  --accent: #6fe3ff;
+  --accent-ink: #03141c;
+  --glow: rgb(111 227 255 / 0.32);
 
-  /* Palco (mar) e o que está sobre ele. */
-  --stage: #dcebf5;
-  --stage-2: #c6dcec;
-  --stage-ink: #0a1d2e;
-  --stage-ink-2: #3a5168;
-  --stage-line: rgb(10 29 46 / 0.15);
-  --stage-accent: #0b5cad;
+  /* Vidro: painéis sobre a cena 3D. */
+  --glass: rgb(13 22 37 / 0.62);
+  --glass-strong: rgb(10 17 29 / 0.84);
+  --glass-line: rgb(255 255 255 / 0.1);
+  --glass-hi: rgb(255 255 255 / 0.14);
+  --shadow: 0 24px 60px -24px rgb(0 0 0 / 0.75);
+
+  /* O "palco" (cabeçalhos das páginas e boletim) é o mesmo fundo, sem faixa. */
+  --stage: transparent;
+  --stage-2: rgb(255 255 255 / 0.04);
+  --stage-ink: var(--ink);
+  --stage-ink-2: var(--ink-2);
+  --stage-line: rgb(255 255 255 / 0.12);
+  --stage-accent: var(--accent);
   /* Distritos esbatidos na página de um distrito. */
-  --land-dim: #b5cbdd;
-  /* Barra de legenda do boletim: branca nos dois temas, como no ecrã da televisão. */
-  --caption: #ffffff;
+  --land-dim: #1c2b40;
+  --caption: var(--glass-strong);
 
-  /* Preenchimentos do mapa do boletim (escala do IPMA). */
+  /* Preenchimentos do mapa (escala do IPMA), fixos nos dois temas. */
   --land-none: #4f9d63;
   --land-yellow: #f2c200;
   --land-orange: #f07f1a;
   --land-red: #d7262b;
   --land-unknown: #8797a3;
   --land-info: #8fd6ff;
-  /* Incêndio em curso (pictograma no mapa e na legenda). */
-  --fire: #e2401b;
-  /* Texto sobre as cores do mapa e sobre a barra clara: escuro nos dois temas. */
+  --fire: #ff5a2a;
+  /* Texto sobre as cores do mapa: escuro nos dois temas. */
   --ink-on-land: #0a1d2e;
 
-  --sev-none: #2e7d4f;
-  --sev-none-bg: #e2f1e7;
-  --sev-none-ink: #1c5535;
-  --sev-yellow: #e8b000;
-  --sev-yellow-bg: #fff3c7;
-  --sev-yellow-ink: #634800;
-  --sev-orange: #e0661b;
-  --sev-orange-bg: #fde5d3;
-  --sev-orange-ink: #843505;
-  --sev-red: #c62828;
-  --sev-red-bg: #fbe0e0;
-  --sev-red-ink: #8b1a1a;
-  --sev-unknown: #7c8b94;
-  --sev-unknown-bg: #e6ebee;
-  --sev-unknown-ink: #3d4a52;
+  --sev-none: #4caf73;
+  --sev-none-bg: rgb(76 175 115 / 0.16);
+  --sev-none-ink: #a6e6bd;
+  --sev-yellow: #f2c230;
+  --sev-yellow-bg: rgb(242 194 48 / 0.16);
+  --sev-yellow-ink: #f7dc84;
+  --sev-orange: #f07a2e;
+  --sev-orange-bg: rgb(240 122 46 / 0.18);
+  --sev-orange-ink: #fbbf96;
+  --sev-red: #ef5350;
+  --sev-red-bg: rgb(239 83 80 / 0.18);
+  --sev-red-ink: #f9b3b2;
+  --sev-unknown: #8d9ba3;
+  --sev-unknown-bg: rgb(141 155 163 / 0.16);
+  --sev-unknown-ink: #cbd5db;
 
-  --radius: 0.5rem;
+  --radius: 1rem;
 
   /* Mapeamento para os componentes shadcn/ui. */
   --background: var(--bg);
@@ -69,79 +79,65 @@
   --popover: var(--surface);
   --popover-foreground: var(--ink);
   --primary: var(--ink);
-  --primary-foreground: var(--surface);
+  --primary-foreground: var(--bg);
   --secondary: var(--surface-2);
   --secondary-foreground: var(--ink);
   --muted: var(--surface-2);
   --muted-foreground: var(--ink-2);
-  --accent-foreground: var(--surface);
+  --accent-foreground: var(--accent-ink);
   --destructive: var(--sev-red);
   --border: var(--line);
   --input: var(--line);
   --ring: var(--accent);
-  color-scheme: light;
-}
-
-:root[data-theme="dark"] {
-  --bg: #06121d;
-  --surface: #0c1c2b;
-  --surface-2: #12283a;
-  --ink: #e6eef4;
-  --ink-2: #a4b6c4;
-  --line: #223a4e;
-  --accent: #7fc7ff;
-  --stage: #071f38;
-  --stage-2: #0b2b4c;
-  --stage-ink: #ffffff;
-  --stage-ink-2: #b8cbe0;
-  --stage-line: rgb(255 255 255 / 0.16);
-  --stage-accent: #8fd6ff;
-  --land-dim: #2b4f75;
-
-  --sev-none: #4caf73;
-  --sev-none-bg: #15321f;
-  --sev-none-ink: #a6e0bb;
-  --sev-yellow: #f2c230;
-  --sev-yellow-bg: #362c05;
-  --sev-yellow-ink: #f6d975;
-  --sev-orange: #f07a2e;
-  --sev-orange-bg: #43220e;
-  --sev-orange-ink: #f8b98f;
-  --sev-red: #ef5350;
-  --sev-red-bg: #461818;
-  --sev-red-ink: #f6a9a9;
-  --sev-unknown: #8d9ba3;
-  --sev-unknown-bg: #1d2e38;
-  --sev-unknown-ink: #c3cfd5;
   color-scheme: dark;
 }
 
-/* Sem JavaScript: segue o sistema. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    --bg: #06121d;
-    --surface: #0c1c2b;
-    --surface-2: #12283a;
-    --ink: #e6eef4;
-    --ink-2: #a4b6c4;
-    --line: #223a4e;
-    --accent: #7fc7ff;
-    --stage: #071f38;
-    --stage-2: #0b2b4c;
-    --stage-ink: #ffffff;
-    --stage-ink-2: #b8cbe0;
-    --stage-line: rgb(255 255 255 / 0.16);
-    --stage-accent: #8fd6ff;
-    --land-dim: #2b4f75;
-    color-scheme: dark;
-  }
+/* Dia: a mesma composição em claro. */
+:root[data-theme="light"] {
+  --bg: #eaf0f7;
+  --bg-2: #dfe7f1;
+  --surface: #ffffff;
+  --surface-2: #e4ecf5;
+  --ink: #0a1628;
+  --ink-2: #48596e;
+  --line: rgb(10 22 40 / 0.13);
+  --accent: #0060c7;
+  --accent-ink: #ffffff;
+  --glow: rgb(0 96 199 / 0.22);
+
+  --glass: rgb(255 255 255 / 0.62);
+  --glass-strong: rgb(255 255 255 / 0.86);
+  --glass-line: rgb(10 22 40 / 0.1);
+  --glass-hi: rgb(255 255 255 / 0.9);
+  --shadow: 0 24px 60px -28px rgb(20 40 70 / 0.35);
+
+  --stage-2: rgb(10 22 40 / 0.04);
+  --stage-line: rgb(10 22 40 / 0.13);
+  --land-dim: #c9d6e5;
+
+  --sev-none: #2e7d4f;
+  --sev-none-bg: #dff0e5;
+  --sev-none-ink: #1c5535;
+  --sev-yellow: #e8b000;
+  --sev-yellow-bg: #fff1c2;
+  --sev-yellow-ink: #634800;
+  --sev-orange: #e0661b;
+  --sev-orange-bg: #fde3cf;
+  --sev-orange-ink: #843505;
+  --sev-red: #c62828;
+  --sev-red-bg: #fbdfdf;
+  --sev-red-ink: #8b1a1a;
+  --sev-unknown: #7c8b94;
+  --sev-unknown-bg: #e4e9ec;
+  --sev-unknown-ink: #3d4a52;
+  color-scheme: light;
 }
 
 @theme inline {
   --font-sans: var(--font-sans);
   --font-heading: var(--font-sans);
   --font-display: var(--font-display);
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: var(--font-data), ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -150,6 +146,11 @@
   --color-ink-2: var(--ink-2);
   --color-line: var(--line);
   --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-bg-2: var(--bg-2);
+  --color-glass: var(--glass);
+  --color-glass-strong: var(--glass-strong);
+  --color-glass-line: var(--glass-line);
   --color-stage: var(--stage);
   --color-stage-2: var(--stage-2);
   --color-stage-ink: var(--stage-ink);
@@ -198,9 +199,12 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.5);
 
-  --text-display: clamp(2.1rem, 1.3rem + 2.6vw, 3.5rem);
-  --text-display--line-height: 1.04;
-  --text-display--letter-spacing: -0.01em;
+  --text-display: clamp(2.4rem, 1.2rem + 3.8vw, 4.75rem);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.035em;
+  --text-title: clamp(1.6rem, 1.1rem + 1.6vw, 2.5rem);
+  --text-title--line-height: 1.08;
+  --text-title--letter-spacing: -0.025em;
 }
 
 @layer base {
@@ -214,15 +218,22 @@
     @apply bg-bg font-sans text-ink;
   }
   body {
-    @apply bg-bg text-ink;
+    @apply text-ink;
     font-feature-settings: "tnum" 1;
     line-height: 1.55;
+    /* Luz ambiente: um brilho frio no alto e outro violeta à esquerda, fixos. */
+    background:
+      radial-gradient(70rem 40rem at 78% -12%, var(--glow), transparent 62%),
+      radial-gradient(50rem 32rem at -12% 28%, rgb(124 92 255 / 0.1), transparent 60%), var(--bg);
+    background-attachment: fixed;
   }
   h1,
   h2,
   h3 {
     text-wrap: balance;
-    line-height: 1.2;
+    line-height: 1.12;
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
   }
   p,
   li {
@@ -247,7 +258,7 @@
     accent-color: var(--accent);
     caret-color: var(--accent);
   }
-  /* Ligações, foco e seleção sobre o palco azul. */
+  /* Ligações, foco e seleção sobre o palco. */
   .on-stage a {
     color: var(--stage-ink);
     text-decoration-color: color-mix(in srgb, var(--stage-ink) 55%, transparent);
@@ -255,15 +266,80 @@
   .on-stage :focus-visible {
     outline-color: var(--stage-accent);
   }
-  .on-stage .lower-third a {
-    color: var(--ink-on-land);
-    text-decoration-color: color-mix(in srgb, var(--ink-on-land) 45%, transparent);
-  }
-  .on-stage .lower-third :focus-visible {
-    outline-color: var(--ink-on-land);
-  }
   .on-stage ::selection {
     background: color-mix(in srgb, var(--stage-accent) 40%, transparent);
+  }
+}
+
+/*
+ * Vidro: os painéis que flutuam sobre a cena 3D (e sobre o fundo nas outras
+ * páginas). Desfoca o que está atrás, com um filete de luz no topo.
+ */
+@utility glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  box-shadow:
+    inset 0 1px 0 var(--glass-hi),
+    var(--shadow);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+}
+@utility glass-strong {
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-line);
+  box-shadow:
+    inset 0 1px 0 var(--glass-hi),
+    var(--shadow);
+  backdrop-filter: blur(22px) saturate(1.5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+}
+/* Cabeçalho: logótipo, separadores e controlos (components/layout/site-header.tsx). */
+.header-grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "logo . tools"
+    "picker picker picker"
+    "nav nav nav";
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.5rem;
+}
+@media (min-width: 1024px) {
+  .header-grid {
+    grid-template-areas:
+      "logo . tools"
+      "nav nav nav";
+  }
+}
+@media (min-width: 1280px) {
+  .header-grid {
+    grid-template-areas: "logo nav tools";
+  }
+}
+
+/* Etiqueta de dados: mono, maiúsculas pequenas, espaçadas. */
+@utility kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+/* Botão de vidro redondo (ícones do cabeçalho, controlos dos mapas). */
+@utility glass-button {
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  color: var(--ink);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition:
+    background-color 180ms,
+    border-color 180ms;
+  &:hover {
+    background: var(--surface-2);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   }
 }
 

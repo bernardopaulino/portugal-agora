@@ -25,7 +25,7 @@ export function LevelMark({ level, className }: { level: Level; className?: stri
     <span
       aria-hidden
       className={cn(
-        "flex size-10 shrink-0 items-center justify-center rounded-sm",
+        "flex size-10 shrink-0 items-center justify-center rounded-xl",
         levelBlock[level],
         className,
       )}
@@ -39,8 +39,11 @@ export function LevelMark({ level, className }: { level: Level; className?: stri
 export function TopicList({
   topics,
   hrefFor = (id) => `#${id}`,
+  compact = false,
 }: {
   topics: Topic[];
+  /** Linhas mais baixas, para o painel do boletim na página inicial. */
+  compact?: boolean;
   /** Para onde leva cada linha (na página inicial, às páginas de cada tema). */
   hrefFor?: (id: Topic["id"]) => string;
 }) {
@@ -54,12 +57,20 @@ export function TopicList({
         >
           <Link
             href={hrefFor(t.id)}
-            className="lift-hover group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 py-3 no-underline"
+            className={cn(
+              "lift-hover group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 no-underline",
+              compact ? "py-2" : "py-3",
+            )}
           >
-            <LevelMark level={t.level} />
+            <LevelMark level={t.level} className={compact ? "size-8 rounded-lg" : undefined} />
             <span className="flex min-w-0 flex-col">
               <span className="text-sm text-stage-ink-2">{t.label}</span>
-              <span className="font-display text-2xl leading-tight font-bold text-stage-ink">
+              <span
+                className={cn(
+                  "font-display leading-tight font-semibold tracking-[-0.02em] text-stage-ink",
+                  compact ? "text-lg" : "text-2xl",
+                )}
+              >
                 {t.value}
                 {t.detail ? (
                   <span className="block font-sans text-base leading-snug font-normal text-stage-ink-2 sm:inline">
@@ -100,10 +111,10 @@ export function LowerThird({
 }) {
   const Icon = levels[level].icon;
   return (
-    <div className="lower-third lower-third-in flex min-h-16 items-stretch overflow-hidden rounded-sm bg-caption text-ink-on-land shadow-[0_10px_30px_-12px_rgb(0_0_0/0.55)]">
+    <div className="lower-third lower-third-in flex min-h-16 items-stretch gap-2 overflow-hidden rounded-2xl p-1.5 text-ink glass-strong">
       <span
         className={cn(
-          "flex shrink-0 flex-col items-center justify-center gap-1 px-3 font-display text-base font-bold sm:min-w-44 sm:flex-row sm:justify-start sm:gap-2 sm:px-4 sm:text-lg",
+          "flex shrink-0 flex-col items-center justify-center gap-1 rounded-xl px-3 font-display text-base font-semibold sm:min-w-40 sm:flex-row sm:justify-start sm:gap-2 sm:px-4",
           levelBlock[level],
         )}
       >
@@ -139,10 +150,7 @@ export function MapLegend({ showMarkers = true }: { showMarkers?: boolean }) {
           <li key={l} className="inline-flex items-center gap-2">
             <span
               aria-hidden
-              className={cn(
-                "flex size-5 items-center justify-center rounded-[3px] ring-1 ring-white/70",
-                levelBlock[l],
-              )}
+              className={cn("flex size-5 items-center justify-center rounded-md", levelBlock[l])}
             >
               <Icon className="size-3.5" strokeWidth={2.6} />
             </span>
