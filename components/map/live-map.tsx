@@ -15,6 +15,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getDistrict, regionBounds, type Region } from "@/data/districts";
 import { useI18n } from "@/lib/i18n/client";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { quakeRadiusPx } from "@/lib/geo/scales";
 import type { CountryState } from "@/lib/state/aggregate";
 
 import { riskColors } from "../cards/fire-risk";
@@ -337,7 +338,7 @@ export default function LiveMap({
           point(q.id, q.coordinates!, {
             level: q.severity,
             region: q.place.region,
-            size: 4 + q.magnitude * 3,
+            size: quakeRadiusPx(q.magnitude),
             age: Date.parse(state.generatedAt) - Date.parse(q.occurredAt),
           }),
         ),
