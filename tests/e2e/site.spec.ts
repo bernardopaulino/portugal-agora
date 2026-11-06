@@ -1,5 +1,6 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+
+import { expectAccessible } from "./helpers";
 
 // Com Cache Components, o Next mantém a página anterior escondida (React <Activity>)
 // para o "voltar" ser instantâneo; por isso procuramos o título visível pelo papel.
@@ -9,15 +10,6 @@ const pageTitle = (page: Page) => page.getByRole("heading", { level: 1 });
 // telemóvel); getByRole só encontra o que está visível.
 const picker = (page: Page, name = "Escolher distrito ou região") =>
   page.getByRole("combobox", { name });
-
-async function expectAccessible(page: Page) {
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
-    // O canvas do mapa é complementar; a mesma informação está nas listas.
-    .exclude(".maplibregl-canvas")
-    .analyze();
-  expect(results.violations.map((v) => `${v.id}: ${v.nodes[0]?.target}`)).toEqual([]);
-}
 
 test("página inicial mostra o boletim do país", async ({ page }) => {
   await page.goto("/");
