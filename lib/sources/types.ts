@@ -52,7 +52,8 @@ export interface WarningEvent extends BaseEvent {
 export interface EarthquakeEvent extends BaseEvent {
   kind: "earthquake";
   magnitude: number;
-  depthKm: number;
+  /** Profundidade do hipocentro; null quando o IPMA não a indica (diferente de 0 km). */
+  depthKm: number | null;
   felt: boolean;
   intensity?: string;
   occurredAt: string;

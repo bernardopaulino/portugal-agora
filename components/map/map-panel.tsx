@@ -147,7 +147,7 @@ function Detail({
             {quake.felt ? t.lists.felt : ""}
             {t.map.quakeDetail(
               capitalize(formatDayTime(quake.occurredAt, reference, quake.place.region, locale)),
-              Math.round(quake.depthKm),
+              quake.depthKm === null ? null : Math.round(quake.depthKm),
             )}
           </p>
           <p className="text-sm text-ink-2">{t.source.source}: IPMA</p>

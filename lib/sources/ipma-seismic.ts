@@ -19,7 +19,11 @@ export const ipmaSeismicSchema = z.object({
       time: z.string(),
       lat: z.coerce.number(),
       lon: z.coerce.number(),
-      depth: z.coerce.number().nullish(),
+      // Profundidade em falta pode vir como null, "" ou -99 (como a magnitude por calcular).
+      depth: z.preprocess(
+        (v) => (v === "" || (v != null && Number(v) <= -90) ? null : v),
+        z.coerce.number().nullish(),
+      ),
       magnitud: z.coerce.number(),
       obsRegion: z.string().nullish(),
       sensed: z.boolean().nullish(),
@@ -110,7 +114,8 @@ export function normalizeSeismic(raws: IpmaSeismicRaw[], now: Date): EarthquakeE
         severity: earthquakeSeverity(s.magnitud, felt),
         title: `Sismo de magnitude ${formatNumber(s.magnitud)}`,
         magnitude: s.magnitud,
-        depthKm: s.depth ?? 0,
+        // Sem profundidade no IPMA fica null: 0 km seria um valor real (à superfície).
+        depthKm: s.depth ?? null,
         felt,
         intensity: s.degree ?? undefined,
         occurredAt,

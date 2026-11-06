@@ -283,8 +283,8 @@ const pt = {
     showOthers: (n: number) => `Mostrar também ${n} em conclusão ou vigilância`,
     magnitude: (m: string) => `Magnitude ${m}`,
     felt: "Sentido pela população. ",
-    quakeMeta: (when: string, depth: number, intensity?: string) =>
-      `${when}, a ${depth} km de profundidade${intensity ? `, intensidade ${intensity}` : ""}.`,
+    quakeMeta: (when: string, depth: number | null, intensity?: string) =>
+      `${when}, ${depth === null ? "profundidade não indicada" : `a ${depth} km de profundidade`}${intensity ? `, intensidade ${intensity}` : ""}.`,
     showLess: "Mostrar menos",
     showAllQuakes: (n: number) => `Mostrar os ${n} sismos dos últimos 7 dias`,
     riskOnMap: "Ver por concelho no mapa",
@@ -362,7 +362,8 @@ const pt = {
     seeAllAbout: (name: string) => `Ver tudo sobre ${name}`,
     fireDetail: (nature: string, start: string, people: number, air: number) =>
       `${nature}. Início ${start}. ${people} operacionais, ${air} meios aéreos.`,
-    quakeDetail: (when: string, depth: number) => `${when}, a ${depth} km de profundidade.`,
+    quakeDetail: (when: string, depth: number | null) =>
+      `${when}, ${depth === null ? "profundidade não indicada" : `a ${depth} km de profundidade`}.`,
     regions: { continente: "Continente", acores: "Açores", madeira: "Madeira" },
     zoomIn: "Aproximar",
     zoomOut: "Afastar",
@@ -661,7 +662,7 @@ const en: Dictionary = {
     magnitude: (m) => `Magnitude ${m}`,
     felt: "Felt by the population. ",
     quakeMeta: (when, depth, intensity) =>
-      `${when}, ${depth} km deep${intensity ? `, intensity ${intensity}` : ""}.`,
+      `${when}, ${depth === null ? "depth not given" : `${depth} km deep`}${intensity ? `, intensity ${intensity}` : ""}.`,
     showLess: "Show less",
     showAllQuakes: (n) => `Show all ${n} earthquakes from the last 7 days`,
     riskOnMap: "See by municipality on the map",
@@ -738,7 +739,8 @@ const en: Dictionary = {
     seeAllAbout: (name) => `See everything about ${name}`,
     fireDetail: (nature, start, people, air) =>
       `${nature}. Started ${start}. ${people} firefighters, ${air} aircraft.`,
-    quakeDetail: (when, depth) => `${when}, ${depth} km deep.`,
+    quakeDetail: (when, depth) =>
+      `${when}, ${depth === null ? "depth not given" : `${depth} km deep`}.`,
     regions: { continente: "Mainland", acores: "Azores", madeira: "Madeira" },
     zoomIn: "Zoom in",
     zoomOut: "Zoom out",

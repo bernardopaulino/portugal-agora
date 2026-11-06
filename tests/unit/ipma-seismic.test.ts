@@ -42,6 +42,37 @@ describe("normalizeSeismic", () => {
   });
 });
 
+describe("profundidade", () => {
+  const one = (depth: unknown) =>
+    normalizeSeismic(
+      [
+        ipmaSeismicSchema.parse({
+          data: [
+            {
+              time: "2026-09-29T10:00:00",
+              lat: "38.7",
+              lon: "-9.1",
+              depth,
+              magnitud: "2.4",
+              obsRegion: "W Lisboa",
+            },
+          ],
+        }),
+      ],
+      now,
+    )[0]!;
+
+  it("mantém a profundidade indicada, incluindo 0 km", () => {
+    expect(one(12).depthKm).toBe(12);
+    expect(one("7.5").depthKm).toBe(7.5);
+    expect(one(0).depthKm).toBe(0);
+  });
+
+  it.each([null, undefined, "", -99, "-99.0"])("sem profundidade (%s) fica null, não 0", (d) => {
+    expect(one(d).depthKm).toBeNull();
+  });
+});
+
 describe("earthquakeSeverity", () => {
   it.each([
     [2.1, false, "none"],

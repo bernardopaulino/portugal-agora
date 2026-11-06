@@ -60,7 +60,7 @@ export function QuakeList({
                   {t.lists.quakeMeta(
                     capitalize(formatDayTime(q.occurredAt, reference, q.place.region, locale)) +
                       (q.place.region === "acores" ? t.lists.azoresTime : ""),
-                    Math.round(q.depthKm),
+                    q.depthKm === null ? null : Math.round(q.depthKm),
                     q.intensity,
                   )}
                 </>
