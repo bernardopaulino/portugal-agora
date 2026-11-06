@@ -73,6 +73,7 @@ const choose = (page: Page, name: "Mapa" | "3D") =>
 const depthScene = (page: Page) => page.getByRole("img", { name: /Vista 3D dos sismos/ });
 const liveMap = (page: Page) => page.getByRole("region", { name: /Mapa interativo/ });
 const legend = (page: Page) => page.getByTestId("map-legend");
+const pageTitleOf = (page: Page) => page.getByRole("heading", { level: 1 });
 
 /** O three minificado ainda traz o nome nas mensagens de erro do WebGLRenderer. */
 const isThree = (code: string) => code.includes("THREE.WebGLRenderer");
@@ -202,20 +203,42 @@ test("risco de incêndio em altura", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test("boletim em relevo: o 3D toma o lugar do mapa plano e o teclado continua", async ({
+const sceneLayer = (page: Page) => page.locator("[data-scene-ready]").first();
+
+test("página inicial imersiva: o país em 3D atrás do boletim, um painel por tema", async ({
   page,
 }) => {
   const errors = consoleErrors(page);
   await page.goto("/");
-  const stage = page.locator("[data-relief]").first();
-  await expect(stage).toHaveAttribute("data-relief", "on");
-  await expect(stage.locator("canvas")).toBeVisible();
-  // Os links do SVG continuam a ser o caminho do teclado: apontar Lisboa muda a legenda.
-  await stage.getByRole("link", { name: /^Lisboa:/ }).focus();
-  await expect(page.locator(".lower-third")).toContainText("Lisboa");
+  await expect(pageTitleOf(page)).toBeVisible();
+  await expect(sceneLayer(page)).toHaveAttribute("data-scene-ready", "on");
+  await expect(sceneLayer(page).locator("canvas")).toBeAttached();
+  // Um painel por tema, cada um com a ligação para a sua página.
+  for (const name of ["Abrir os avisos", "Abrir os incêndios", "Abrir os sismos"]) {
+    await expect(page.getByRole("link", { name })).toBeAttached();
+  }
+  // Os painéis ficam por cima da cena: as ligações continuam a funcionar.
+  const quakes = page.getByRole("link", { name: "Abrir os sismos" });
+  await quakes.scrollIntoViewIfNeeded();
   await settle(page);
-  await expectAccessible(page);
+  await quakes.click();
+  await expect(page).toHaveURL(/\/sismos$/);
   expect(errors).toEqual([]);
+});
+
+test("o índice dos distritos é o caminho do teclado para cada distrito", async ({ page }) => {
+  await page.goto("/");
+  const lisboa = page
+    .getByRole("region", { name: "Todos os distritos" })
+    .getByRole("link", { name: /Lisboa$/ });
+  await lisboa.focus();
+  await expect(lisboa).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/lisboa$/);
+  await expect(page.locator("[data-scene-ready]").first()).toHaveAttribute(
+    "data-scene-ready",
+    "on",
+  );
 });
 
 test.describe("com reduzir movimento", () => {
@@ -234,9 +257,9 @@ test.describe("com reduzir movimento", () => {
     await page.goto("/risco");
     await expect(liveMap(page)).toHaveAttribute("data-camera-duration", "0");
 
-    // Página inicial: o relevo aparece sem entrada e nada fica a animar nem escondido.
+    // Página inicial: a cena aparece sem entrada e nada fica a animar nem escondido.
     await page.goto("/");
-    await expect(page.locator("[data-relief]").first()).toHaveAttribute("data-relief", "on");
+    await expect(sceneLayer(page)).toHaveAttribute("data-scene-ready", "on");
     const running = await page.evaluate(
       () =>
         document
@@ -245,7 +268,7 @@ test.describe("com reduzir movimento", () => {
           .length,
     );
     expect(running).toBe(0);
-    await page.mouse.wheel(0, 2000);
+    await page.mouse.wheel(0, 3000);
     await expect(page.locator(".reveal-wait")).toHaveCount(0);
   });
 });
@@ -262,10 +285,10 @@ test("o three não entra nas páginas sem 3D", async ({ browser, baseURL }) => {
   await page.waitForTimeout(1500);
   expect((await Promise.all(bodies)).some(isThree)).toBe(false);
 
-  // Na página inicial chega depois do primeiro desenho, para o boletim em relevo.
+  // Na página inicial chega depois do primeiro desenho, para a cena.
   bodies = [];
   await page.goto("/");
-  await expect(page.locator("[data-relief]").first()).toHaveAttribute("data-relief", "on");
+  await expect(sceneLayer(page)).toHaveAttribute("data-scene-ready", "on");
   expect((await Promise.all(bodies)).some(isThree)).toBe(true);
   await context.close();
 });
@@ -279,15 +302,24 @@ test("a CSP inclui a origem do relevo", async ({ request }) => {
   expect(csp).not.toContain("wasm-unsafe-eval");
 });
 
-for (const colorScheme of ["light", "dark"] as const) {
-  test(`acessibilidade nas duas vistas, tema ${colorScheme === "light" ? "claro" : "escuro"}`, async ({
+test("o tema da casa é o escuro, mesmo com o sistema em claro", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+});
+
+for (const theme of ["dark", "light"] as const) {
+  test(`acessibilidade nas páginas com 3D, tema ${theme === "light" ? "claro" : "escuro"}`, async ({
     page,
   }) => {
-    await page.emulateMedia({ colorScheme });
+    await page.addInitScript((t) => localStorage.setItem("pa:tema", t), theme);
     await withTestQuakes(page);
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    await expect(sceneLayer(page)).toHaveAttribute("data-scene-ready", "on");
+    await expectAccessible(page);
     for (const path of ["/sismos", "/incendios", "/risco"]) {
       await page.goto(path);
-      await expect(page.locator("html")).toHaveAttribute("data-theme", colorScheme);
       await expect(legend(page)).toContainText(/exagerad|repete a classe/);
       if (path === "/sismos") await expect(depthScene(page).locator("canvas")).toBeVisible();
       await expectAccessible(page);

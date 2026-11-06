@@ -8,6 +8,10 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "tests/e2e",
   timeout: 60_000,
+  // As páginas com cenas WebGL (em software, sem GPU) demoram mais a ficar prontas.
+  expect: { timeout: 10_000 },
+  // Cada browser desenha WebGL no CPU: com muitos ao mesmo tempo, os testes atrasam-se.
+  workers: process.env.CI ? undefined : 4,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
