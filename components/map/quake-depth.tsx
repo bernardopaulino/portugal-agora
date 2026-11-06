@@ -133,6 +133,8 @@ function Rig({
   const view = useRef<View | null>(null);
   const frame = useRef<number | null>(null);
   const touched = useRef(false);
+  // Com um sismo escolhido, a imagem sobe: o painel de detalhe ocupa o fundo do mapa.
+  const lift = useRef(0);
 
   const fitDistance = () => {
     const { width, height } = get().size;
@@ -159,6 +161,10 @@ function Rig({
       Math.max(radius * 0.02, v.target.y + v.distance * Math.cos(v.polar)),
       v.target.z + v.distance * s * Math.cos(v.azimuth),
     );
+    const { width, height } = get().size;
+    if (lift.current > 0)
+      camera.setViewOffset(width, height, 0, height * lift.current, width, height);
+    else camera.clearViewOffset();
     camera.near = radius / 200;
     camera.far = radius * 20;
     camera.updateProjectionMatrix();
@@ -200,10 +206,9 @@ function Rig({
   // Vista inicial; volta a ela quando a região muda. Enquanto a pessoa não
   // mexer, acompanha o tamanho do mapa.
   useEffect(() => {
-    if (!view.current || !touched.current) {
-      view.current = homeView();
-      apply();
-    }
+    if (!view.current || !touched.current) view.current = homeView();
+    // Sempre: o desvio da imagem (lift) depende do tamanho.
+    apply();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size.width, size.height]);
   useEffect(() => {
@@ -218,10 +223,12 @@ function Rig({
   useEffect(() => {
     if (focusPoint) {
       hadFocus.current = true;
+      lift.current = 0.2;
       touched.current = true;
       animateTo({ target: focusPoint, distance: radius * 0.9 }, cameraDuration());
     } else if (hadFocus.current) {
       hadFocus.current = false;
+      lift.current = 0;
       const h = homeView();
       animateTo({ target: h.target, distance: h.distance }, cameraDuration());
     }
@@ -776,7 +783,8 @@ export default function QuakeDepth({
           </span>
         ))}
       </div>
-      <div className="absolute top-3 right-3 z-10 grid grid-cols-2 gap-1">
+      {/* Duas filas no canto: o painel de detalhe, em baixo, não as tapa nem num telemóvel. */}
+      <div className="absolute top-3 right-3 z-10 grid grid-cols-4 gap-1">
         {buttons.map((b) => (
           <button
             key={b.label}
