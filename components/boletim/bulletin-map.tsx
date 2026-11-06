@@ -5,7 +5,34 @@ import { MAP_VIEWBOX, mapFrames, mapShapes, projectPoint } from "@/data/map-shap
 import type { Severity } from "@/lib/sources/types";
 import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
-import { useRef } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
+
+import { useWebGL } from "@/lib/hooks/webgl";
+
+// O boletim em relevo (three) só é pedido depois do primeiro desenho, quando o browser tem tempo.
+const Stage3D = dynamic(() => import("./stage-3d"), { ssr: false });
+
+/**
+ * Vale a pena trocar o SVG pelo relevo? Só com WebGL2 e sem "poupar dados",
+ * e só quando o browser está livre (o SVG é o que aparece primeiro).
+ */
+function useStageEnhancement(): boolean {
+  const webgl = useWebGL();
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+      ?.saveData;
+    if (!webgl || saveData) return;
+    if ("requestIdleCallback" in window) {
+      const id = requestIdleCallback(() => setOn(true), { timeout: 1500 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = setTimeout(() => setOn(true), 300);
+    return () => clearTimeout(id);
+  }, [webgl]);
+  return on;
+}
 
 export type MapLevel = Severity | "unknown";
 
@@ -36,7 +63,7 @@ const glyph = {
   red: { shape: "M-6.6-16H6.6L16-6.6V6.6L6.6 16H-6.6L-16 6.6V-6.6Z", bar: "M0-8V3", dot: 8.5 },
 };
 
-function WarningGlyph({ level, x, y }: { level: MapLevel; x: number; y: number }) {
+export function WarningGlyph({ level, x, y }: { level: MapLevel; x: number; y: number }) {
   if (level === "none" || level === "unknown") return null;
   const g = glyph[level];
   return (
@@ -54,7 +81,7 @@ function WarningGlyph({ level, x, y }: { level: MapLevel; x: number; y: number }
   );
 }
 
-function FireGlyph({ x, y }: { x: number; y: number }) {
+export function FireGlyph({ x, y }: { x: number; y: number }) {
   return (
     <g transform={`translate(${x} ${y})`} aria-hidden>
       <circle r="13" fill="var(--fire)" stroke="#fff" strokeWidth="2.5" />
@@ -66,7 +93,7 @@ function FireGlyph({ x, y }: { x: number; y: number }) {
   );
 }
 
-function QuakeGlyph({ x, y, magnitude = 2 }: { x: number; y: number; magnitude?: number }) {
+export function QuakeGlyph({ x, y, magnitude = 2 }: { x: number; y: number; magnitude?: number }) {
   const r = 7 + Math.max(0, magnitude - 2) * 5;
   return (
     <g transform={`translate(${x} ${y})`} aria-hidden>
@@ -103,138 +130,161 @@ export function BulletinMap({
   const { t } = useI18n();
   const active = pointed ? mapShapes.find((s) => s.slug === pointed) : undefined;
   const focused = focus ? mapShapes.find((s) => s.slug === focus) : undefined;
+  const enhance = useStageEnhancement();
+  const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const relief = enhance && !failed;
 
   return (
-    <svg
-      viewBox={MAP_VIEWBOX}
-      className={cn("h-auto w-full", className)}
-      role="group"
-      aria-label={t.stage.mapLabel}
-      onMouseLeave={() => onPoint?.(null)}
-      onPointerDown={(e) => {
-        touch.current = e.pointerType !== "mouse";
-      }}
-      onKeyDown={() => {
-        touch.current = false;
-      }}
+    <div
+      className={cn("@container relative w-full", className)}
+      data-relief={relief && ready ? "on" : "off"}
     >
-      {(["acores", "madeira"] as const).map((region) => {
-        const [x, y, w, h] = mapFrames[region];
-        return (
-          <g key={region} aria-hidden>
-            <rect
-              x={x}
-              y={y}
-              width={w}
-              height={h}
-              fill="none"
-              stroke="var(--stage-line)"
-              strokeWidth="1.5"
-            />
-            {/* Em unidades do viewBox: 30 dá cerca de 13 px num telemóvel de 390 px. */}
-            <text
-              x={x + 2}
-              y={y - 12}
-              fill="var(--stage-ink-2)"
-              className="font-display text-[30px] lg:text-[24px]"
-              fontWeight="600"
-            >
-              {region === "acores" ? t.stage.acores : t.stage.madeira}
-            </text>
-          </g>
-        );
-      })}
-
-      {mapShapes.map((shape) => {
-        const level = levels[shape.slug] ?? "unknown";
-        const district = getDistrict(shape.slug);
-        const name = district ? t.districtName(district) : shape.slug;
-        const dim = focus !== undefined && focus !== shape.slug;
-        const islands = shape.region !== "continente";
-        const color = dim ? "var(--land-dim)" : fill[level];
-        return (
-          <a
-            key={shape.slug}
-            href={`/${shape.slug}`}
-            aria-label={`${name}: ${t.levels[level].toLowerCase()}`}
-            onMouseEnter={() => !touch.current && onPoint?.(shape.slug)}
-            onFocus={() => !touch.current && onPoint?.(shape.slug)}
-            onClick={(e) => {
-              // Ecrã tátil: o primeiro toque mostra a legenda; o segundo (ou o
-              // botão "Abrir" da legenda) abre a página do distrito.
-              if (onPoint && pointed !== shape.slug && touch.current) {
-                e.preventDefault();
-                onPoint(shape.slug);
-              }
-            }}
-            className="outline-none"
-          >
-            {/*
-             * As ilhas levam um contorno da própria cor (ficam mais visíveis a
-             * esta escala) e uma área de toque invisível mais larga à volta.
-             */}
-            <path
-              d={shape.d}
-              fill={color}
-              fillOpacity={1}
-              stroke={islands ? color : "#fff"}
-              strokeOpacity={islands ? 1 : dim ? 0.35 : 0.95}
-              strokeWidth={islands ? 5 : 1.6}
-              strokeLinejoin="round"
-              className="cursor-pointer transition-[fill-opacity] duration-150"
-            />
-            {islands ? (
-              <path
-                d={shape.d}
+      <svg
+        viewBox={MAP_VIEWBOX}
+        // Com o relevo pronto, o SVG fica invisível mas continua lá: os links são o caminho do teclado.
+        className={cn("h-auto w-full", relief && ready && "opacity-0")}
+        role="group"
+        aria-label={t.stage.mapLabel}
+        onMouseLeave={() => onPoint?.(null)}
+        onPointerDown={(e) => {
+          touch.current = e.pointerType !== "mouse";
+        }}
+        onKeyDown={() => {
+          touch.current = false;
+        }}
+      >
+        {(["acores", "madeira"] as const).map((region) => {
+          const [x, y, w, h] = mapFrames[region];
+          return (
+            <g key={region} aria-hidden>
+              <rect
+                x={x}
+                y={y}
+                width={w}
+                height={h}
                 fill="none"
-                stroke="#000"
-                strokeOpacity={0}
-                strokeWidth="26"
-                strokeLinejoin="round"
-                pointerEvents="stroke"
-                className="cursor-pointer"
+                stroke="var(--stage-line)"
+                strokeWidth="1.5"
               />
-            ) : null}
-          </a>
-        );
-      })}
-
-      {/* Contorno do distrito em foco ou apontado, por cima de todos. */}
-      {[focused, active].map((shape, i) =>
-        shape ? (
-          <path
-            key={`${i}-${shape.slug}`}
-            d={shape.d}
-            fill="none"
-            stroke={i === 0 ? "#fff" : "var(--stage-accent)"}
-            strokeWidth={i === 0 ? 3.5 : 4.5}
-            strokeLinejoin="round"
-            pointerEvents="none"
-            aria-hidden
-          />
-        ) : null,
-      )}
-
-      <g pointerEvents="none">
-        {mapShapes.map((shape) =>
-          focus && focus !== shape.slug ? null : (
-            <WarningGlyph
-              key={shape.slug}
-              level={levels[shape.slug] ?? "unknown"}
-              x={shape.anchor[0]}
-              y={shape.anchor[1]}
-            />
-          ),
-        )}
-        {markers.map((m) => {
-          const [x, y] = projectPoint(m.coordinates, m.region);
-          return m.kind === "fire" ? (
-            <FireGlyph key={m.id} x={x} y={y} />
-          ) : (
-            <QuakeGlyph key={m.id} x={x} y={y} magnitude={m.magnitude} />
+              {/* Em unidades do viewBox: 30 dá cerca de 13 px num telemóvel de 390 px. */}
+              <text
+                x={x + 2}
+                y={y - 12}
+                fill="var(--stage-ink-2)"
+                className="font-display text-[30px] lg:text-[24px]"
+                fontWeight="600"
+              >
+                {region === "acores" ? t.stage.acores : t.stage.madeira}
+              </text>
+            </g>
           );
         })}
-      </g>
-    </svg>
+
+        {mapShapes.map((shape) => {
+          const level = levels[shape.slug] ?? "unknown";
+          const district = getDistrict(shape.slug);
+          const name = district ? t.districtName(district) : shape.slug;
+          const dim = focus !== undefined && focus !== shape.slug;
+          const islands = shape.region !== "continente";
+          const color = dim ? "var(--land-dim)" : fill[level];
+          return (
+            <a
+              key={shape.slug}
+              href={`/${shape.slug}`}
+              aria-label={`${name}: ${t.levels[level].toLowerCase()}`}
+              onMouseEnter={() => !touch.current && onPoint?.(shape.slug)}
+              onFocus={() => !touch.current && onPoint?.(shape.slug)}
+              onClick={(e) => {
+                // Ecrã tátil: o primeiro toque mostra a legenda; o segundo (ou o
+                // botão "Abrir" da legenda) abre a página do distrito.
+                if (onPoint && pointed !== shape.slug && touch.current) {
+                  e.preventDefault();
+                  onPoint(shape.slug);
+                }
+              }}
+              className="outline-none"
+            >
+              {/*
+               * As ilhas levam um contorno da própria cor (ficam mais visíveis a
+               * esta escala) e uma área de toque invisível mais larga à volta.
+               */}
+              <path
+                d={shape.d}
+                fill={color}
+                fillOpacity={1}
+                stroke={islands ? color : "#fff"}
+                strokeOpacity={islands ? 1 : dim ? 0.35 : 0.95}
+                strokeWidth={islands ? 5 : 1.6}
+                strokeLinejoin="round"
+                className="cursor-pointer transition-[fill-opacity] duration-150"
+              />
+              {islands ? (
+                <path
+                  d={shape.d}
+                  fill="none"
+                  stroke="#000"
+                  strokeOpacity={0}
+                  strokeWidth="26"
+                  strokeLinejoin="round"
+                  pointerEvents="stroke"
+                  className="cursor-pointer"
+                />
+              ) : null}
+            </a>
+          );
+        })}
+
+        {/* Contorno do distrito em foco ou apontado, por cima de todos. */}
+        {[focused, active].map((shape, i) =>
+          shape ? (
+            <path
+              key={`${i}-${shape.slug}`}
+              d={shape.d}
+              fill="none"
+              stroke={i === 0 ? "#fff" : "var(--stage-accent)"}
+              strokeWidth={i === 0 ? 3.5 : 4.5}
+              strokeLinejoin="round"
+              pointerEvents="none"
+              aria-hidden
+            />
+          ) : null,
+        )}
+
+        <g pointerEvents="none">
+          {mapShapes.map((shape) =>
+            focus && focus !== shape.slug ? null : (
+              <WarningGlyph
+                key={shape.slug}
+                level={levels[shape.slug] ?? "unknown"}
+                x={shape.anchor[0]}
+                y={shape.anchor[1]}
+              />
+            ),
+          )}
+          {markers.map((m) => {
+            const [x, y] = projectPoint(m.coordinates, m.region);
+            return m.kind === "fire" ? (
+              <FireGlyph key={m.id} x={x} y={y} />
+            ) : (
+              <QuakeGlyph key={m.id} x={x} y={y} magnitude={m.magnitude} />
+            );
+          })}
+        </g>
+      </svg>
+      {relief ? (
+        <div className={cn("absolute inset-0", !ready && "pointer-events-none opacity-0")}>
+          <Stage3D
+            levels={levels}
+            markers={markers}
+            focus={focus}
+            pointed={pointed ?? null}
+            onPoint={onPoint}
+            onReady={() => setReady(true)}
+            onFailed={() => setFailed(true)}
+          />
+        </div>
+      ) : null}
+    </div>
   );
 }
