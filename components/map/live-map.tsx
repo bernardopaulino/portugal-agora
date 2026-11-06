@@ -72,6 +72,32 @@ const reliefSource = (t: Dictionary) => ({
   attribution: `${t.view3d.relief} <a href="https://mapterhorn.com/attribution" target="_blank" rel="noopener">© Mapterhorn</a>`,
 });
 
+/** A primeira entrada na vista 3D: duração e rotação final (graus). */
+const ENTRY_MS = 1800;
+const ENTRY_BEARING = -12;
+const cubicInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+
+/**
+ * Faz subir a extrusão do risco (de 0 à altura da classe). O MapLibre não
+ * anima propriedades que dependem dos dados, por isso o fator muda a cada
+ * fotograma, só durante a subida.
+ */
+function growExtrusion(map: MapLibreMap, duration: number, delay = 0) {
+  const set = (f: number) => {
+    if (map.getLayer("risk-extrusion"))
+      map.setPaintProperty("risk-extrusion", "fill-extrusion-height", ["*", ["get", "height"], f]);
+  };
+  if (duration <= 0) return set(1);
+  set(0);
+  const start = performance.now() + delay;
+  const step = (now: number) => {
+    const k = Math.min(1, Math.max(0, (now - start) / duration));
+    set(1 - Math.pow(1 - k, 3));
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
 /** Os estilos do OpenFreeMap mostram nomes em inglês; preferimos o nome em português. */
 function applyPortugueseLabels(map: MapLibreMap) {
   for (const layer of map.getStyle().layers) {
@@ -669,6 +695,7 @@ export default function LiveMap({
   // Vista 3D: relevo (incêndios) ou só inclinação (risco em altura); rotação
   // e compasso só aqui. A câmara move-se uma vez, quando a vista muda.
   const was3d = useRef(false);
+  const entered = useRef(false);
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !styleReady.current) return;
@@ -715,9 +742,26 @@ export default function LiveMap({
     if (navRef.current) map.removeControl(navRef.current);
     navRef.current = new NavigationControl({ showCompass: view3d, visualizePitch: view3d });
     map.addControl(navRef.current, "top-right");
-    const duration = cameraDuration();
+    // A primeira entrada em 3D (ao abrir a página) é a viagem longa: a câmara
+    // inclina-se e roda um pouco. As trocas seguintes são curtas.
+    const first = view3d && !entered.current;
+    if (view3d) entered.current = true;
+    const reduced = cameraDuration() === 0;
+    const duration = reduced ? 0 : first ? ENTRY_MS : cameraDuration();
     if (container.current) container.current.dataset.cameraDuration = String(duration);
-    map.easeTo(view3d ? { pitch: MAP_3D_PITCH, duration } : { pitch: 0, bearing: 0, duration });
+    map.easeTo(
+      view3d
+        ? {
+            pitch: MAP_3D_PITCH,
+            bearing: first ? ENTRY_BEARING : map.getBearing(),
+            duration,
+            easing: first ? cubicInOut : undefined,
+          }
+        : { pitch: 0, bearing: 0, duration },
+    );
+    // No risco em altura, os concelhos sobem do chão até à altura da classe.
+    if (view3d && layer === "risk")
+      growExtrusion(map, reduced ? 0 : first ? 1300 : 600, first ? 400 : 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view3d, layer, styleVersion]);
 

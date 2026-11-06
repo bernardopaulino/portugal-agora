@@ -322,8 +322,9 @@ export function MapPanel({
   // O risco de incêndio tem previsão para hoje e amanhã (só no continente).
   const [riskDay, setRiskDay] = useState<RiskDay>("today");
   const showRiskDay = layer === "risk" && region === "continente" && state.fireRisk.data !== null;
-  // Vista 3D: só por escolha; o estado é deste componente, por isso reinicia ao mudar de página.
-  const [view, setView] = useState<"map" | "3d">("map");
+  // Os mapas que têm vista 3D abrem nela (com a entrada da câmara); "Mapa" volta ao 2D.
+  // O estado é deste componente, por isso reinicia ao mudar de página.
+  const [view, setView] = useState<"map" | "3d">("3d");
   const webgl = useWebGL();
   const [lost, setLost] = useState(false);
   const mode3d = mode3dFor(layer, showRiskDay);

@@ -18,7 +18,7 @@ import type { Region } from "@/data/districts";
 import { boundsCenter, depthSceneBounds, inBounds, localProjection } from "@/lib/geo/projection";
 import { DEPTH_EXAGGERATION, depthGrid, quakeRadiusPx } from "@/lib/geo/scales";
 import { useResolvedTheme } from "@/lib/hooks/external";
-import { cameraDuration } from "@/lib/hooks/webgl";
+import { cameraDuration, prefersReducedMotion } from "@/lib/hooks/webgl";
 import { useI18n } from "@/lib/i18n/client";
 import type { EarthquakeEvent } from "@/lib/sources/types";
 
@@ -110,6 +110,13 @@ function circle(): THREE.BufferGeometry {
 }
 
 const easeOut = (k: number) => 1 - Math.pow(1 - k, 3);
+const easeInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+
+/** A entrada da cena: a câmara desce de cima até à vista inicial. */
+const ENTRY_MS = 1800;
+/** Cada sismo afunda da superfície até à sua profundidade (depois de a câmara começar a descer). */
+const SINK_DELAY_MS = 450;
+const SINK_MS = 1200;
 
 /** Câmara em órbita à volta de um alvo, com limites (nunca por baixo nem de pernas para o ar). */
 function Rig({
@@ -177,7 +184,7 @@ function Rig({
     frame.current = null;
   };
 
-  const animateTo = (to: Partial<View>, duration: number) => {
+  const animateTo = (to: Partial<View>, duration: number, ease = easeOut) => {
     stop();
     const from = view.current ?? homeView();
     const goal: View = { ...from, ...to, target: (to.target ?? from.target).clone() };
@@ -190,7 +197,7 @@ function Rig({
     const start = performance.now();
     const startTarget = from.target.clone();
     const step = (now: number) => {
-      const k = easeOut(Math.min(1, (now - start) / duration));
+      const k = ease(Math.min(1, (now - start) / duration));
       view.current = {
         target: startTarget.clone().lerp(goal.target, k),
         distance: THREE.MathUtils.lerp(from.distance, goal.distance, k),
@@ -206,15 +213,31 @@ function Rig({
   // Vista inicial; volta a ela quando a região muda. Enquanto a pessoa não
   // mexer, acompanha o tamanho do mapa.
   useEffect(() => {
-    if (!view.current || !touched.current) view.current = homeView();
+    // Durante uma viagem da câmara, ela própria acompanha o tamanho a cada fotograma.
+    if (frame.current === null && (!view.current || !touched.current)) view.current = homeView();
     // Sempre: o desvio da imagem (lift) depende do tamanho.
     apply();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size.width, size.height]);
+  // A entrada: ao abrir (e ao mudar de região), a câmara parte de cima, mais
+  // longe e rodada, e desce até à vista inicial. Uma vez; depois fica quieta.
   useEffect(() => {
     touched.current = false;
-    view.current = homeView();
+    const h = homeView();
+    if (prefersReducedMotion()) {
+      view.current = h;
+      apply();
+      onMove(0);
+      return;
+    }
+    view.current = {
+      ...h,
+      distance: h.distance * 1.7,
+      azimuth: h.azimuth + THREE.MathUtils.degToRad(50),
+      polar: POLAR_MIN,
+    };
     apply();
+    animateTo(h, ENTRY_MS, easeInOut);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [home, radius]);
 
@@ -356,6 +379,25 @@ function Marks({
   const sphere = useGeometry(() => new THREE.SphereGeometry(1, 24, 16), "sphere");
   const torus = useGeometry(() => new THREE.TorusGeometry(1, 0.09, 8, 48), "torus");
   const ring = useGeometry(circle, "circle");
+  // Quando cada sismo apareceu (para afundar da superfície até à profundidade).
+  const born = useRef(new Map<string, number>());
+  const groups = useRef(new Map<string, THREE.Group>());
+  const animate = useMemo(() => !prefersReducedMotion(), []);
+  useFrame(({ invalidate }) => {
+    const now = performance.now();
+    let moving = false;
+    for (const m of marks) {
+      const g = groups.current.get(m.id);
+      if (!g) continue;
+      if (!born.current.has(m.id)) born.current.set(m.id, now);
+      const k = animate
+        ? Math.min(1, Math.max(0, (now - born.current.get(m.id)! - SINK_DELAY_MS) / SINK_MS))
+        : 1;
+      if (k < 1) moving = true;
+      g.position.set(m.position.x, m.position.y * easeOut(k), m.position.z);
+    }
+    if (moving) invalidate();
+  });
   const drops = useGeometry(
     () =>
       segments(
@@ -374,7 +416,13 @@ function Marks({
       {marks.map((m) => {
         const selected = m.id === selectedId;
         return (
-          <group key={m.id} position={m.position}>
+          <group
+            key={m.id}
+            ref={(g) => {
+              if (g) groups.current.set(m.id, g);
+              else groups.current.delete(m.id);
+            }}
+          >
             <mesh geometry={sphere} scale={m.radius} renderOrder={2}>
               <meshLambertMaterial
                 color={m.color}
