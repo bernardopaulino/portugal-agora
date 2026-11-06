@@ -6,15 +6,19 @@ const isDev = process.env.NODE_ENV !== "production";
  * Content-Security-Policy. Já inclui as origens de que o mapa vai
  * precisar (OpenFreeMap para estilos/tiles, blob: para os workers do
  * MapLibre). Os dados das APIs externas passam sempre pelo servidor,
- * por isso o browser só fala com 'self' e com o servidor de tiles.
+ * por isso o browser só fala com 'self' e com os servidores de tiles.
+ * A Mapterhorn dá o relevo da vista 3D dos incêndios (tiles WebP pedidos
+ * pelo MapLibre com fetch e descodificados como imagem). Sem
+ * 'wasm-unsafe-eval': o three é usado sem descodificadores em WebAssembly.
  */
+const RELIEF_ORIGIN = "https://tiles.mapterhorn.com";
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://tiles.openfreemap.org",
+  `img-src 'self' data: blob: https://tiles.openfreemap.org ${RELIEF_ORIGIN}`,
   "font-src 'self'",
-  "connect-src 'self' https://tiles.openfreemap.org",
+  `connect-src 'self' https://tiles.openfreemap.org ${RELIEF_ORIGIN}`,
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",
