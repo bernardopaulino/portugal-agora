@@ -15,7 +15,11 @@ import { ThemeToggle } from "./theme";
 export async function SiteHeader() {
   const state = await getPageState();
   return (
-    <header className="relative z-40 rounded-none border-x-0 border-t-0 shadow-none glass-strong lg:sticky lg:top-0">
+    <header
+      // A cena 3D lê a altura do cabeçalho para não pôr o país por baixo dele.
+      data-site-header
+      className="relative z-40 rounded-none border-x-0 border-t-0 shadow-none glass-strong lg:sticky lg:top-0"
+    >
       <div className="header-grid mx-auto max-w-7xl px-4 py-2.5 sm:px-6">
         <div className="[grid-area:logo]">
           <HomeLink>
@@ -26,7 +30,7 @@ export async function SiteHeader() {
             </span>
           </HomeLink>
         </div>
-        <div className="min-w-0 [grid-area:nav] xl:flex xl:justify-center">
+        <div className="min-w-0 [grid-area:nav] min-[90rem]:flex min-[90rem]:justify-center">
           <MainNav />
         </div>
         <div className="flex shrink-0 items-center justify-end gap-1.5 [grid-area:tools] sm:gap-2">

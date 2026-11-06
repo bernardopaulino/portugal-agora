@@ -26,7 +26,8 @@ export function DistrictPicker() {
         onChange={(e) =>
           router.push(path(e.target.value ? `/${e.target.value}${topic}` : topic || "/"))
         }
-        className="h-11 w-full min-w-0 cursor-pointer appearance-none rounded-full glass-button pr-11 pl-4 font-display text-base font-medium lg:w-56"
+        // Abaixo de 360 px, menos margem dentro do botão, para "Todo o país" caber inteiro.
+        className="h-11 w-full min-w-0 cursor-pointer appearance-none rounded-full glass-button pr-11 pl-4 font-display text-base font-medium max-[359px]:pr-8 max-[359px]:pl-3 lg:w-56"
       >
         <option value="">{t.header.wholeCountry}</option>
         <optgroup label={t.header.mainland}>
@@ -48,7 +49,10 @@ export function DistrictPicker() {
             ))}
         </optgroup>
       </select>
-      <ChevronDown aria-hidden className="pointer-events-none absolute right-4 size-5 text-ink-2" />
+      <ChevronDown
+        aria-hidden
+        className="pointer-events-none absolute right-4 size-5 text-ink-2 max-[359px]:right-2.5"
+      />
     </label>
   );
 }

@@ -79,10 +79,14 @@ export function MainNav() {
   }, [current]);
 
   return (
-    <nav aria-label={district ? t.districtPages.menu(t.districtName(district)) : t.nav.label}>
+    <nav
+      aria-label={district ? t.districtPages.menu(t.districtName(district)) : t.nav.label}
+      // Se um dia não couber, a barra desliza em vez de passar por cima do logótipo.
+      className="max-w-full min-w-0"
+    >
       <ul
         ref={listRef}
-        className="flex [scrollbar-width:none] overflow-x-auto rounded-full border border-glass-line bg-[var(--stage-2)] p-0.5 max-lg:justify-between sm:p-1 lg:inline-flex lg:gap-0.5"
+        className="flex max-w-full [scrollbar-width:none] overflow-x-auto rounded-full border border-glass-line bg-[var(--stage-2)] p-0.5 max-lg:justify-between sm:p-1 lg:inline-flex lg:gap-0.5"
       >
         {tabs.map((tab) => {
           const href = base + tab.path || "/";

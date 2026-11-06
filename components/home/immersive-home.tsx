@@ -116,6 +116,7 @@ export function ImmersiveHome({ initial }: { initial: CountryState }) {
                 ? {
                     name: t.districtName(pointedDistrict),
                     level: t.levels[levels[pointedDistrict.slug] ?? "unknown"],
+                    open: t.caption.open(t.districtName(pointedDistrict)),
                   }
                 : undefined
             }
@@ -125,7 +126,7 @@ export function ImmersiveHome({ initial }: { initial: CountryState }) {
       {/* Vinheta: o texto fica legível por cima da cena, sem esconder o país. */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(120%_90%_at_75%_40%,transparent_35%,var(--bg)_100%)] max-lg:bg-[linear-gradient(to_bottom,transparent_30%,var(--bg)_92%)]"
+        className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(120%_90%_at_75%_40%,transparent_35%,var(--bg)_100%)] max-lg:bg-[linear-gradient(to_bottom,transparent_55%,var(--bg)_100%)]"
       />
 
       <div className="pointer-events-none relative z-10">
@@ -133,8 +134,30 @@ export function ImmersiveHome({ initial }: { initial: CountryState }) {
         <section
           data-scene="hero"
           aria-labelledby="boletim-titulo"
-          className="mx-auto grid min-h-[calc(100svh-8rem)] max-w-7xl items-end gap-6 px-4 pt-[38svh] pb-10 sm:px-6 lg:grid-cols-12 lg:items-center lg:pt-10"
+          className="mx-auto grid max-w-7xl gap-6 px-4 pt-2 pb-10 sm:px-6 lg:min-h-[calc(100svh-8rem)] lg:grid-cols-12 lg:items-center lg:pt-10"
         >
+          {/*
+           * Telemóveis e tablets: o espaço do país, entre o cabeçalho e o painel.
+           * A cena enquadra-o aqui; sem ela (a carregar, sem WebGL ou a poupar
+           * dados) fica cá o mapa plano. Em ecrãs baixos encolhe, e abaixo de
+           * 600 px de altura desaparece: aí o título tem de aparecer no
+           * primeiro ecrã, e o país aparece logo no primeiro tema.
+           */}
+          <div
+            data-scene-frame
+            className="flex h-[clamp(8rem,100svh_-_27rem,22rem)] justify-center lg:hidden [@media(max-height:600px)]:hidden"
+          >
+            {!ready ? (
+              <BulletinMap
+                levels={levels}
+                markers={mapMarkers(state)}
+                pointed={pointed}
+                onPoint={setPointed}
+                className="pointer-events-auto h-full w-auto max-w-full"
+              />
+            ) : null}
+          </div>
+
           <div className="pointer-events-auto flex flex-col gap-5 rounded-3xl p-6 glass sm:p-8 lg:col-span-6 xl:col-span-5">
             <p className="flex items-center gap-2 kicker">
               <span
@@ -216,31 +239,54 @@ export function ImmersiveHome({ initial }: { initial: CountryState }) {
             topic={topic}
             step={t.home.step(i + 1, topics.length)}
             state={state}
+            framed={scene}
           />
         ))}
 
         <section
           data-scene="distritos"
-          className="pointer-events-auto mx-auto max-w-7xl px-4 pt-[30svh] sm:px-6"
+          className={cn("mx-auto max-w-7xl px-4 sm:px-6 lg:pt-[30svh]", scene ? "" : "max-lg:pt-6")}
         >
-          <Section id="distritos" title={t.sections.allDistricts}>
-            <DistrictIndex state={state} />
-          </Section>
+          {scene ? <div data-scene-frame className="h-[30svh] lg:hidden" /> : null}
+          <div className="pointer-events-auto">
+            <Section id="distritos" title={t.sections.allDistricts}>
+              <DistrictIndex state={state} />
+            </Section>
+          </div>
         </section>
       </div>
     </div>
   );
 }
 
-function TopicStop({ topic, step, state }: { topic: Topic; step: string; state: CountryState }) {
+/**
+ * O painel de um tema. Em ecrãs largos fica à esquerda, a meio do ecrã;
+ * em telemóveis e tablets, com a cena, leva por cima o espaço onde a câmara
+ * mostra o tema (sem a cena, os painéis seguem-se sem espaços vazios).
+ */
+function TopicStop({
+  topic,
+  step,
+  state,
+  framed,
+}: {
+  topic: Topic;
+  step: string;
+  state: CountryState;
+  framed: boolean;
+}) {
   const { t, path } = useI18n();
   const id = topic.id;
   return (
     <section
       data-scene={id}
       aria-labelledby={`tema-${id}`}
-      className="mx-auto flex min-h-[92svh] max-w-7xl items-center px-4 sm:px-6"
+      className={cn(
+        "mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:min-h-[92svh] lg:flex-row lg:items-center",
+        framed ? "max-lg:pb-6" : "max-lg:py-3",
+      )}
     >
+      {framed ? <div data-scene-frame className="h-[42svh] shrink-0 lg:hidden" /> : null}
       <article className="pointer-events-auto flex w-full max-w-xl flex-col gap-5 rounded-3xl p-6 glass sm:p-8">
         <p className="kicker">
           {step} · {topic.label}

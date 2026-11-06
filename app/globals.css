@@ -312,7 +312,8 @@
       "nav nav nav";
   }
 }
-@media (min-width: 1280px) {
+/* Numa linha só a partir de 1440px: abaixo disso os separadores (em inglês, sobretudo) não cabem entre o logótipo e os controlos. */
+@media (min-width: 1440px) {
   .header-grid {
     grid-template-areas: "logo nav tools";
   }

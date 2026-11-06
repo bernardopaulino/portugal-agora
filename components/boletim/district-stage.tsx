@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import type { District } from "@/data/districts";
+import { getDistrict, type District } from "@/data/districts";
 import { useWebGLEnhancement } from "@/lib/hooks/webgl";
 import { useI18n } from "@/lib/i18n/client";
 import type { ForecastDay } from "@/lib/sources/ipma-forecast";
@@ -54,6 +54,7 @@ export function DistrictStage({
   const [failed, setFailed] = useState(false);
   const [pointed, setPointed] = useState<string | null>(null);
   const scene = enhance && !failed;
+  const pointedDistrict = pointed ? getDistrict(pointed) : undefined;
   const levels = mapLevels(state);
   const { fires, quakes } = sceneMarkers(state, district.slug);
 
@@ -80,18 +81,42 @@ export function DistrictStage({
             onReady={() => setReady(true)}
             onFailed={() => setFailed(true)}
             regionLabels={{ acores: t.stage.acores, madeira: t.stage.madeira }}
+            pointedLabel={
+              pointedDistrict
+                ? {
+                    name: t.districtName(pointedDistrict),
+                    level: t.levels[levels[pointedDistrict.slug] ?? "unknown"],
+                    open: t.caption.open(t.districtName(pointedDistrict)),
+                  }
+                : undefined
+            }
           />
         </div>
       ) : null}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(120%_90%_at_75%_40%,transparent_35%,var(--bg)_100%)] max-lg:bg-[linear-gradient(to_bottom,transparent_30%,var(--bg)_92%)]"
+        className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(120%_90%_at_75%_40%,transparent_35%,var(--bg)_100%)] max-lg:bg-[linear-gradient(to_bottom,transparent_55%,var(--bg)_100%)]"
       />
 
       <section
         aria-labelledby="boletim-titulo"
-        className="pointer-events-none relative z-10 mx-auto grid min-h-[calc(100svh-8rem)] max-w-7xl items-end gap-6 px-4 pt-[34svh] pb-8 sm:px-6 lg:grid-cols-12 lg:items-center lg:pt-10"
+        className="pointer-events-none relative z-10 mx-auto grid max-w-7xl gap-6 px-4 pt-2 pb-8 sm:px-6 lg:min-h-[calc(100svh-8rem)] lg:grid-cols-12 lg:items-center lg:pt-10"
       >
+        {/* Telemóveis e tablets: o espaço do distrito, entre o cabeçalho e o painel (como na página inicial). */}
+        <div
+          data-scene-frame
+          className="flex h-[clamp(8rem,100svh_-_27rem,20rem)] justify-center lg:hidden [@media(max-height:600px)]:hidden"
+        >
+          {!ready ? (
+            <BulletinMap
+              levels={levels}
+              markers={mapMarkers(state, district.slug)}
+              focus={district.slug}
+              className="pointer-events-auto h-full w-auto max-w-full"
+            />
+          ) : null}
+        </div>
+
         <div className="pointer-events-auto flex flex-col gap-5 rounded-3xl p-6 glass sm:p-8 lg:col-span-6 xl:col-span-5">
           <Link
             href={path("/")}
