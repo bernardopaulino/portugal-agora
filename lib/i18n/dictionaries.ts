@@ -375,6 +375,38 @@ const pt = {
     ariaLabel: "Mapa interativo. A mesma informação está nas listas desta página.",
     boundaries: "Limites",
   },
+  /** Vista 3D opcional dos mapas de tema (sismos, incêndios, risco de incêndio). */
+  view3d: {
+    group: "Vista do mapa",
+    map: "Mapa",
+    threeD: "3D",
+    unavailable:
+      "A vista 3D precisa de WebGL, que este browser não tem. O mapa continua disponível.",
+    lost: "A vista 3D deixou de funcionar neste browser. Voltámos ao mapa.",
+    depthLegend: (x: number) =>
+      `Cada sismo está à sua profundidade, por baixo do epicentro. Profundidade exagerada ${x}×.`,
+    depthMarks:
+      "Esfera maior, magnitude maior; mais transparente, mais antigo; anel, sentido pela população.",
+    depthMissing: "Os sismos sem profundidade indicada ficam à superfície, com contorno tracejado.",
+    outside: (n: number) =>
+      `${plural(n, "sismo fora deste bloco está", "sismos fora deste bloco estão")} só na lista.`,
+    seaLevel: "Nível do mar",
+    km: (n: number) => `${n} km`,
+    depthAria: (region: string, n: number, deepest: number | null) =>
+      n === 0
+        ? `Vista 3D dos sismos em profundidade, ${region}: sem sismos nos últimos 7 dias.`
+        : `Vista 3D dos sismos em profundidade, ${region}: ${plural(n, "sismo", "sismos")}${deepest === null ? "" : `; o mais profundo a ${deepest} km`}.`,
+    keysHint: "Use as setas para rodar e inclinar a vista, e + ou − para aproximar.",
+    rotateLeft: "Rodar para a esquerda",
+    rotateRight: "Rodar para a direita",
+    tiltMore: "Inclinar a vista",
+    tiltLess: "Ver mais de cima",
+    reset: "Repor vista",
+    reliefLegend: (x: number) => `Relevo exagerado ${x}×. Os incêndios ficam assentes no terreno.`,
+    relief: "Relevo",
+    heightLegend:
+      "A altura de cada concelho repete a classe de risco (1 a 5), tal como a cor. Não é relevo.",
+  },
   notFound: {
     title: "Esta página não existe.",
     body: "Pode ter sido um erro no endereço. Escolha um distrito no topo da página ou veja o estado de todo o país.",
@@ -751,6 +783,37 @@ const en: Dictionary = {
     twoFingers: "Use two fingers to move the map",
     ariaLabel: "Interactive map. The same information is in the lists on this page.",
     boundaries: "Boundaries",
+  },
+  view3d: {
+    group: "Map view",
+    map: "Map",
+    threeD: "3D",
+    unavailable:
+      "The 3D view needs WebGL, which this browser doesn't have. The map is still available.",
+    lost: "The 3D view stopped working in this browser. We've gone back to the map.",
+    depthLegend: (x) =>
+      `Each earthquake sits at its depth, below the epicentre. Depth exaggerated ${x}×.`,
+    depthMarks:
+      "Bigger sphere, bigger magnitude; more transparent, older; ring, felt by the population.",
+    depthMissing: "Earthquakes with no depth given stay at the surface, with a dashed outline.",
+    outside: (n) =>
+      `${plural(n, "earthquake outside this block is", "earthquakes outside this block are")} only in the list.`,
+    seaLevel: "Sea level",
+    km: (n) => `${n} km`,
+    depthAria: (region, n, deepest) =>
+      n === 0
+        ? `3D view of earthquake depths, ${region}: no earthquakes in the last 7 days.`
+        : `3D view of earthquake depths, ${region}: ${plural(n, "earthquake", "earthquakes")}${deepest === null ? "" : `; the deepest at ${deepest} km`}.`,
+    keysHint: "Use the arrow keys to rotate and tilt the view, and + or − to zoom.",
+    rotateLeft: "Rotate left",
+    rotateRight: "Rotate right",
+    tiltMore: "Tilt the view",
+    tiltLess: "View from above",
+    reset: "Reset view",
+    reliefLegend: (x) => `Relief exaggerated ${x}×. Wildfires sit on the terrain.`,
+    relief: "Relief",
+    heightLegend:
+      "Each municipality's height repeats its risk class (1 to 5), as does the colour. It is not relief.",
   },
   notFound: {
     title: "This page doesn't exist.",

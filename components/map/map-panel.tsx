@@ -3,11 +3,15 @@
 import { ArrowRight, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { getDistrict, type Region } from "@/data/districts";
+import { depthSceneBounds, inBounds } from "@/lib/geo/projection";
+import { DEPTH_EXAGGERATION, RELIEF_EXAGGERATION } from "@/lib/geo/scales";
+import { useWebGL } from "@/lib/hooks/webgl";
 import { useI18n } from "@/lib/i18n/client";
 import { fireRiskLabels } from "@/lib/sources/labels";
+import type { EarthquakeEvent } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
 import { capitalize, formatDayTime, formatNumber } from "@/lib/time/format";
 import { cn } from "@/lib/utils";
@@ -21,6 +25,22 @@ const LiveMap = dynamic(() => import("./live-map"), {
   ssr: false,
   loading: () => <MapLoading />,
 });
+
+// O three só é pedido quando alguém escolhe a vista 3D dos sismos.
+const QuakeDepth = dynamic(() => import("./quake-depth"), {
+  ssr: false,
+  loading: () => <MapLoading />,
+});
+
+/** O que a vista 3D mostra em cada camada (avisos e qualidade do ar ficam só em 2D). */
+type Mode3d = "depth" | "relief" | "height";
+
+function mode3dFor(layer: LayerId, riskAvailable: boolean): Mode3d | null {
+  if (layer === "quakes") return "depth";
+  if (layer === "fires") return "relief";
+  if (layer === "risk" && riskAvailable) return "height";
+  return null;
+}
 
 function MapLoading() {
   const { t } = useI18n();
@@ -38,16 +58,19 @@ function Chip({
   onClick,
   children,
   role,
+  disabled,
 }: {
   pressed: boolean;
   onClick: () => void;
   children: React.ReactNode;
   role?: "radio";
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       role={role}
+      disabled={disabled}
       aria-pressed={role ? undefined : pressed}
       aria-checked={role ? pressed : undefined}
       onClick={onClick}
@@ -55,7 +78,8 @@ function Chip({
         "inline-flex min-h-11 items-center gap-2 rounded-sm border px-4 font-display text-lg font-semibold",
         pressed
           ? "border-ink bg-ink text-bg"
-          : "border-line bg-surface text-ink hover:bg-surface-2",
+          : "border-line bg-surface text-ink enabled:hover:bg-surface-2",
+        "disabled:cursor-not-allowed disabled:border-dashed disabled:text-ink-2",
       )}
     >
       {children}
@@ -175,7 +199,19 @@ function Detail({
 type Severe = "red" | "orange" | "yellow" | "none";
 
 /** Legenda só da camada mostrada, com as cores que o mapa usa nessa camada. */
-function Legend({ layer, region }: { layer: LayerId; region: Region }) {
+function Legend({
+  layer,
+  region,
+  mode3d,
+  quakes,
+}: {
+  layer: LayerId;
+  region: Region;
+  /** A vista 3D mostrada, se for o caso. */
+  mode3d: Mode3d | null;
+  /** Sismos da página (para as notas da vista em profundidade). */
+  quakes: EarthquakeEvent[];
+}) {
   const { t } = useI18n();
   const scale = (labels: Record<Severe, string>, none: Level) => (
     <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -221,7 +257,33 @@ function Legend({ layer, region }: { layer: LayerId; region: Region }) {
       ) : (
         <span>{t.map.riskMainlandOnly}</span>
       );
-  return <div className="flex flex-col gap-2 text-sm text-ink-2">{items}</div>;
+  let extra: React.ReactNode = null;
+  if (mode3d === "depth") {
+    const bounds = depthSceneBounds[region];
+    const inRegion = quakes.filter((q) => q.place.region === region);
+    const shown = inRegion.filter((q) => q.coordinates && inBounds(q.coordinates, bounds));
+    const outside = inRegion.length - shown.length;
+    extra = (
+      <>
+        <span className="font-bold text-ink">{t.view3d.depthLegend(DEPTH_EXAGGERATION)}</span>
+        <span>{t.view3d.depthMarks}</span>
+        {shown.some((q) => q.depthKm === null) ? <span>{t.view3d.depthMissing}</span> : null}
+        {outside > 0 ? <span>{t.view3d.outside(outside)}</span> : null}
+      </>
+    );
+  } else if (mode3d === "relief") {
+    extra = (
+      <span className="font-bold text-ink">{t.view3d.reliefLegend(RELIEF_EXAGGERATION)}</span>
+    );
+  } else if (mode3d === "height") {
+    extra = <span className="font-bold text-ink">{t.view3d.heightLegend}</span>;
+  }
+  return (
+    <div data-testid="map-legend" className="flex flex-col gap-2 text-sm text-ink-2">
+      {extra}
+      {mode3d === "depth" ? scale(t.map.quakeLevels, "info") : items}
+    </div>
+  );
 }
 
 /**
@@ -260,9 +322,21 @@ export function MapPanel({
   // O risco de incêndio tem previsão para hoje e amanhã (só no continente).
   const [riskDay, setRiskDay] = useState<RiskDay>("today");
   const showRiskDay = layer === "risk" && region === "continente" && state.fireRisk.data !== null;
+  // Vista 3D: só por escolha; o estado é deste componente, por isso reinicia ao mudar de página.
+  const [view, setView] = useState<"map" | "3d">("map");
+  const webgl = useWebGL();
+  const [lost, setLost] = useState(false);
+  const mode3d = mode3dFor(layer, showRiskDay);
+  const can3d = webgl && !lost;
+  const active3d = view === "3d" && can3d ? mode3d : null;
+  const quakes = (state.earthquakes.data ?? []).filter((q) => !focus || q.place.district === focus);
+  const onWebglLost = useCallback(() => {
+    setLost(true);
+    setView("map");
+  }, []);
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      {onRegion || views.length > 1 || showRiskDay ? (
+      {onRegion || views.length > 1 || showRiskDay || mode3d ? (
         <div className="flex flex-wrap gap-x-6 gap-y-3">
           {views.length > 1 ? (
             <div role="radiogroup" aria-label={t.map.show} className="flex flex-wrap gap-2">
@@ -287,6 +361,21 @@ export function MapPanel({
               ))}
             </div>
           ) : null}
+          {mode3d ? (
+            <div role="radiogroup" aria-label={t.view3d.group} className="flex flex-wrap gap-2">
+              <Chip role="radio" pressed={active3d === null} onClick={() => setView("map")}>
+                {t.view3d.map}
+              </Chip>
+              <Chip
+                role="radio"
+                pressed={active3d !== null}
+                onClick={() => setView("3d")}
+                disabled={!can3d}
+              >
+                {t.view3d.threeD}
+              </Chip>
+            </div>
+          ) : null}
           {onRegion ? (
             <div role="radiogroup" aria-label={t.map.zone} className="flex flex-wrap gap-2">
               {regions.map((r) => (
@@ -298,22 +387,40 @@ export function MapPanel({
           ) : null}
         </div>
       ) : null}
+      {mode3d && !can3d ? (
+        <p className="text-sm text-ink-2">{lost ? t.view3d.lost : t.view3d.unavailable}</p>
+      ) : null}
       <div className="relative h-[45vh] min-h-[300px] overflow-hidden rounded-sm border border-line bg-surface-2 sm:h-[62vh] sm:min-h-[360px] lg:h-[min(62vh,680px)]">
-        <LiveMap
-          state={state}
-          layer={layer}
-          riskDay={riskDay}
-          selection={selection}
-          onSelect={onSelect}
-          onClear={onClearSelection}
-          region={region}
-          focus={focus}
-        />
+        {active3d === "depth" ? (
+          <QuakeDepth
+            quakes={quakes}
+            region={region}
+            focus={focus}
+            selection={selection}
+            onSelect={onSelect}
+            onClear={onClearSelection}
+            generatedAt={state.generatedAt}
+            onFailed={onWebglLost}
+          />
+        ) : (
+          <LiveMap
+            state={state}
+            layer={layer}
+            riskDay={riskDay}
+            selection={selection}
+            onSelect={onSelect}
+            onClear={onClearSelection}
+            region={region}
+            focus={focus}
+            view3d={active3d !== null}
+            onWebglLost={onWebglLost}
+          />
+        )}
         {selection ? (
           <Detail state={state} selection={selection} onClose={onClearSelection} />
         ) : null}
       </div>
-      <Legend layer={layer} region={region} />
+      <Legend layer={layer} region={region} mode3d={active3d} quakes={quakes} />
       {focus ? (
         <Link
           href={path(layerTopic[layer])}

@@ -15,7 +15,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getDistrict, regionBounds, type Region } from "@/data/districts";
 import { useI18n } from "@/lib/i18n/client";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { quakeRadiusPx } from "@/lib/geo/scales";
+import { MAP_3D_PITCH, quakeRadiusPx, RELIEF_EXAGGERATION, riskHeight } from "@/lib/geo/scales";
+import { cameraDuration } from "@/lib/hooks/webgl";
 import type { CountryState } from "@/lib/state/aggregate";
 
 import { riskColors } from "../cards/fire-risk";
@@ -23,6 +24,7 @@ import { isSameSelection, type OnSelect, type Selection } from "../cards/types";
 import { useResolvedTheme } from "@/lib/hooks/external";
 import { mapColors } from "../status/severity";
 import type { LayerId, RiskDay } from "./layers";
+import { RELIEF_TILES, registerReliefProtocol } from "./relief";
 
 type Feature = GeoJSON.Feature<GeoJSON.Geometry, Record<string, unknown>>;
 type Collection = GeoJSON.FeatureCollection<GeoJSON.Geometry, Record<string, unknown>>;
@@ -54,6 +56,22 @@ const attribution = (t: Dictionary) =>
 
 const FIT_PADDING = { top: 24, right: 24, bottom: 44, left: 24 };
 
+/**
+ * Relevo da vista 3D dos incêndios: Mapterhorn (terrarium, sem chave), com
+ * dados da DGT no continente, do IGP na Madeira e Copernicus GLO-30 no resto.
+ * Só é pedido quando a pessoa escolhe 3D (ver relief.ts e a CSP em next.config.ts).
+ */
+registerReliefProtocol();
+
+const reliefSource = (t: Dictionary) => ({
+  type: "raster-dem" as const,
+  tiles: [RELIEF_TILES],
+  tileSize: 512,
+  encoding: "terrarium" as const,
+  maxzoom: 12,
+  attribution: `${t.view3d.relief} <a href="https://mapterhorn.com/attribution" target="_blank" rel="noopener">© Mapterhorn</a>`,
+});
+
 /** Os estilos do OpenFreeMap mostram nomes em inglês; preferimos o nome em português. */
 function applyPortugueseLabels(map: MapLibreMap) {
   for (const layer of map.getStyle().layers) {
@@ -71,7 +89,7 @@ function applyPortugueseLabels(map: MapLibreMap) {
 
 const layerIds: Record<LayerId, string[]> = {
   warnings: ["warnings-fill", "warnings-line"],
-  risk: ["risk-fill", "risk-line"],
+  risk: ["risk-fill", "risk-line", "risk-extrusion"],
   air: ["air-circle"],
   quakes: ["quakes-circle"],
   fires: ["fires-halo", "fires-circle"],
@@ -113,6 +131,8 @@ export default function LiveMap({
   onClear,
   focus,
   region,
+  view3d = false,
+  onWebglLost,
 }: {
   state: CountryState;
   layer: LayerId;
@@ -128,6 +148,13 @@ export default function LiveMap({
    */
   focus?: string;
   region: Region;
+  /**
+   * Vista 3D: relevo nos incêndios, risco de incêndio em altura. A câmara
+   * inclina e a rotação (com o compasso) só fica ligada nesta vista.
+   */
+  view3d?: boolean;
+  /** O contexto WebGL perdeu-se: a vista 3D deixa de estar disponível. */
+  onWebglLost?: () => void;
 }) {
   const { t } = useI18n();
   const container = useRef<HTMLDivElement>(null);
@@ -150,12 +177,18 @@ export default function LiveMap({
   const hadSelection = useRef(false);
   const theme = useResolvedTheme();
   const colors = mapColors[theme];
+  // Os reenquadramentos (fitBounds) mantêm a inclinação e a orientação da vista atual.
+  const tilt = (map: MapLibreMap) => ({ pitch: map.getPitch(), bearing: map.getBearing() });
+  const navRef = useRef<NavigationControl | null>(null);
+  const onWebglLostRef = useRef(onWebglLost);
+  const removed = useRef(false);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
     onClearRef.current = onClear;
     selectionRef.current = selection;
-  }, [onSelect, onClear, selection]);
+    onWebglLostRef.current = onWebglLost;
+  }, [onSelect, onClear, selection, onWebglLost]);
 
   // Limites dos distritos (sempre) e dos concelhos (só na camada de risco).
   useEffect(() => {
@@ -190,7 +223,14 @@ export default function LiveMap({
       maxZoom: 13,
     });
     map.touchZoomRotate.disableRotation();
-    map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+    map.keyboard.disableRotation();
+    navRef.current = new NavigationControl({ showCompass: false });
+    map.addControl(navRef.current, "top-right");
+    // Ao remover o mapa, o MapLibre liberta o contexto; isso não é uma falha.
+    removed.current = false;
+    map.on("webglcontextlost", () => {
+      if (!removed.current) onWebglLostRef.current?.();
+    });
     // O estilo do OpenFreeMap refere ícones que não estão no seu sprite
     // (ex.: "circle-11"); em vez de um aviso na consola, fica um ícone vazio.
     map.setMissingStyleImageResolver((id) => {
@@ -212,7 +252,14 @@ export default function LiveMap({
       attrib?.removeAttribute("open");
     });
 
-    const clickable = ["fires-circle", "quakes-circle", "air-circle", "warnings-fill", "risk-fill"];
+    const clickable = [
+      "fires-circle",
+      "quakes-circle",
+      "air-circle",
+      "warnings-fill",
+      "risk-fill",
+      "risk-extrusion",
+    ];
     for (const id of clickable) {
       map.on("mouseenter", id, () => (map.getCanvas().style.cursor = "pointer"));
       map.on("mouseleave", id, () => (map.getCanvas().style.cursor = ""));
@@ -247,7 +294,7 @@ export default function LiveMap({
     // pessoa arrastar ou ampliar (só esses movimentos trazem originalEvent).
     const initialBounds = regionBounds[focusFeatureBounds?.region ?? region];
     fitTarget.current = (duration) =>
-      map.fitBounds(initialBounds, { padding: FIT_PADDING, duration });
+      map.fitBounds(initialBounds, { padding: FIT_PADDING, duration, ...tilt(map) });
     map.on("movestart", (e) => {
       if ((e as { originalEvent?: Event }).originalEvent) userMoved.current = true;
     });
@@ -260,6 +307,7 @@ export default function LiveMap({
     mapRef.current = map;
     return () => {
       observer.disconnect();
+      removed.current = true;
       map.remove();
       mapRef.current = null;
     };
@@ -304,7 +352,11 @@ export default function LiveMap({
             .filter((f) => inFocus(f.properties.district))
             .map((f) => ({
               ...f,
-              properties: { ...f.properties, risk: risk[f.properties.dico as string] ?? 0 },
+              properties: {
+                ...f.properties,
+                risk: risk[f.properties.dico as string] ?? 0,
+                height: riskHeight(risk[f.properties.dico as string] ?? 0),
+              },
             })),
         )
       : collection([]);
@@ -427,6 +479,36 @@ export default function LiveMap({
           "line-color": theme === "dark" ? "#0b1a23" : "#ffffff",
           "line-width": 0.5,
           "line-opacity": 0.8,
+        },
+      },
+      firstLabel,
+    );
+    add(
+      {
+        id: "risk-extrusion",
+        type: "fill-extrusion",
+        source: "concelhos",
+        filter: [">", ["get", "height"], 0],
+        layout: { visibility: "none" },
+        paint: {
+          "fill-extrusion-color": [
+            "match",
+            ["get", "risk"],
+            1,
+            riskColors[1]!,
+            2,
+            riskColors[2]!,
+            3,
+            riskColors[3]!,
+            4,
+            riskColors[4]!,
+            5,
+            riskColors[5]!,
+            "rgba(0,0,0,0)",
+          ],
+          "fill-extrusion-height": ["get", "height"],
+          "fill-extrusion-base": 0,
+          "fill-extrusion-opacity": 0.88,
         },
       },
       firstLabel,
@@ -565,17 +647,79 @@ export default function LiveMap({
     set("air", data.air);
   }, [data, styleVersion]);
 
-  // Visibilidade das camadas.
+  // Visibilidade das camadas. No risco em 3D, a extrusão substitui o preenchimento.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !styleReady.current) return;
+    const extruded = view3d && layer === "risk";
+    const hiddenIn = (mapLayer: string) =>
+      extruded ? mapLayer !== "risk-extrusion" : mapLayer === "risk-extrusion";
     for (const [id, ids] of Object.entries(layerIds) as [LayerId, string[]][]) {
       for (const mapLayer of ids) {
         if (map.getLayer(mapLayer))
-          map.setLayoutProperty(mapLayer, "visibility", id === layer ? "visible" : "none");
+          map.setLayoutProperty(
+            mapLayer,
+            "visibility",
+            id === layer && !hiddenIn(mapLayer) ? "visible" : "none",
+          );
       }
     }
-  }, [layer, styleVersion]);
+  }, [layer, view3d, styleVersion]);
+
+  // Vista 3D: relevo (incêndios) ou só inclinação (risco em altura); rotação
+  // e compasso só aqui. A câmara move-se uma vez, quando a vista muda.
+  const was3d = useRef(false);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !styleReady.current) return;
+    const relief = view3d && layer === "fires";
+    if (relief) {
+      // Duas fontes iguais: o MapLibre desenha melhor o sombreado e o terreno separados.
+      if (!map.getSource("relief-dem")) map.addSource("relief-dem", reliefSource(t));
+      if (!map.getSource("relief-shade")) map.addSource("relief-shade", reliefSource(t));
+      if (!map.getLayer("relief-hillshade"))
+        map.addLayer(
+          {
+            id: "relief-hillshade",
+            type: "hillshade",
+            source: "relief-shade",
+            paint: {
+              "hillshade-exaggeration": theme === "dark" ? 0.4 : 0.3,
+              "hillshade-shadow-color": theme === "dark" ? "#000000" : "#3d5262",
+              "hillshade-highlight-color": theme === "dark" ? "#3a5168" : "#ffffff",
+              "hillshade-accent-color": theme === "dark" ? "#000000" : "#3d5262",
+            },
+          },
+          map.getLayer("risk-fill") ? "risk-fill" : undefined,
+        );
+      map.setLayoutProperty("relief-hillshade", "visibility", "visible");
+      map.setTerrain({ source: "relief-dem", exaggeration: RELIEF_EXAGGERATION });
+    } else {
+      if (map.getLayer("relief-hillshade"))
+        map.setLayoutProperty("relief-hillshade", "visibility", "none");
+      if (map.getTerrain()) map.setTerrain(null);
+    }
+
+    if (view3d) {
+      map.dragRotate.enable();
+      map.touchZoomRotate.enableRotation();
+      map.keyboard.enableRotation();
+    } else {
+      map.dragRotate.disable();
+      map.touchZoomRotate.disableRotation();
+      map.keyboard.disableRotation();
+    }
+
+    if (was3d.current === view3d) return;
+    was3d.current = view3d;
+    if (navRef.current) map.removeControl(navRef.current);
+    navRef.current = new NavigationControl({ showCompass: view3d, visualizePitch: view3d });
+    map.addControl(navRef.current, "top-right");
+    const duration = cameraDuration();
+    if (container.current) container.current.dataset.cameraDuration = String(duration);
+    map.easeTo(view3d ? { pitch: MAP_3D_PITCH, duration } : { pitch: 0, bearing: 0, duration });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view3d, layer, styleVersion]);
 
   // Seleção: realçar e enquadrar.
   useEffect(() => {
@@ -605,7 +749,7 @@ export default function LiveMap({
         (f) => f.properties.slug === selection.slug,
       );
       const bounds = bboxOf(features);
-      if (bounds) map.fitBounds(bounds, { padding: 40, maxZoom: 9, duration: 700 });
+      if (bounds) map.fitBounds(bounds, { padding: 40, maxZoom: 9, duration: 700, ...tilt(map) });
     } else {
       map.setFilter("selected-district", ["==", ["get", "slug"], ""]);
       selected?.setData(
@@ -627,7 +771,7 @@ export default function LiveMap({
     if (!map || focus) return;
     userMoved.current = false;
     fitTarget.current = (duration) =>
-      map.fitBounds(regionBounds[region], { padding: FIT_PADDING, duration });
+      map.fitBounds(regionBounds[region], { padding: FIT_PADDING, duration, ...tilt(map) });
     fitTarget.current(600);
   }, [region, focus]);
 
@@ -637,7 +781,8 @@ export default function LiveMap({
     if (!map || !focus || !districtGeo) return;
     const bounds = bboxOf(districtGeo.features.filter((f) => f.properties.slug === focus));
     if (!bounds) return;
-    fitTarget.current = (duration) => map.fitBounds(bounds, { padding: 32, duration });
+    fitTarget.current = (duration) =>
+      map.fitBounds(bounds, { padding: 32, duration, ...tilt(map) });
     if (!userMoved.current) fitTarget.current(0);
   }, [focus, districtGeo]);
 
