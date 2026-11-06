@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
-import { getDistrict, type Region } from "@/data/districts";
+import { fireDataRegions, fireRiskRegions, getDistrict, type Region } from "@/data/districts";
 import { depthSceneBounds, inBounds } from "@/lib/geo/projection";
 import { DEPTH_EXAGGERATION, RELIEF_EXAGGERATION } from "@/lib/geo/scales";
 import { useWebGL } from "@/lib/hooks/webgl";
@@ -321,7 +321,13 @@ export function MapPanel({
   const { t, path } = useI18n();
   // O risco de incêndio tem previsão para hoje e amanhã (só no continente).
   const [riskDay, setRiskDay] = useState<RiskDay>("today");
-  const showRiskDay = layer === "risk" && region === "continente" && state.fireRisk.data !== null;
+  // Nas páginas nacionais, só as zonas que têm dados desta camada: o risco de
+  // incêndio do IPMA é só do continente; o Fogos.pt não tem os Açores.
+  const zones: readonly Region[] =
+    layer === "risk" ? fireRiskRegions : layer === "fires" ? fireDataRegions : regions;
+  const shownRegion: Region = !onRegion || zones.includes(region) ? region : "continente";
+  const showRiskDay =
+    layer === "risk" && shownRegion === "continente" && state.fireRisk.data !== null;
   // Os mapas que têm vista 3D abrem nela (com a entrada da câmara); "Mapa" volta ao 2D.
   // O estado é deste componente, por isso reinicia ao mudar de página.
   const [view, setView] = useState<"map" | "3d">("3d");
@@ -337,7 +343,7 @@ export function MapPanel({
   }, []);
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      {onRegion || views.length > 1 || showRiskDay || mode3d ? (
+      {(onRegion && zones.length > 1) || views.length > 1 || showRiskDay || mode3d ? (
         <div className="flex flex-wrap gap-x-6 gap-y-3">
           {views.length > 1 ? (
             <div role="radiogroup" aria-label={t.map.show} className="flex flex-wrap gap-2">
@@ -377,10 +383,10 @@ export function MapPanel({
               </Chip>
             </div>
           ) : null}
-          {onRegion ? (
+          {onRegion && zones.length > 1 ? (
             <div role="radiogroup" aria-label={t.map.zone} className="flex flex-wrap gap-2">
-              {regions.map((r) => (
-                <Chip key={r} role="radio" pressed={region === r} onClick={() => onRegion(r)}>
+              {zones.map((r) => (
+                <Chip key={r} role="radio" pressed={shownRegion === r} onClick={() => onRegion(r)}>
                   {t.map.regions[r]}
                 </Chip>
               ))}
@@ -395,7 +401,7 @@ export function MapPanel({
         {active3d === "depth" ? (
           <QuakeDepth
             quakes={quakes}
-            region={region}
+            region={shownRegion}
             focus={focus}
             selection={selection}
             onSelect={onSelect}
@@ -411,7 +417,7 @@ export function MapPanel({
             selection={selection}
             onSelect={onSelect}
             onClear={onClearSelection}
-            region={region}
+            region={shownRegion}
             focus={focus}
             view3d={active3d !== null}
             onWebglLost={onWebglLost}
@@ -421,7 +427,7 @@ export function MapPanel({
           <Detail state={state} selection={selection} onClose={onClearSelection} />
         ) : null}
       </div>
-      <Legend layer={layer} region={region} mode3d={active3d} quakes={quakes} />
+      <Legend layer={layer} region={shownRegion} mode3d={active3d} quakes={quakes} />
       {focus ? (
         <Link
           href={path(layerTopic[layer])}

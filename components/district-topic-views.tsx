@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import type { District } from "@/data/districts";
+import { fireDataRegions, regionalCivilProtection, type District } from "@/data/districts";
 import { useI18n } from "@/lib/i18n/client";
 import type { CountryState } from "@/lib/state/aggregate";
 import { districtFireRisk } from "@/lib/state/district";
@@ -60,17 +60,31 @@ export function DistrictFiresView({ district, initial }: Props) {
   const { state, controls, mapRef, reference } = useTopic(initial, ["fires"], district.region);
   const inPlace = t.inPlace(district);
   const fires = (state.fires.data ?? []).filter((f) => f.place.district === district.slug);
+  const covered = fireDataRegions.includes(district.region);
+  const regional = regionalCivilProtection[district.region];
   return (
     <TopicLayout
       title={t.districtPages.firesTitle(inPlace)}
-      intro={t.districtPages.firesIntro(inPlace)}
+      intro={t.districtPages.firesIntro(district)}
       state={state}
       controls={controls}
       mapRef={mapRef}
       district={district}
     >
-      <Section id="incendios" title={t.pages.firesList} result={state.fires}>
-        {state.fires.data ? (
+      <Section id="incendios" title={t.pages.firesList} result={covered ? state.fires : undefined}>
+        {!covered ? (
+          <EmptyState>
+            {t.empty.firesNotCovered(inPlace)}{" "}
+            {regional ? (
+              <a href={regional.url} rel="noopener">
+                {t.empty.firesRegional} ({regional.name})
+              </a>
+            ) : (
+              t.empty.firesRegional
+            )}
+            .
+          </EmptyState>
+        ) : state.fires.data ? (
           <FireList
             fires={fires}
             reference={reference}

@@ -425,6 +425,8 @@ function Scene({
       const rc = risk[d.slug] ?? 0;
       tmp.set(dim ? colors.dim : LAND[level]);
       if (rc > 0 && wRisk > 0) tmp.lerp(tmp2.set(riskColors[rc]!), wRisk);
+      // Sem risco publicado (as ilhas): apagado, para não parecer um nível.
+      else if (wRisk > 0) tmp.lerp(tmp2.set(colors.dim), wRisk);
       if (wWarn > 0 && level === "none") tmp.lerp(tmp2.set(colors.dim), wWarn * 0.7);
       const [top, wall] = materials.get(d.slug)!;
       top.color.copy(tmp);

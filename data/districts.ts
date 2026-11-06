@@ -287,6 +287,22 @@ export function ipmaAreaLabel(area: string): string {
   return ipmaAreaNames[area] ?? districtForIpmaArea(area)?.name ?? area;
 }
 
+/**
+ * Que regiões tem cada fonte. O Fogos.pt publica incêndios do continente
+ * (ANEPC) e da Madeira; os Açores não. O risco de incêndio do IPMA é só do
+ * continente. Avisos, sismos, previsão, UV e qualidade do ar cobrem tudo.
+ */
+export const fireDataRegions: readonly Region[] = ["continente", "madeira"];
+export const fireRiskRegions: readonly Region[] = ["continente"];
+
+/** Contactos da proteção civil regional onde o Fogos.pt não tem dados. */
+export const regionalCivilProtection: Partial<Record<Region, { url: string; name: string }>> = {
+  acores: {
+    url: "https://www.prociv.azores.gov.pt",
+    name: "SRPCBA",
+  },
+};
+
 /** Enquadramentos do mapa por região: [[oeste, sul], [este, norte]]. */
 export const regionBounds: Record<Region, [[number, number], [number, number]]> = {
   continente: [

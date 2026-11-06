@@ -1,5 +1,5 @@
 import { districtOfDico } from "@/data/dico-district";
-import { getDistrict, type District } from "@/data/districts";
+import { fireDataRegions, getDistrict, type District } from "@/data/districts";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { fireRiskLabels } from "@/lib/sources/labels";
 import { severityRank, type Severity, type WarningEvent } from "@/lib/sources/types";
@@ -293,7 +293,17 @@ export function districtTopics(state: CountryState, slug: string, t: Dictionary)
   );
 
   const fires = state.fires.data;
-  if (fires) {
+  const region = getDistrict(slug)?.region ?? "continente";
+  if (!fireDataRegions.includes(region)) {
+    const d = getDistrict(slug);
+    topics.push({
+      id: "incendios",
+      label: T.fires,
+      value: T.noData,
+      detail: T.firesNotCovered(d ? t.inPlace(d) : ""),
+      level: "unknown",
+    });
+  } else if (fires) {
     const active = fires.filter((f) => f.active && f.place.district === slug);
     const places = [...new Set(active.map((f) => f.concelho ?? f.place.label))];
     topics.push({

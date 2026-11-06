@@ -110,7 +110,10 @@ export function WarningGroups({
                 <span className="font-bold">{w.label}</span>
                 {showPlaces ? (
                   <>
-                    <span className="text-ink-2"> · {t.lists.windowPlaces(w.items.length)}</span>
+                    <span className="text-ink-2">
+                      {" "}
+                      · {t.lists.windowPlaces(w.items.length, t.areaName(w.items[0]?.area ?? ""))}
+                    </span>
                     <Places items={w.items} />
                   </>
                 ) : null}

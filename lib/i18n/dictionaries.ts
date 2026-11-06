@@ -9,6 +9,32 @@ import {
 import type { Locale } from "./locales";
 import { translateTerm } from "./terms";
 
+/** Capitais de distrito que levam artigo: "no Porto", "na Guarda", "no Funchal". */
+const capitalArticle: Record<string, "o" | "a"> = { Porto: "o", Guarda: "a", Funchal: "o" };
+
+/** "em Lisboa" / "no Porto", "para Lisboa" / "para o Porto". */
+function ptCapital(prep: "em" | "para", name: string): string {
+  const a = capitalArticle[name];
+  if (!a) return `${prep} ${name}`;
+  return prep === "em" ? `${a === "o" ? "no" : "na"} ${name}` : `para ${a} ${name}`;
+}
+
+/** "em" com o artigo que a zona de aviso pede: "nos Açores, Grupo Central", "na Madeira, costa norte", "no Porto". */
+function ptInArea(label: string): string {
+  if (label.startsWith("Açores")) return "nos ";
+  if (label.startsWith("Madeira")) return "na ";
+  if (label === "Porto") return "no ";
+  if (label === "Guarda") return "na ";
+  return "em ";
+}
+
+/** "em Lisboa" → "de Lisboa", "no Porto" → "do Porto", "nos Açores" → "dos Açores". */
+const ofPlace = (inName: string) =>
+  inName.replace(
+    /^(em|no|na|nos|nas) /,
+    (_, p: string) => ({ em: "de ", no: "do ", na: "da ", nos: "dos ", nas: "das " })[p] ?? "de ",
+  );
+
 type LevelKey = "none" | "yellow" | "orange" | "red";
 type BadgeKey = LevelKey | "info" | "unknown";
 
@@ -161,7 +187,9 @@ const pt = {
     riskWhereDistrict: (n: number) => `em ${plural(n, "concelho", "concelhos")}`,
     riskEverywhere: (n: number) => `hoje, em todos os ${n} concelhos`,
     riskEverywhereDistrict: (n: number) => `em todos os ${n} concelhos`,
-    airValue: (label: string) => `Ar ${label.toLowerCase()}`,
+    airValue: (label: string) => `Qualidade ${label.toLowerCase()}`,
+    /** Linha dos incêndios num sítio sem dados do Fogos.pt. */
+    firesNotCovered: (inPlace: string) => `o Fogos.pt não tem dados ${inPlace}`,
     uv: (index: string, label?: string) => `UV ${index}${label ? `, ${label.toLowerCase()}` : ""}`,
   },
   caption: {
@@ -193,7 +221,7 @@ const pt = {
     legendFire: "Incêndio em curso",
     legendQuake: "Sismo sentido",
     back: "Todo o país",
-    forecastFor: (capital: string) => `Previsão para ${capital}`,
+    forecastFor: (capital: string) => `Previsão ${ptCapital("para", capital)}`,
     forecastNote: "Máxima e mínima; percentagem é a probabilidade de chuva. Fonte: IPMA.",
     forecastNone: "Sem previsão de momento. Consulte",
     rainChance: "Probabilidade de chuva: ",
@@ -211,7 +239,7 @@ const pt = {
     airUv: "Ar e raios UV",
     allDistricts: "Todos os distritos",
     map: "Mapa",
-    mapOf: (name: string) => `Mapa de ${name}`,
+    mapOf: (d: District) => `Mapa ${ofPlace(d.inName)}`,
     mapIntro: "Aproxime e toque num evento para ver o detalhe.",
     mapIntroDistrict: (inPlace: string) =>
       `Só o que acontece ${inPlace}. Aproxime e toque num evento para ver o detalhe.`,
@@ -225,7 +253,8 @@ const pt = {
     warningsIntro:
       "Os avisos do IPMA para os próximos três dias. Cada aviso aparece uma vez, com o horário e os locais.",
     firesTitle: "Incêndios",
-    firesIntro: "Ocorrências registadas pela Proteção Civil (ANEPC), via Fogos.pt.",
+    firesIntro:
+      "Ocorrências no continente e na Madeira, registadas pela Proteção Civil e publicadas no Fogos.pt.",
     quakesTitle: "Sismos",
     quakesIntro: "Sismos registados pelo IPMA nos últimos 7 dias, em Portugal e perto da costa.",
     riskTitle: "Risco de incêndio e qualidade do ar",
@@ -239,16 +268,20 @@ const pt = {
     warningsIntro: (inPlace: string) =>
       `Os avisos do IPMA ${inPlace} para os próximos três dias, com o horário de cada um.`,
     firesTitle: (inPlace: string) => `Incêndios ${inPlace}`,
-    firesIntro: (inPlace: string) =>
-      `Ocorrências registadas pela Proteção Civil (ANEPC) ${inPlace}, via Fogos.pt.`,
+    firesIntro: (d: District) =>
+      d.region === "continente"
+        ? `Ocorrências registadas pela Proteção Civil (ANEPC) ${d.inName}, via Fogos.pt.`
+        : d.region === "madeira"
+          ? `Ocorrências registadas pela proteção civil regional ${d.inName}, via Fogos.pt.`
+          : `O Fogos.pt não tem dados de incêndios ${d.inName}.`,
     quakesTitle: (inPlace: string) => `Sismos ${inPlace}`,
     quakesIntro: (inPlace: string) =>
       `Sismos de magnitude 2 ou superior registados pelo IPMA ${inPlace} nos últimos 7 dias.`,
     riskTitle: (inPlace: string) => `Risco de incêndio, ar e UV ${inPlace}`,
     airTitle: (inPlace: string) => `Ar e raios UV ${inPlace}`,
     riskIntro: (capital: string) =>
-      `O risco de incêndio rural por concelho, hoje e amanhã (IPMA), e a qualidade do ar e o índice UV em ${capital}.`,
-    airIntro: (capital: string) => `A qualidade do ar e o índice UV em ${capital}.`,
+      `O risco de incêndio rural por concelho, hoje e amanhã (IPMA), e a qualidade do ar e o índice UV ${ptCapital("em", capital)}.`,
+    airIntro: (capital: string) => `A qualidade do ar e o índice UV ${ptCapital("em", capital)}.`,
   },
   empty: {
     warnings: "Não há avisos meteorológicos em vigor nem previstos para os próximos três dias.",
@@ -258,6 +291,10 @@ const pt = {
     firesDown:
       "Informação sobre incêndios indisponível neste momento. Consulte os incêndios ativos em",
     firesNone: "Não há incêndios registados neste momento.",
+    /** Nos Açores: o Fogos.pt não cobre a região; a proteção civil regional sim. */
+    firesNotCovered: (inPlace: string) =>
+      `O Fogos.pt só tem dados do continente e da Madeira; não há informação de incêndios ${inPlace}. Consulte`,
+    firesRegional: "o Serviço Regional de Proteção Civil",
     firesNoneActive: "Nenhum incêndio em curso ou em resolução.",
     quakesDown: "Sem dados de sismos de momento.",
     quakesNone: "Nenhum sismo de magnitude 2 ou superior nos últimos 7 dias.",
@@ -273,7 +310,7 @@ const pt = {
   },
   lists: {
     showMap: "Ver no mapa",
-    windowPlaces: (n: number) => (n === 1 ? "em " : `${n} locais: `),
+    windowPlaces: (n: number, first = "") => (n === 1 ? ptInArea(first) : `${n} locais: `),
     azoresTime: " (hora dos Açores)",
     mainlandTime: " (hora do continente)",
     fireMeta: (nature: string, start: string) => `${nature}. Início ${start}.`,
@@ -307,7 +344,7 @@ const pt = {
     airNote:
       "Estimativa de modelo (Copernicus CAMS) para as capitais de distrito, não medição de estação.",
     airNoteDistrict: (capital: string) =>
-      `Qualidade do ar: estimativa de modelo (Copernicus CAMS via Open-Meteo) para ${capital}. Índice UV: previsão do IPMA.`,
+      `Qualidade do ar: estimativa de modelo (Copernicus CAMS via Open-Meteo) ${ptCapital("para", capital)}. Índice UV: previsão do IPMA.`,
   },
   source: {
     source: "Fonte",
@@ -392,7 +429,7 @@ const pt = {
       incendios: "Cada coluna de luz é um incêndio em curso: quanto mais alta, mais operacionais.",
       sismos: "Cada anel é um sismo sentido nos últimos 7 dias: quanto maior, maior a magnitude.",
       risco:
-        "No mapa, cada distrito toma a cor e a altura do risco de incêndio mais alto de hoje num dos seus concelhos.",
+        "No mapa, cada distrito do continente toma a cor e a altura do risco de incêndio mais alto de hoje num dos seus concelhos; as ilhas ficam apagadas, porque o IPMA não publica este risco para elas.",
       ar: "Estimativa de modelo para a capital de cada distrito (Copernicus CAMS).",
     },
     warnedNone: "Nenhum distrito com aviso.",
@@ -603,7 +640,8 @@ const en: Dictionary = {
     riskWhereDistrict: (n) => `in ${plural(n, "municipality", "municipalities")}`,
     riskEverywhere: (n) => `today, in all ${n} municipalities`,
     riskEverywhereDistrict: (n) => `in all ${n} municipalities`,
-    airValue: (label) => `Air ${label.toLowerCase()}`,
+    airValue: (label) => `${capitalizeEn(label.toLowerCase())} air`,
+    firesNotCovered: (inPlace) => `Fogos.pt has no data ${inPlace}`,
     uv: (index, label) => `UV ${index}${label ? `, ${label.toLowerCase()}` : ""}`,
   },
   caption: {
@@ -651,7 +689,7 @@ const en: Dictionary = {
     airUv: "Air and UV",
     allDistricts: "All districts",
     map: "Map",
-    mapOf: (name) => `Map of ${name}`,
+    mapOf: (d) => `Map of ${d.en?.inName?.replace(/^in /, "") ?? enDistrictName(d)}`,
     mapIntro: "Zoom in and tap an event for details.",
     mapIntroDistrict: (inPlace) =>
       `Only what is happening ${inPlace}. Zoom in and tap an event for details.`,
@@ -665,7 +703,8 @@ const en: Dictionary = {
     warningsIntro:
       "IPMA warnings for the next three days. Each warning appears once, with its times and places.",
     firesTitle: "Wildfires",
-    firesIntro: "Incidents recorded by Civil Protection (ANEPC), via Fogos.pt.",
+    firesIntro:
+      "Incidents on the mainland and in Madeira, recorded by Civil Protection and published on Fogos.pt.",
     quakesTitle: "Earthquakes",
     quakesIntro: "Earthquakes recorded by IPMA in the last 7 days, in Portugal and off its coast.",
     riskTitle: "Wildfire risk and air quality",
@@ -678,8 +717,14 @@ const en: Dictionary = {
     warningsIntro: (inPlace) =>
       `IPMA warnings ${inPlace} for the next three days, with the times of each one.`,
     firesTitle: (inPlace) => `Wildfires ${inPlace}`,
-    firesIntro: (inPlace) =>
-      `Incidents recorded by Civil Protection (ANEPC) ${inPlace}, via Fogos.pt.`,
+    firesIntro: (d) => {
+      const inPlace = d.en?.inName ?? `in ${enDistrictName(d)}`;
+      return d.region === "continente"
+        ? `Incidents recorded by Civil Protection (ANEPC) ${inPlace}, via Fogos.pt.`
+        : d.region === "madeira"
+          ? `Incidents recorded by regional civil protection ${inPlace}, via Fogos.pt.`
+          : `Fogos.pt has no wildfire data ${inPlace}.`;
+    },
     quakesTitle: (inPlace) => `Earthquakes ${inPlace}`,
     quakesIntro: (inPlace) =>
       `Earthquakes of magnitude 2 or more recorded by IPMA ${inPlace} in the last 7 days.`,
@@ -695,6 +740,9 @@ const en: Dictionary = {
     warningsDown: "See the warnings at ipma.pt while the connection to IPMA is restored.",
     firesDown: "Wildfire information is unavailable right now. See active wildfires at",
     firesNone: "No wildfires recorded right now.",
+    firesNotCovered: (inPlace) =>
+      `Fogos.pt only has data for the mainland and Madeira; there is no wildfire information ${inPlace}. See`,
+    firesRegional: "the Regional Civil Protection Service",
     firesNoneActive: "No wildfires in progress or being resolved.",
     quakesDown: "No earthquake data right now.",
     quakesNone: "No earthquakes of magnitude 2 or more in the last 7 days.",
@@ -709,7 +757,8 @@ const en: Dictionary = {
   },
   lists: {
     showMap: "Show on map",
-    windowPlaces: (n) => (n === 1 ? "in " : `${n} areas: `),
+    windowPlaces: (n, first = "") =>
+      n === 1 ? (first.startsWith("Azores") ? "in the " : "in ") : `${n} areas: `,
     azoresTime: " (Azores time)",
     mainlandTime: " (mainland time)",
     fireMeta: (nature, start) => `${nature}. Started ${start}.`,
@@ -826,7 +875,7 @@ const en: Dictionary = {
       incendios: "Each column of light is an active wildfire: the taller, the more firefighters.",
       sismos: "Each ring is an earthquake felt in the last 7 days: the bigger, the stronger.",
       risco:
-        "On the map, each district takes the colour and height of today's highest wildfire risk in any of its municipalities.",
+        "On the map, each mainland district takes the colour and height of today's highest wildfire risk in any of its municipalities; the islands are dimmed, as IPMA does not publish this risk for them.",
       ar: "Model estimate for each district capital (Copernicus CAMS).",
     },
     warnedNone: "No district under a warning.",

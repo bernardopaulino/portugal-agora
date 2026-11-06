@@ -48,9 +48,9 @@ function Portuguese() {
       </p>
       <h2>Tecnologia</h2>
       <p>
-        Next.js, TypeScript e Tailwind CSS, com mapa em MapLibre. Os dados são obtidos no servidor,
-        validados, guardados em cache e atualizados a cada minuto no seu ecrã. Se uma fonte falhar,
-        o site continua a funcionar com os últimos dados conhecidos.
+        Next.js, TypeScript e Tailwind CSS, com mapas em MapLibre e cenas 3D em three.js. Os dados
+        são obtidos no servidor, validados, guardados em cache e atualizados a cada minuto no seu
+        ecrã. Se uma fonte falhar, o site continua a funcionar com os últimos dados conhecidos.
       </p>
       <h2>Contacto</h2>
       <p>
@@ -86,9 +86,9 @@ function English() {
       </p>
       <h2>Technology</h2>
       <p>
-        Next.js, TypeScript and Tailwind CSS, with maps in MapLibre. Data is fetched on the server,
-        validated, cached and refreshed on your screen every minute. If a source fails, the site
-        keeps working with the last known data.
+        Next.js, TypeScript and Tailwind CSS, with maps in MapLibre and 3D scenes in three.js. Data
+        is fetched on the server, validated, cached and refreshed on your screen every minute. If a
+        source fails, the site keeps working with the last known data.
       </p>
       <h2>Contact</h2>
       <p>

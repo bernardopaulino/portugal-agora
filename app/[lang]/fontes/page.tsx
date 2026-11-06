@@ -98,7 +98,9 @@ function Portuguese() {
         <a href="https://fogos.pt" rel="noopener">
           Fogos.pt
         </a>
-        , que reúne as ocorrências da ANEPC. Consultado a cada 2 minutos.
+        , que reúne as ocorrências da ANEPC no continente e as da Madeira. Não tem dados dos Açores:
+        aí, consulte o Serviço Regional de Proteção Civil e Bombeiros dos Açores. Consultado a cada
+        2 minutos.
       </p>
       <h3>Como classificamos os incêndios</h3>
       <p>
@@ -277,7 +279,9 @@ function English() {
         <a href="https://fogos.pt" rel="noopener">
           Fogos.pt
         </a>
-        , which gathers incidents from ANEPC (Civil Protection). Checked every 2 minutes.
+        , which gathers incidents from ANEPC (Civil Protection) on the mainland and those in
+        Madeira. It has no data for the Azores: there, see the Azores Regional Civil Protection
+        Service. Checked every 2 minutes.
       </p>
       <h3>How we classify wildfires</h3>
       <p>

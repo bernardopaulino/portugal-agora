@@ -77,7 +77,7 @@ export function TopicLayout({
               id="mapa-titulo"
               className="font-display text-2xl leading-tight font-semibold tracking-[-0.02em]"
             >
-              {district ? t.sections.mapOf(t.districtName(district)) : t.sections.map}
+              {district ? t.sections.mapOf(district) : t.sections.map}
             </h2>
             <p className="max-w-[70ch] text-base text-ink-2">
               {district ? t.sections.mapIntroDistrict(t.inPlace(district)) : t.sections.mapIntro}

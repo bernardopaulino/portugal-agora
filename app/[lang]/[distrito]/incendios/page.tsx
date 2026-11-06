@@ -25,7 +25,7 @@ export async function generateMetadata(
     locale: lang,
     path: `/${district.slug}/incendios`,
     title: t.meta.districtFiresTitle(inPlace),
-    description: t.districtPages.firesIntro(inPlace),
+    description: t.districtPages.firesIntro(district),
     image: inheritedOgImage(lang, t.site.ogAlt, district.slug),
   });
 }
