@@ -37,7 +37,7 @@ test("o seletor leva à página do distrito", async ({ page }) => {
   await picker(page).selectOption("porto");
   await expect(page).toHaveURL(/\/porto$/);
   await expect(pageTitle(page)).toContainText("Porto");
-  await expect(page.getByRole("heading", { name: "Previsão para Porto" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Previsão para o Porto" })).toBeVisible();
   // Durante a view transition da mudança de página (~350 ms) o React tira o <title>
   // antigo e só põe o novo no fim; espera-se pelo título antes da auditoria.
   await expect(page).toHaveTitle(/^Porto/);
@@ -135,6 +135,37 @@ test("o mapa mostra só o tema da página", async ({ page }) => {
   await expect(air).toHaveAttribute("aria-checked", "false");
   await air.click();
   await expect(air).toHaveAttribute("aria-checked", "true");
+});
+
+test("o mapa só oferece as zonas que têm dados", async ({ page }) => {
+  const zones = page.getByRole("radiogroup", { name: "Zona do mapa" });
+  // O risco de incêndio do IPMA é só do continente: sem escolha de zona.
+  await page.goto("/risco");
+  await expect(page.getByRole("radio", { name: "Risco de incêndio", exact: true })).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
+  await expect(zones).toHaveCount(0);
+  // A qualidade do ar cobre as ilhas.
+  await page.getByRole("radio", { name: "Qualidade do ar", exact: true }).click();
+  await expect(zones.getByRole("radio")).toHaveText(["Continente", "Açores", "Madeira"]);
+  // O Fogos.pt não tem os Açores.
+  await page.goto("/incendios");
+  await expect(zones.getByRole("radio")).toHaveText(["Continente", "Madeira"]);
+});
+
+test("nos Açores, os incêndios dizem que não há dados e para onde ir", async ({ page }) => {
+  await page.goto("/acores/incendios");
+  await expect(page.getByText("O Fogos.pt não tem dados de incêndios nos Açores.")).toBeVisible();
+  await expect(page.getByRole("link", { name: /Proteção Civil \(SRPCBA/ })).toHaveAttribute(
+    "href",
+    "https://www.prociv.azores.gov.pt",
+  );
+  await page.goto("/acores");
+  // A linha dos incêndios do resumo: sem dados, e porquê (não "nenhum em curso").
+  await expect(
+    page.getByRole("link", { name: /Incêndios.*Sem dados.*o Fogos\.pt não tem dados nos Açores/ }),
+  ).toBeVisible();
 });
 
 test("o mapa do risco de incêndio mostra hoje ou amanhã", async ({ page }) => {
