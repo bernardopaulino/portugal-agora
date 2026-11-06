@@ -17,6 +17,11 @@ Projeto **sem fins lucrativos**: sem publicidade, sem donativos, sem monetizaç�
   - `/lisboa/avisos`, `/lisboa/incendios`, `/lisboa/sismos` e `/lisboa/risco` (risco de incêndio por concelho, hoje e amanhã, qualidade do ar e UV), com o mapa enquadrado no distrito.
   - O menu do cabeçalho acompanha o distrito, e o seletor mantém o tema ao mudar de sítio (de `/lisboa/avisos` para `/porto/avisos`).
 - **Mapa detalhado** (MapLibre + OpenFreeMap) com 5 camadas: avisos por distrito, incêndios, sismos, risco de incêndio por concelho e qualidade do ar. Cada página mostra só a camada do seu tema (na página do risco escolhe-se entre risco de incêndio e qualidade do ar), com a legenda dessa camada. Nas páginas de distrito, o mapa mostra só o que é do distrito, esbate o resto do país e tem uma ligação para o mesmo tema em todo o país. No risco de incêndio, escolhe-se hoje ou amanhã. Liga-se às listas: "Ver no mapa" enquadra o evento, um clique no mapa mostra o detalhe e um segundo clique no mesmo sítio tira a seleção e volta à vista geral.
+- **Vista 3D (opcional)** nos mapas dos sismos, dos incêndios e do risco de incêndio, escolhida com o par de botões Mapa | 3D (cada mapa abre em 2D):
+  - **Sismos, "Profundidade":** um bloco de crosta da região, com o nível do mar translúcido, os distritos e cada sismo à sua profundidade, por baixo do epicentro (profundidade exagerada 3×). Feito com three e @react-three/fiber, que só são descarregados quando se escolhe esta vista. Roda-se com o rato, o dedo (na horizontal), os botões ou as setas; aproxima-se com Ctrl/⌘ e a roda, dois dedos ou + e −.
+  - **Incêndios, "Relevo 3D":** o relevo da Mapterhorn (exagerado 2×) com sombreado, o mapa inclinado e os incêndios assentes no terreno.
+  - **Risco, "Risco em altura":** cada concelho com uma altura que repete a classe de risco.
+  - Cada legenda diz o que exagera. A seleção, "Ver no mapa" e o painel de detalhe funcionam como no 2D. Sem WebGL, o botão 3D fica desativado e o mapa 2D continua; a câmara só se move quando a pessoa a move ou escolhe um evento (e salta, sem animação, com "reduzir movimento").
 - **Português e inglês:** o português fica na raiz (`/`, `/lisboa`) e o inglês em `/en` (`/en`, `/en/lisboa`). O botão PT | EN leva à mesma página no outro idioma. Os textos que vêm das fontes (descrições dos avisos, nomes de locais) ficam em português, como publicados; o vocabulário fixo (tipos de aviso, estado dos incêndios, classes de qualidade do ar) é traduzido.
 - **Perto de mim:** a localização é convertida em distrito **no próprio dispositivo** (ponto-em-polígono com os limites da CAOP). Nada é enviado ao servidor.
 - **Resiliência:** se uma fonte falhar, o site mostra os últimos dados obtidos, assinalados como desatualizados. Nunca fica em branco.
@@ -28,16 +33,17 @@ Projeto **sem fins lucrativos**: sem publicidade, sem donativos, sem monetizaç�
 
 ## Fontes de dados
 
-| Dados                                  | Fonte                                                             | Atualização |
-| -------------------------------------- | ----------------------------------------------------------------- | ----------- |
-| Avisos meteorológicos                  | [IPMA](https://api.ipma.pt)                                       | 5 min       |
-| Sismos (continente, Madeira, Açores)   | IPMA                                                              | 5 min       |
-| Risco de incêndio rural por concelho   | IPMA (só continente)                                              | 1 h         |
-| Índice UV e previsão a 5 dias          | IPMA                                                              | 1 h         |
-| Incêndios ativos                       | [Fogos.pt](https://fogos.pt) (dados ANEPC), requer chave          | 2 min       |
-| Qualidade do ar (estimativa de modelo) | [Open-Meteo](https://open-meteo.com) / Copernicus CAMS, CC BY 4.0 | 10 min      |
-| Mapa base                              | [OpenFreeMap](https://openfreemap.org), © OpenStreetMap           | —           |
-| Limites de distritos e concelhos       | CAOP 2025, [DGT](https://www.dgterritorio.gov.pt), CC BY          | estático    |
+| Dados                                  | Fonte                                                              | Atualização |
+| -------------------------------------- | ------------------------------------------------------------------ | ----------- |
+| Avisos meteorológicos                  | [IPMA](https://api.ipma.pt)                                        | 5 min       |
+| Sismos (continente, Madeira, Açores)   | IPMA                                                               | 5 min       |
+| Risco de incêndio rural por concelho   | IPMA (só continente)                                               | 1 h         |
+| Índice UV e previsão a 5 dias          | IPMA                                                               | 1 h         |
+| Incêndios ativos                       | [Fogos.pt](https://fogos.pt) (dados ANEPC), requer chave           | 2 min       |
+| Qualidade do ar (estimativa de modelo) | [Open-Meteo](https://open-meteo.com) / Copernicus CAMS, CC BY 4.0  | 10 min      |
+| Mapa base                              | [OpenFreeMap](https://openfreemap.org), © OpenStreetMap            | —           |
+| Relevo (vista 3D dos incêndios)        | [Mapterhorn](https://mapterhorn.com) (DGT, IGP, Copernicus GLO-30) | —           |
+| Limites de distritos e concelhos       | CAOP 2025, [DGT](https://www.dgterritorio.gov.pt), CC BY           | estático    |
 
 A página `/fontes` explica cada fonte e como classificamos incêndios, sismos e qualidade do ar. O nível principal segue sempre a escala oficial do IPMA.
 
@@ -45,7 +51,7 @@ A página `/privacidade` descreve o que (não) é recolhido e `/sobre` explica o
 
 ## Stack
 
-Next.js 16 (App Router, Cache Components, Turbopack), React 19, TypeScript, Tailwind CSS 4, shadcn/ui, Zod 4, SWR, MapLibre GL 6, Upstash Redis, Vitest, Playwright + axe-core. Alojamento na Vercel (região `cdg1`, Paris).
+Next.js 16 (App Router, Cache Components, Turbopack), React 19, TypeScript, Tailwind CSS 4, shadcn/ui, Zod 4, SWR, MapLibre GL 6, three e @react-three/fiber 9 (só a vista 3D dos sismos, sem descodificadores em WebAssembly), Upstash Redis, Vitest, Playwright + axe-core. Alojamento na Vercel (região `cdg1`, Paris).
 
 ## Arquitetura
 
@@ -113,7 +119,7 @@ public/geo/             limites simplificados da CAOP 2025 (GeoJSON)
 public/icons/           ícones da app
 tests/unit/             testes com respostas reais das APIs (tests/fixtures)
 tests/e2e/              Playwright + auditoria de acessibilidade, em computador e telemóvel
-scripts/                worker do MapLibre (postinstall) e formas do mapa do boletim
+scripts/                worker do MapLibre (postinstall), formas do mapa do boletim e índice do relevo
 ```
 
 ## Desenvolvimento
@@ -147,6 +153,14 @@ Todo o texto do site está em `lib/i18n/dictionaries.ts`. Ao acrescentar uma fra
 ### Regenerar os limites administrativos
 
 Os ficheiros em `public/geo/` foram gerados a partir dos GeoPackages oficiais da CAOP 2025 (DGT), simplificados com `geopandas` (tolerância de 400 m para os distritos, 150 m para as ilhas e 250 m para os concelhos). Quando sair uma nova CAOP, basta repetir o processo com os ficheiros novos e depois correr `node scripts/build-map-shapes.mjs`, que gera as formas do mapa do boletim e do logótipo (`data/map-shapes.ts`). Nos Açores, o script aproxima os três grupos de ilhas (encolhe o mar entre eles) para as ilhas caberem maiores na caixa; a mesma conversão é usada para pôr os sismos no sítio certo.
+
+### Regenerar o índice do relevo
+
+A Mapterhorn responde 404 aos tiles só de mar, e o browser mostra cada 404 como um erro na consola. Por isso o mapa só pede os tiles que existem, segundo `public/geo/relief-tiles.json` (os tiles com relevo à volta de Portugal, ao zoom 12, gerados a partir do índice de cobertura público da Mapterhorn), e usa um tile plano para o resto. Quando a Mapterhorn acrescentar fontes:
+
+```bash
+npm install --no-save pmtiles && node scripts/build-relief-index.mjs
+```
 
 ## Deploy (Vercel)
 

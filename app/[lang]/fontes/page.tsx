@@ -142,6 +142,39 @@ function Portuguese() {
         </a>
         , licença CC BY.
       </p>
+      <h3 id="vista-3d">A vista 3D dos mapas</h3>
+      <p>
+        Os mapas dos sismos, dos incêndios e do risco de incêndio têm uma vista 3D opcional. Cada
+        uma diz na legenda o que exagera:
+      </p>
+      <ul>
+        <li>
+          <strong>Sismos:</strong> cada sismo aparece à profundidade indicada pelo IPMA, por baixo
+          do epicentro, com a profundidade exagerada 3 vezes. Os sismos sem profundidade indicada
+          ficam à superfície, com contorno tracejado.
+        </li>
+        <li>
+          <strong>Incêndios:</strong> relevo da{" "}
+          <a href="https://mapterhorn.com/attribution" rel="noopener">
+            Mapterhorn
+          </a>
+          , exagerado 2 vezes, construído com dados abertos: modelos digitais do terreno da
+          Direção-Geral do Território (continente) e do Instituto Geográfico Português (Madeira),
+          licença CC BY 4.0, e{" "}
+          <a
+            href="https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM"
+            rel="noopener"
+          >
+            Copernicus GLO-30
+          </a>{" "}
+          (© DLR e Airbus, fornecido no âmbito do Copernicus pela União Europeia e pela ESA) no
+          resto. O mapa só pede o relevo quando se escolhe a vista 3D.
+        </li>
+        <li>
+          <strong>Risco de incêndio:</strong> a altura de cada concelho repete a classe de risco do
+          IPMA (1 a 5), tal como a cor. Não é relevo.
+        </li>
+      </ul>
 
       <h2>Quando uma fonte falha</h2>
       <p>
@@ -286,6 +319,39 @@ function English() {
         </a>
         , CC BY licence.
       </p>
+      <h3 id="vista-3d">The 3D view of the maps</h3>
+      <p>
+        The earthquake, wildfire and wildfire risk maps have an optional 3D view. Each one says in
+        its legend what it exaggerates:
+      </p>
+      <ul>
+        <li>
+          <strong>Earthquakes:</strong> each earthquake sits at the depth given by IPMA, below the
+          epicentre, with depth exaggerated 3 times. Earthquakes with no depth given stay at the
+          surface, with a dashed outline.
+        </li>
+        <li>
+          <strong>Wildfires:</strong> relief from{" "}
+          <a href="https://mapterhorn.com/attribution" rel="noopener">
+            Mapterhorn
+          </a>
+          , exaggerated 2 times, built from open data: digital terrain models from the
+          Directorate-General for Territory (mainland) and the Portuguese Geographic Institute
+          (Madeira), CC BY 4.0 licence, and{" "}
+          <a
+            href="https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM"
+            rel="noopener"
+          >
+            Copernicus GLO-30
+          </a>{" "}
+          (© DLR and Airbus, provided under Copernicus by the European Union and ESA) elsewhere. The
+          map only requests the relief when you choose the 3D view.
+        </li>
+        <li>
+          <strong>Wildfire risk:</strong> each municipality&apos;s height repeats IPMA&apos;s risk
+          class (1 to 5), as does the colour. It is not relief.
+        </li>
+      </ul>
 
       <h2>When a source fails</h2>
       <p>

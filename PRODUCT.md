@@ -27,16 +27,17 @@ One calm, non-commercial place that aggregates IPMA, Fogos.pt (ANEPC), Open-Mete
 ## Capabilities and Constraints
 
 - National summary (headline level = highest IPMA warning in force or forecast), one page per topic (warnings, fires, earthquakes, fire risk and air quality), each opening with an interactive map that shows only that topic (fire risk can be shown for today or tomorrow) and the list below it, or beside it on wide screens, district pages for 18 districts + Açores + Madeira (5-day forecast, warnings, fires, quakes, fire risk today/tomorrow, air quality, UV).
+- Optional 3D view on the earthquake, wildfire and fire-risk maps, only by the visitor's choice (every map opens flat): earthquakes at their depth under the epicentre in a crust block of the region, wildfires on the terrain, fire risk as height per concelho. Each view states what it exaggerates; the selection, the list and the detail panel work the same as in 2D. Without WebGL the 3D choice is disabled and the flat map stays. The 3D library loads only when someone chooses the earthquake view.
 - "Perto de mim": location → district resolved on the device; nothing sent to the server.
 - Resilience: stale/unavailable states per source must remain visible and honest.
-- Stack: Next.js 16 App Router (Cache Components), React 19, Tailwind 4, MapLibre, SWR. Hosted on Vercel (cdg1).
+- Stack: Next.js 16 App Router (Cache Components), React 19, Tailwind 4, MapLibre, three with @react-three/fiber (the 3D earthquake view only), SWR. Hosted on Vercel (cdg1).
 - Languages: European Portuguese at the root (default) and British English under /en. Text from the sources (warning descriptions, place names) stays in Portuguese as published; fixed vocabulary is translated.
 
 ## Brand Commitments
 
 - Name: Portugal Agora.
 - Strictly non-profit: no ads, no donations, no monetisation (required by Fogos.pt and IPMA terms).
-- Must attribute sources visibly (IPMA, Fogos.pt, Open-Meteo/Copernicus CAMS, OpenFreeMap/OSM, DGT CAOP).
+- Must attribute sources visibly (IPMA, Fogos.pt, Open-Meteo/Copernicus CAMS, OpenFreeMap/OSM, DGT CAOP, and Mapterhorn for the relief of the 3D wildfire view: "© Mapterhorn" on the map, and its open terrain sources, DGT, IGP and Copernicus GLO-30, on /fontes).
 - Must state it is informative and does not replace the authorities; emergency number 112.
 - Severity always follows the official IPMA scale (verde/amarelo/laranja/vermelho).
 
