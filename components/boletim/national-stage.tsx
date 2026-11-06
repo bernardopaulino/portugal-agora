@@ -110,7 +110,10 @@ export function NationalStage({ state }: { state: CountryState }) {
             {/* Linha fixa por cima do título, que muda com o estado do país: diz ao
                 Google (e a quem chega pela primeira vez) do que trata a página. */}
             <p className="text-base font-semibold text-stage-ink-2">{t.meta.homeKicker}</p>
-            <h1 id="boletim-titulo" className="font-display text-display font-bold text-balance">
+            <h1
+              id="boletim-titulo"
+              className="title-in font-display text-display font-bold text-balance"
+            >
               {countryHeadline(state.levelKnown, state.districts, t)}
             </h1>
             <BulletinStamp iso={state.generatedAt} />

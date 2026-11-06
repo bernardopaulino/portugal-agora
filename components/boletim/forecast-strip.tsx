@@ -57,12 +57,13 @@ export function ForecastStrip({
       <h2 id="previsao-titulo" className="font-display text-2xl font-bold">
         {t.stage.forecastFor(capital)}
       </h2>
-      <ol className="lower-third-in grid grid-cols-5 overflow-hidden rounded-sm bg-stage-2">
+      <ol className="flip-in grid grid-cols-5 overflow-hidden rounded-sm bg-stage-2">
         {days.slice(0, 5).map((d, i) => {
           const Icon = weatherIcon(d.weatherId);
           return (
             <li
               key={d.date}
+              style={{ "--i": i } as React.CSSProperties}
               className={
                 "flex min-w-0 flex-col items-center gap-1.5 px-0.5 py-3 text-center sm:px-3 sm:py-4" +
                 (i > 0 ? " border-l border-stage-line" : "")

@@ -45,12 +45,16 @@ export function TopicList({
   hrefFor?: (id: Topic["id"]) => string;
 }) {
   return (
-    <ul className="flex flex-col border-t border-stage-line">
-      {topics.map((t) => (
-        <li key={t.id} className="border-b border-stage-line">
+    <ul className="cascade-in flex flex-col border-t border-stage-line">
+      {topics.map((t, i) => (
+        <li
+          key={t.id}
+          className="border-b border-stage-line"
+          style={{ "--i": i } as React.CSSProperties}
+        >
           <Link
             href={hrefFor(t.id)}
-            className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 py-3 no-underline"
+            className="lift-hover group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 py-3 no-underline"
           >
             <LevelMark level={t.level} />
             <span className="flex min-w-0 flex-col">

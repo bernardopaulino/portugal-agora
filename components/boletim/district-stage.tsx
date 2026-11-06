@@ -54,7 +54,10 @@ export function DistrictStage({
             <ArrowLeft aria-hidden className="size-4" /> {t.stage.back}
           </Link>
           <div className="flex flex-col gap-3">
-            <h1 id="boletim-titulo" className="font-display text-display font-bold text-balance">
+            <h1
+              id="boletim-titulo"
+              className="title-in font-display text-display font-bold text-balance"
+            >
               {districtHeadline(district, state.warnings.data ?? [], state.levelKnown, t)}
             </h1>
             <BulletinStamp iso={state.generatedAt} />

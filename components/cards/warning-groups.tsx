@@ -8,6 +8,7 @@ import { useHighlightNew } from "@/lib/hooks/live-highlight";
 import { useI18n } from "@/lib/i18n/client";
 import type { Locale } from "@/lib/i18n/locales";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { reveal } from "@/lib/motion/reveal";
 import type { WarningEvent } from "@/lib/sources/types";
 import { groupWarnings, type WarningGroup } from "@/lib/state/bulletin";
 import { capitalize, formatRange } from "@/lib/time/format";
@@ -89,6 +90,7 @@ export function WarningGroups({
         <li
           key={g.key}
           data-live-key={g.key}
+          ref={reveal}
           className="flex flex-col gap-3 border-b border-line py-5"
         >
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">

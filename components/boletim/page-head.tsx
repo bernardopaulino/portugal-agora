@@ -36,7 +36,10 @@ export function PageHead({
             <ArrowLeft aria-hidden className="size-4" /> {back.label}
           </Link>
         ) : null}
-        <h1 id="pagina-titulo" className="font-display text-display font-bold text-balance">
+        <h1
+          id="pagina-titulo"
+          className="title-in font-display text-display font-bold text-balance"
+        >
           {title}
         </h1>
         <p className="max-w-[60ch] text-lg">{intro}</p>

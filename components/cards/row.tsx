@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { useI18n } from "@/lib/i18n/client";
+import { reveal } from "@/lib/motion/reveal";
 import { cn } from "@/lib/utils";
 
 import { SeverityBadge, type Level } from "../status/severity";
@@ -37,6 +38,7 @@ export function EventRow({
     <li
       id={id}
       data-live-key={id}
+      ref={reveal}
       className={cn(
         "flex scroll-mt-24 flex-col gap-3 border-b border-line py-4 sm:flex-row sm:items-start sm:gap-6",
         selected && "bg-surface-2",

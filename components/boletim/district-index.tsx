@@ -4,6 +4,7 @@ import { districts } from "@/data/districts";
 import type { CountryState } from "@/lib/state/aggregate";
 import { severityRank } from "@/lib/sources/types";
 import { useI18n } from "@/lib/i18n/client";
+import { reveal } from "@/lib/motion/reveal";
 import { cn } from "@/lib/utils";
 
 import { levels } from "../status/severity";
@@ -32,7 +33,7 @@ export function DistrictIndex({ state }: { state: CountryState }) {
       {rows.map(({ district, level }) => {
         const Icon = levels[level].icon;
         return (
-          <li key={district.slug} className="border-b border-line">
+          <li key={district.slug} ref={reveal} className="border-b border-line">
             <a
               href={path(`/${district.slug}`)}
               className="flex min-h-11 items-center gap-2.5 py-1.5 text-base text-ink no-underline hover:underline"
