@@ -1,6 +1,6 @@
 ---
 name: Portugal Agora
-description: The national hazard picture as the TV weather bulletin; one sea-blue stage, one map coloured by the IPMA levels, one sentence.
+description: The national hazard picture as the TV weather bulletin in 3D; one sea-blue stage, one relief map raised by the IPMA levels, one sentence.
 colors:
   stage: "#dcebf5"
   stage-2: "#c6dcec"
@@ -161,16 +161,16 @@ components:
 
 **Creative North Star: "The Evening Weather Bulletin"**
 
-Portugal Agora reads like the boletim meteorológico on the evening news. The first viewport is a sea-blue stage: a pale morning sea in the light theme, a deep night sea in the dark one. On it sits one flat map of the country, every distrito filled with its official IPMA level and outlined in white, with Açores and Madeira boxed as insets in the sea. Beside the map, a presenter's summary: a date-and-time stamp, one headline at display size, and four topic lines. Below the map, a white lower-third bar carries the level legend and a live caption that follows whatever distrito the visitor points at.
+Portugal Agora reads like the boletim meteorológico on the evening news. The first viewport is a sea-blue stage: a pale morning sea in the light theme, a deep night sea in the dark one. On it sits one relief map of the country, every distrito filled with its official IPMA level, outlined in white and raised to a height that repeats that level, with Açores and Madeira boxed as insets in the sea. Beside the map, a presenter's summary: a date-and-time stamp, one headline at display size, and four topic lines. Below the map, a white lower-third bar carries the level legend and a live caption that follows whatever distrito the visitor points at.
 
 Below the stage the page turns into a calm, cool, light reading ground. Each topic (avisos, incêndios, sismos, risco e ar) has its own page: the detailed map of that one topic first, then the grouped detail set as ruled lists, not cards. Colour does almost no decorative work. The four IPMA levels carry the only saturated colour; everything else is blue-grey ink on cool paper, or navy ink on the pale sea (white on the night sea).
 
-Density is low on the stage and moderate below it. Type is large (an 18px root that honours the visitor's own font size), contrast is high, and every level is spoken three ways: colour, icon shape and word. Motion only ever carries information: the lower third wipes in once, the caption crossfades, pages hand over to each other with a short fade, the current-tab rule slides to the new tab, a list item that arrived in the last refresh is tinted once, and in the optional 3D view of a topic map the camera glides only where the visitor sends it. Nothing loops, pulses or blinks.
+Density is low on the stage and moderate below it. Type is large (an 18px root that honours the visitor's own font size), contrast is high, and every level is spoken three ways: colour, icon shape and word. Motion is broadcast graphics in 3D, and it is cinematic once, then still: on arrival the camera tilts over the map and the districts rise to their levels, the lower third flips up and wipes across, the topic rows turn into place one by one, and pages hand over in depth. After that nothing moves until the visitor does. Nothing loops, pulses or blinks, and with reduced motion everything appears in its final state (see Motion).
 
 **Key Characteristics:**
 
 - Full-bleed sea stage owns the first viewport: pale sea-blue in the light theme, night navy in the dark one.
-- Flat district fills in the IPMA scale with white borders; no gradients, no relief, no basemap on the stage.
+- District fills in the IPMA scale with white borders, raised in relief by level (red tallest); no gradients, no glows, no basemap on the stage.
 - Condensed broadcast sans for headlines, numbers, captions and controls; a hyperlegible sans for reading text.
 - Lower-third caption bar as the signature component, driven by pointing at the map.
 - Below the stage: ruled lists on a cool light ground; one interaction accent per context.
@@ -254,7 +254,7 @@ One centred container (80rem, gutters 1rem, 1.5rem from 640px). The stage is ful
 
 ## Elevation & Depth
 
-Flat. Depth comes from the two grounds (sea above, paper below) and from hairline rules, not from shadow. One exception is native to the world: the lower third and the overlay panel on the detailed map float above their ground with a soft broadcast drop, the way a caption graphic sits over the picture.
+Depth comes from the two grounds (sea above, paper below), from hairline rules and from relief, not from shadow. The bulletin map and the topic maps are 3D scenes: height repeats a level or a class, or shows a real depth or terrain, and it is never decoration. One exception is native to the world: the lower third and the overlay panel on the detailed map float above their ground with a soft broadcast drop, the way a caption graphic sits over the picture.
 
 ### Shadow Vocabulary
 
@@ -262,7 +262,7 @@ Flat. Depth comes from the two grounds (sea above, paper below) and from hairlin
 
 ### Named Rules
 
-**The Flat Map Rule.** The bulletin map is flat fills with white borders (island districts take a 5px outline in their own fill instead, so they hold up at inset scale). No relief, gradients, glows or drop shadows on districts; emphasis is a thicker outline (white for the focused distrito, `stage-accent` for the pointed one), and other distritos dim to `land-dim` on a district page. The rule governs the stage. The detailed maps on the topic pages open flat too; their 3D view (see Detailed Map) is only ever the visitor's choice, says what it exaggerates and never moves on its own.
+**The Relief Rule.** Height on a map always means something and is always said. On the bulletin map each distrito is a flat-coloured block (top in its `land-*` fill, walls the same fill at 70%, white borders; island districts take a 5px outline in their own fill so they hold up at inset scale) raised to a height that repeats its level: no warning 8, unknown 5, amarelo 22, laranja 38, vermelho 56 viewBox units; dimmed distritos on a district page lie almost flat in `land-dim`. No gradients, glows or drop shadows; emphasis is a lift (12 units) plus a thicker outline (white for the focused distrito, `stage-accent` for the pointed one). On the topic maps, every 3D legend states the exaggeration. The relief is an enhancement: the flat SVG map comes first, stays underneath for the keyboard and screen readers, and remains the whole map without WebGL.
 
 ## Shapes
 
@@ -272,11 +272,11 @@ Small, square-ish corners everywhere (0.25rem): lower third, level marks, foreca
 
 ### Lower Third (signature)
 
-The bulletin's caption bar. A white bar (`caption`) on the stage with a level block on the left (map fill, icon and level word in Barlow) and the caption beside it: distrito name at title size, one sentence of status in body, and an "Abrir [distrito]" link. Pointing at a distrito (hover, keyboard focus, first tap on touch) swaps the caption; with nothing pointed, it shows the national caption. Wipes in once on load (clip-path left to right, 700ms, expo-out, 150ms delay); each caption change fades up 4px in 180ms. Minimum 64px tall; on phones the action drops under the text with a 44px target.
+The bulletin's caption bar. A white bar (`caption`) on the stage with a level block on the left (map fill, icon and level word in Barlow) and the caption beside it: distrito name at title size, one sentence of status in body, and an "Abrir [distrito]" link. Pointing at a distrito (hover, keyboard focus, first tap on touch) swaps the caption; with nothing pointed, it shows the national caption. Enters once on load like a broadcast caption: it flips up from its bottom edge while wiping open left to right (950ms, expo-out, 350ms delay); each caption change turns down into place like a split-flap board (340ms). Minimum 64px tall; on phones the action drops under the text with a 44px target.
 
 ### Topic List
 
-Four rows on the stage between translucent white rules: a 40px level mark, a small pale label, the value in Barlow at title size with optional detail in Atkinson, and an arrow that nudges right on hover. Each row links to its section below.
+Four rows on the stage between translucent white rules: a 40px level mark, a small pale label, the value in Barlow at title size with optional detail in Atkinson, and an arrow that nudges right on hover. Each row links to its section below. On load the rows turn up into place one after another (800ms each, 90ms apart); on hover a row comes forward in depth.
 
 ### Level Mark and Legend Chips
 
@@ -304,7 +304,7 @@ The page-ground expression of a level: a pill with the soft background and reada
 
 ### Lists (instead of cards)
 
-Detail is set as ruled lists: a hairline above the list, a hairline under each item, no boxes. Warning groups show badge plus type at title size, the IPMA text once, and each time window with its places. Event rows add a meta line and a "Ver no mapa" text button; the selected row fills with mist. Empty states are a line of large slate text between two rules.
+Detail is set as ruled lists: a hairline above the list, a hairline under each item, no boxes. Warning groups show badge plus type at title size, the IPMA text once, and each time window with its places. Event rows add a meta line and a "Ver no mapa" text button; the selected row fills with mist. Empty states are a line of large slate text between two rules. Items that start below the screen enter once when they scroll into view, tilting up from depth (750ms, 60ms apart); items already on screen never move.
 
 ### Detailed Map (topic pages)
 
@@ -314,7 +314,7 @@ On a district page the rest of the country is washed over with the page ground a
 
 #### The 3D view
 
-The earthquake, wildfire and fire-risk maps (the risk page only on its fire-risk layer; air quality and warnings stay flat) have an optional 3D view that shows what the flat map cannot. Every map opens flat. A **Mapa | 3D** radio pair of map chips sits with the other chips; the choice lives in the page's client state and resets on the next page. Without WebGL2, or if the context is lost, the 3D chip is disabled (dashed hairline border, `ink-2` label) with a short body-small note above the frame, and the flat map carries on.
+The earthquake, wildfire and fire-risk maps (the risk page only on its fire-risk layer; air quality and warnings stay flat) open in a 3D view that shows what the flat map cannot. A **Mapa | 3D** radio pair of map chips sits with the other chips and takes the visitor back to the flat map; the choice lives in the page's client state and resets on the next page. Without WebGL2, or if the context is lost, the 3D chip is disabled (dashed hairline border, `ink-2` label) with a short body-small note above the frame, and the flat map carries on.
 
 - **Earthquakes, "Profundidade":** a crust block of the chosen region (Continente, Açores or Madeira, with a margin of sea) seen from the south-south-west at 55°. Sea level is a translucent plane (sea blue at about 30%), the distritos are hairlines on it (the page's distrito in `ink`), and each quake is a sphere at its depth under the epicentre, joined to the surface by a faint drop line. Size follows magnitude on the same scale as the flat map; colour is the level from the map palette (`info` below 3.5); a felt quake carries a thin `ink` ring; older quakes are more transparent. A quake with no depth given stays at the surface with a dashed `ink` outline. The selected quake takes an outline in the interaction accent. Depth grid lines run round the block at 0, 10, 20, 50 and 100 km, only as deep as the data needs; their labels are real HTML text in body small on `surface` chips beside the nearest vertical edge, and a label that would overlap the one above it hides.
 - **Wildfires, "Relevo 3D":** the same MapLibre map with Mapterhorn terrain, a discreet hillshade under the layers and a 55° pitch; fire markers sit on the ground. Rotation and the compass in the zoom control exist only in this view.
@@ -322,7 +322,7 @@ The earthquake, wildfire and fire-risk maps (the risk page only on its fire-risk
 
 Every 3D legend opens with one bold `ink` line saying what it exaggerates ("Profundidade exagerada 3×", "Relevo exagerado 2×", or that the height repeats the class and is not relief), then the usual level scale. The detail panel and the list still give each level by word and icon (the Three Ways Rule), and the selection is the one the flat map uses, so "Ver no mapa", the list and the panel behave the same in both views.
 
-**Camera.** Nothing turns, pulses or loops. The camera moves only when the visitor moves it or chooses an event: choosing (or clearing) a quake glides there in 600 ms, ease-out, and so do "Repor vista" and the tilt into (or out of) the relief and height views; with reduced motion every move is a jump. On the earthquake block, dragging orbits within limits (never under the sea plane, never upside down); zooming needs Ctrl/⌘ with the wheel or two fingers, as on the flat map, and a wheel without the key shows the same hint. Seven 44px buttons in two rows at the top right, clear of the detail panel even on a phone (`surface`, hairline border, small corners) zoom, rotate, tilt and reset. The canvas is focusable: arrows rotate and tilt, + and − zoom. It is `role="img"` with a generated summary (how many quakes, the deepest in km); the list stays the text equivalent and "Saltar o mapa" still skips it.
+**Camera.** Each 3D view opens with one entry (1.8s, ease-in-out): on the earthquake block the camera comes down from overhead, further out and turned, to its home view while each quake sinks from the surface to its depth (a quake that arrives later sinks too); on the wildfire and risk maps the map tilts to 55° and turns 12°, and on the risk map the concelhos rise from the ground to their class. After that the camera moves only when the visitor moves it or chooses an event: choosing (or clearing) a quake glides there in 600ms, ease-out, and so do "Repor vista" and later switches between Mapa and 3D. With reduced motion every move is a jump. On the earthquake block, dragging orbits within limits (never under the sea plane, never upside down); zooming needs Ctrl/⌘ with the wheel or two fingers, as on the flat map, and a wheel without the key shows the same hint. Seven 44px buttons in two rows at the top right, clear of the detail panel even on a phone (`surface`, hairline border, small corners) zoom, rotate, tilt and reset. The canvas is focusable: arrows rotate and tilt, + and − zoom. It is `role="img"` with a generated summary (how many quakes, the deepest in km); the list stays the text equivalent and "Saltar o mapa" still skips it.
 
 ### Share Image
 
@@ -330,17 +330,30 @@ The 1200 x 630 image each page shares, per locale. The light soft background of 
 
 ### Forecast Strip
 
-Five days in one `stage-2` panel with `stage-line` dividers: day name in Barlow, a `stage-accent` weather pictogram, max in Barlow bold with min in `stage-ink-2`, rain chance in body small. Wipes in like the lower third.
+Five days in one `stage-2` panel with `stage-line` dividers: day name in Barlow, a `stage-accent` weather pictogram, max in Barlow bold with min in `stage-ink-2`, rain chance in body small. The days turn in like cards from their left edge, one after another.
 
 ### District Index
 
 A two-column ruled list of every distrito and região, sorted by level then name, each with a 24px level chip; the text path to the map.
 
+## Motion
+
+Broadcast graphics in 3D: strong entrances that each happen once, then a still picture. Every transform is a perspective rotation or a move in depth, eased with expo-out (`cubic-bezier(0.16, 1, 0.3, 1)`) unless noted.
+
+- **Bulletin relief:** the flat SVG map paints first; the 3D scene replaces it on its first, identical frame, then tilts to 38° (1.7s, ease-in-out) while the distritos rise to their levels, red last. Pointing a distrito lifts it 12 units in 180ms.
+- **Stage titles:** the display headline tilts up into place (1000ms); only its transform moves, so the text is readable from the first frame.
+- **Lower third, caption, topic rows, forecast:** see their components.
+- **Topic maps:** see Detailed Map, Camera.
+- **Page handover:** the old page recedes in depth and fades (300ms); the new one rises from below, straightening (750ms, 120ms delay). The current-tab rule slides to the new tab (280ms).
+- **Lists:** items below the screen tilt up from depth as they scroll into view, once.
+- **Live data:** a list item that arrived in the last refresh is tinted once (2.4s), with no movement.
+- **Reduced motion:** every animation jumps to its end, the relief appears already tilted and raised, the cameras jump, and nothing waits hidden for a scroll.
+
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** open every hazard page with the stage: sea ground, flat level map, one display headline, the lower third.
+- **Do** open every hazard page with the stage: sea ground, level map in relief, one display headline, the lower third.
 - **Do** show each level with its map fill or severity triplet, its icon shape and its word.
 - **Do** set headlines, numbers, names and controls in Barlow Semi Condensed and every sentence in Atkinson Hyperlegible Next.
 - **Do** keep one interaction accent per ground: `stage-accent` on the stage, `accent` on the page.
@@ -353,5 +366,5 @@ A two-column ruled list of every distrito and região, sorted by level then name
 - **Don't** put `land-*` fills on the page ground or `sev-*` triplets on the stage.
 - **Don't** use `stage-ink` as a background; it flips from navy to white between themes. Fixed white surfaces on the stage use `caption`.
 - **Don't** wrap detail in cards or columns of equal-weight boxes; use rules.
-- **Don't** add shadows beyond the caption drop, or relief and gradients to the bulletin map. Relief and height belong only in the optional 3D view of a topic map, with the exaggeration stated in its legend.
-- **Don't** animate anything beyond the lower-third wipe, the forecast wipe, the caption fade, the page handover, the tab-rule slide, the one-off "new" tint on list items, short hover feedback (the topic arrow nudge) and the 3D camera moving where the visitor sends it. Never pulse, blink or loop, least of all on the red and orange levels.
+- **Don't** add shadows beyond the caption drop, or gradients and glows to the maps. Height on a map always repeats a level or a class, or shows a real depth or terrain, and the legend says so.
+- **Don't** add motion outside the vocabulary in Motion, and never let anything move on its own after its entrance. Never pulse, blink, rotate continuously or loop, least of all on the red and orange levels.

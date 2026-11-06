@@ -144,8 +144,9 @@ function Portuguese() {
       </p>
       <h3 id="vista-3d">A vista 3D dos mapas</h3>
       <p>
-        Os mapas dos sismos, dos incêndios e do risco de incêndio têm uma vista 3D opcional. Cada
-        uma diz na legenda o que exagera:
+        O mapa do boletim mostra cada distrito com uma altura que repete o seu nível de aviso (o
+        vermelho é o mais alto). Os mapas dos sismos, dos incêndios e do risco de incêndio abrem
+        numa vista 3D (o botão «Mapa» volta ao mapa plano), e cada uma diz na legenda o que exagera:
       </p>
       <ul>
         <li>
@@ -168,7 +169,7 @@ function Portuguese() {
             Copernicus GLO-30
           </a>{" "}
           (© DLR e Airbus, fornecido no âmbito do Copernicus pela União Europeia e pela ESA) no
-          resto. O mapa só pede o relevo quando se escolhe a vista 3D.
+          resto. O relevo só é pedido no mapa dos incêndios, na vista 3D.
         </li>
         <li>
           <strong>Risco de incêndio:</strong> a altura de cada concelho repete a classe de risco do
@@ -321,8 +322,9 @@ function English() {
       </p>
       <h3 id="vista-3d">The 3D view of the maps</h3>
       <p>
-        The earthquake, wildfire and wildfire risk maps have an optional 3D view. Each one says in
-        its legend what it exaggerates:
+        The bulletin map shows each district at a height that repeats its warning level (red is the
+        tallest). The earthquake, wildfire and wildfire risk maps open in a 3D view (the “Map”
+        button goes back to the flat map), and each one says in its legend what it exaggerates:
       </p>
       <ul>
         <li>
@@ -345,7 +347,7 @@ function English() {
             Copernicus GLO-30
           </a>{" "}
           (© DLR and Airbus, provided under Copernicus by the European Union and ESA) elsewhere. The
-          map only requests the relief when you choose the 3D view.
+          relief is only requested on the wildfire map, in the 3D view.
         </li>
         <li>
           <strong>Wildfire risk:</strong> each municipality&apos;s height repeats IPMA&apos;s risk

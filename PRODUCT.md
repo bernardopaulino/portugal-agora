@@ -27,10 +27,11 @@ One calm, non-commercial place that aggregates IPMA, Fogos.pt (ANEPC), Open-Mete
 ## Capabilities and Constraints
 
 - National summary (headline level = highest IPMA warning in force or forecast), one page per topic (warnings, fires, earthquakes, fire risk and air quality), each opening with an interactive map that shows only that topic (fire risk can be shown for today or tomorrow) and the list below it, or beside it on wide screens, district pages for 18 districts + Açores + Madeira (5-day forecast, warnings, fires, quakes, fire risk today/tomorrow, air quality, UV).
-- Optional 3D view on the earthquake, wildfire and fire-risk maps, only by the visitor's choice (every map opens flat): earthquakes at their depth under the epicentre in a crust block of the region, wildfires on the terrain, fire risk as height per concelho. Each view states what it exaggerates; the selection, the list and the detail panel work the same as in 2D. Without WebGL the 3D choice is disabled and the flat map stays. The 3D library loads only when someone chooses the earthquake view.
+- 3D motion design, cinematic once and then still: the bulletin map rises in relief by level after the flat map has painted (the flat SVG stays underneath for the keyboard and screen readers, and is the whole map without WebGL); pages hand over in depth; captions, topic rows, forecast days and list items enter once in perspective.
+- The earthquake, wildfire and fire-risk maps open in 3D with one camera entry: earthquakes at their depth under the epicentre in a crust block of the region, wildfires on the terrain, fire risk as height per concelho. "Mapa" goes back to the flat map. Each view states what it exaggerates; the selection, the list and the detail panel work the same as in 2D. Without WebGL the 3D choice is disabled and the flat map stays.
 - "Perto de mim": location → district resolved on the device; nothing sent to the server.
 - Resilience: stale/unavailable states per source must remain visible and honest.
-- Stack: Next.js 16 App Router (Cache Components), React 19, Tailwind 4, MapLibre, three with @react-three/fiber (the 3D earthquake view only), SWR. Hosted on Vercel (cdg1).
+- Stack: Next.js 16 App Router (Cache Components), React 19, Tailwind 4, MapLibre, three with @react-three/fiber (the bulletin relief, loaded after first paint, and the 3D earthquake view), SWR. Hosted on Vercel (cdg1).
 - Languages: European Portuguese at the root (default) and British English under /en. Text from the sources (warning descriptions, place names) stays in Portuguese as published; fixed vocabulary is translated.
 
 ## Brand Commitments
@@ -49,9 +50,9 @@ Live official data only. No testimonials, user counts, or press exist; do not in
 
 1. Summary first, detail on demand: never repeat official text that says the same thing for many places — group it.
 2. Official and honest: show the source and freshness of every number; never hide a failed source.
-3. Calm, not alarmist: severity is conveyed precisely, not dramatised.
+3. Calm, not alarmist: severity is conveyed precisely, not dramatised. Motion is a single strong entrance, then stillness; nothing loops, pulses or moves on its own.
 4. Private by default: location stays on the device.
 
 ## Accessibility & Inclusion
 
-WCAG 2.2 AA (verified with axe in Playwright). Severity never by colour alone (colour + icon + word). 44 px touch targets, light/dark themes, respects reduced motion. Readable for older users and low vision (generous base size).
+WCAG 2.2 AA (verified with axe in Playwright). Severity never by colour alone (colour + icon + word). 44 px touch targets, light/dark themes, respects reduced motion (every entrance jumps to its final state). Readable for older users and low vision (generous base size).
