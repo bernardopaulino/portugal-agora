@@ -1,72 +1,70 @@
 ---
 name: Portugal Agora
-description: The national hazard picture as the TV weather bulletin in 3D; one sea-blue stage, one relief map raised by the IPMA levels, one sentence.
+description: Mission control for the national hazard picture; Portugal in 3D, alone in the dark and lit by its IPMA levels, with glass panels that tell the story as the camera travels.
 colors:
-  stage: "#dcebf5"
-  stage-2: "#c6dcec"
-  stage-ink: "#0a1d2e"
-  stage-ink-2: "#3a5168"
-  stage-line: "rgb(10 29 46 / 0.15)"
-  stage-accent: "#0b5cad"
-  caption: "#ffffff"
+  bg: "#05080f"
+  bg-2: "#0a111d"
+  surface: "#0e1726"
+  surface-2: "#17243a"
+  ink: "#eef3f9"
+  ink-2: "#9cadc0"
+  line: "rgb(255 255 255 / 0.11)"
+  accent: "#6fe3ff"
+  accent-ink: "#03141c"
+  glow: "rgb(111 227 255 / 0.32)"
+  glass: "rgb(13 22 37 / 0.62)"
+  glass-strong: "rgb(10 17 29 / 0.84)"
+  glass-line: "rgb(255 255 255 / 0.10)"
+  glass-hi: "rgb(255 255 255 / 0.14)"
   land-none: "#4f9d63"
   land-yellow: "#f2c200"
   land-orange: "#f07f1a"
   land-red: "#d7262b"
   land-unknown: "#8797a3"
   land-info: "#8fd6ff"
-  land-dim: "#b5cbdd"
-  fire: "#e2401b"
+  land-dim: "#1c2b40"
+  fire: "#ff5a2a"
   ink-on-land: "#0a1d2e"
-  bg: "#eef2f5"
-  surface: "#ffffff"
-  surface-2: "#e2e9ef"
-  ink: "#0a1d2e"
-  ink-2: "#45586a"
-  line: "#cdd7df"
-  accent: "#0b5cad"
-  sev-none: "#2e7d4f"
-  sev-none-bg: "#e2f1e7"
-  sev-none-ink: "#1c5535"
-  sev-yellow: "#e8b000"
-  sev-yellow-bg: "#fff3c7"
-  sev-yellow-ink: "#634800"
-  sev-orange: "#e0661b"
-  sev-orange-bg: "#fde5d3"
-  sev-orange-ink: "#843505"
-  sev-red: "#c62828"
-  sev-red-bg: "#fbe0e0"
-  sev-red-ink: "#8b1a1a"
-  sev-unknown: "#7c8b94"
-  sev-unknown-bg: "#e6ebee"
-  sev-unknown-ink: "#3d4a52"
+  sev-none: "#4caf73"
+  sev-none-bg: "rgb(76 175 115 / 0.16)"
+  sev-none-ink: "#a6e6bd"
+  sev-yellow: "#f2c230"
+  sev-yellow-bg: "rgb(242 194 48 / 0.16)"
+  sev-yellow-ink: "#f7dc84"
+  sev-orange: "#f07a2e"
+  sev-orange-bg: "rgb(240 122 46 / 0.18)"
+  sev-orange-ink: "#fbbf96"
+  sev-red: "#ef5350"
+  sev-red-bg: "rgb(239 83 80 / 0.18)"
+  sev-red-ink: "#f9b3b2"
+  sev-unknown: "#8d9ba3"
+  sev-unknown-bg: "rgb(141 155 163 / 0.16)"
+  sev-unknown-ink: "#cbd5db"
 typography:
   display:
-    fontFamily: "Barlow Semi Condensed, sans-serif"
-    fontSize: "clamp(2.1rem, 1.3rem + 2.6vw, 3.5rem)"
-    fontWeight: 700
-    lineHeight: 1.04
-    letterSpacing: "-0.01em"
-  headline:
-    fontFamily: "Barlow Semi Condensed, sans-serif"
-    fontSize: "2.25rem"
-    fontWeight: 700
-    lineHeight: 1.25
-  title:
-    fontFamily: "Barlow Semi Condensed, sans-serif"
-    fontSize: "1.5rem"
-    fontWeight: 700
-    lineHeight: 1.25
-  title-sm:
-    fontFamily: "Barlow Semi Condensed, sans-serif"
-    fontSize: "1.25rem"
-    fontWeight: 700
-    lineHeight: 1.25
-  label:
-    fontFamily: "Barlow Semi Condensed, sans-serif"
-    fontSize: "1.125rem"
+    fontFamily: "Geist, sans-serif"
+    fontSize: "clamp(2.4rem, 1.2rem + 3.8vw, 4.75rem)"
     fontWeight: 600
+    lineHeight: 1
+    letterSpacing: "-0.035em"
+  title:
+    fontFamily: "Geist, sans-serif"
+    fontSize: "clamp(1.6rem, 1.1rem + 1.6vw, 2.5rem)"
+    fontWeight: 600
+    lineHeight: 1.08
+    letterSpacing: "-0.025em"
+  label:
+    fontFamily: "Geist, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 500
     lineHeight: 1.2
+    letterSpacing: "-0.01em"
+  kicker:
+    fontFamily: "Geist Mono, monospace"
+    fontSize: "0.72rem"
+    fontWeight: 500
+    letterSpacing: "0.14em"
+    textTransform: uppercase
   body:
     fontFamily: "Atkinson Hyperlegible Next, sans-serif"
     fontSize: "1rem"
@@ -79,238 +77,186 @@ typography:
     fontWeight: 400
     lineHeight: 1.45
 rounded:
-  chip: "3px"
-  sm: "0.25rem"
-  md: "0.375rem"
-  lg: "0.5rem"
+  sm: "0.5rem"
+  md: "0.75rem"
+  lg: "1rem"
+  xl: "1.5rem"
+  panel: "1.5rem"
   full: "9999px"
 spacing:
   gutter: "1rem"
   gutter-sm: "1.5rem"
-  stack-stage: "2rem"
-  stack-section: "3.5rem"
   container: "80rem"
 components:
-  lower-third:
-    backgroundColor: "{colors.caption}"
-    textColor: "{colors.ink-on-land}"
-    rounded: "{rounded.sm}"
-    padding: "10px 16px"
+  glass-panel:
+    backgroundColor: "{colors.glass}"
+    border: "1px solid {colors.glass-line}"
+    rounded: "{rounded.panel}"
+    padding: "24px 32px"
+    backdropFilter: "blur(18px) saturate(1.4)"
+  header:
+    backgroundColor: "{colors.glass-strong}"
     height: "64px"
-  topic-row:
-    textColor: "{colors.stage-ink}"
-    typography: "{typography.title}"
-    padding: "12px 0"
-  level-mark:
-    backgroundColor: "{colors.land-yellow}"
-    textColor: "{colors.ink-on-land}"
-    rounded: "{rounded.sm}"
-    size: "40px"
+  nav-pill:
+    textColor: "{colors.ink-2}"
+    rounded: "{rounded.full}"
+    height: "44px"
+  nav-pill-active:
+    backgroundColor: "accent at 14%"
+    border: "accent at 45%"
+    textColor: "{colors.ink}"
+  button-primary:
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.accent-ink}"
+    rounded: "{rounded.full}"
+    height: "44px"
+  button-glass:
+    backgroundColor: "{colors.glass}"
+    border: "1px solid {colors.glass-line}"
+    rounded: "{rounded.full}"
+    size: "44px"
+  map-chip:
+    backgroundColor: "{colors.glass}"
+    rounded: "{rounded.full}"
+    height: "44px"
+  map-chip-selected:
+    backgroundColor: "accent at 16%"
+    border: "accent at 55%"
   severity-badge:
     backgroundColor: "{colors.sev-yellow-bg}"
     textColor: "{colors.sev-yellow-ink}"
     rounded: "{rounded.full}"
     padding: "2px 10px"
-  button-solid:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.bg}"
-    typography: "{typography.label}"
-    rounded: "{rounded.sm}"
-    padding: "0 16px"
-    height: "48px"
-  button-text:
-    textColor: "{colors.accent}"
-    rounded: "{rounded.sm}"
-    padding: "0 8px"
-    height: "44px"
-  select-district:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    typography: "{typography.label}"
-    rounded: "{rounded.sm}"
-    padding: "0 44px 0 16px"
-    height: "48px"
-  section-tab:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink-2}"
-    typography: "{typography.label}"
-    padding: "0 12px"
-    height: "48px"
-  section-tab-active:
-    textColor: "{colors.ink}"
-  map-chip:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    typography: "{typography.label}"
-    rounded: "{rounded.sm}"
-    padding: "0 16px"
-    height: "44px"
-  map-chip-selected:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.bg}"
-  forecast-strip:
-    backgroundColor: "{colors.stage-2}"
-    textColor: "{colors.stage-ink}"
-    rounded: "{rounded.sm}"
-    padding: "16px 12px"
 ---
 
 # Design System: Portugal Agora
 
 ## Overview
 
-**Creative North Star: "The Evening Weather Bulletin"**
+**Creative North Star: "Mission Control"**
 
-Portugal Agora reads like the boletim meteorológico on the evening news. The first viewport is a sea-blue stage: a pale morning sea in the light theme, a deep night sea in the dark one. On it sits one relief map of the country, every distrito filled with its official IPMA level, outlined in white and raised to a height that repeats that level, with Açores and Madeira boxed as insets in the sea. Beside the map, a presenter's summary: a date-and-time stamp, one headline at display size, and four topic lines. Below the map, a white lower-third bar carries the level legend and a live caption that follows whatever distrito the visitor points at.
+Portugal Agora is a live operations screen for the country. The home page is dark and almost empty: Portugal floats in 3D at the centre, the only light on the page, every distrito raised to a height and lit in the colour of its official IPMA level, with the Açores and Madeira on their own plates in the sea. The camera comes down from overhead on arrival, then travels with the visitor's scroll: from the whole country to the warnings, north to the fires (columns of light), out over the Atlantic to the earthquakes (rings), and back to the country recoloured by wildfire risk. Glass panels float over the scene and carry everything a visitor reads.
 
-Below the stage the page turns into a calm, cool, light reading ground. Each topic (avisos, incêndios, sismos, risco e ar) has its own page: the detailed map of that one topic first, then the grouped detail set as ruled lists, not cards. Colour does almost no decorative work. The four IPMA levels carry the only saturated colour; everything else is blue-grey ink on cool paper, or navy ink on the pale sea (white on the night sea).
+Topic and district pages keep the same ground and glass: a large Geist title, a mono timestamp, the interactive map in a glass frame (it opens in 3D), and the detail as ruled lists inside glass panels.
 
-Density is low on the stage and moderate below it. Type is large (an 18px root that honours the visitor's own font size), contrast is high, and every level is spoken three ways: colour, icon shape and word. Motion is broadcast graphics in 3D, and it is cinematic once, then still: on arrival the camera tilts over the map and the districts rise to their levels, the lower third flips up and wipes across, the topic rows turn into place one by one, and pages hand over in depth. After that nothing moves until the visitor does. Nothing loops, pulses or blinks, and with reduced motion everything appears in its final state (see Motion).
+Colour does almost no decorative work. The IPMA levels carry the saturated colour; cyan is reserved for interaction and live data; everything else is near-black, blue-grey ink and glass. Every level is still spoken three ways: colour, icon shape and word.
+
+Motion is cinematic once, then still: entrances happen once, the camera only moves when the visitor scrolls, points or chooses, and nothing loops, pulses or turns on its own. With reduced motion everything is in its final state.
 
 **Key Characteristics:**
 
-- Full-bleed sea stage owns the first viewport: pale sea-blue in the light theme, night navy in the dark one.
-- District fills in the IPMA scale with white borders, raised in relief by level (red tallest); no gradients, no glows, no basemap on the stage.
-- Condensed broadcast sans for headlines, numbers, captions and controls; a hyperlegible sans for reading text.
-- Lower-third caption bar as the signature component, driven by pointing at the map.
-- Below the stage: ruled lists on a cool light ground; one interaction accent per context.
+- One dark ground with a cold ambient glow; Portugal in 3D is the light source of the home page.
+- Glass panels (blurred, hairline border, a light rim on top) instead of bands and cards.
+- Geist for the interface voice, Geist Mono for labels and times, Atkinson Hyperlegible Next for reading.
+- Height on a map always repeats a level, a class, or a real depth or terrain, and the legend says so.
+- A "Dia" light theme with the same composition; dark is the house theme.
 
 ## Colors
 
-A two-ground palette: a sea for the bulletin (pale by day, navy by night), cool blue-grey paper for the detail, with the IPMA severity scale as the only chromatic voice. The stage tokens are the ones whose character changes between themes; the front matter lists the light values, and the dark values are given below.
+### Ground
 
-### Primary
+- **Night** (`bg` `#05080f`): the page ground, with two fixed radial glows (cyan from the top right, violet from the left). **Night Raised** (`bg-2`) for the emergency strip and the footer.
+- **Surfaces** (`surface`, `surface-2`): opaque fills for inputs, menus and hover states.
 
-- **Sea** (`stage`): the ground of the bulletin and of the header band on every topic page. **Morning Sea** `#dcebf5` in the light theme, **Night Sea** `#071f38` in the dark one. Also the background of the app icons and the theme colour of the installed app.
-- **Sea Panel** (`stage-2`): the second tone of the stage, used for the forecast strip. `#c6dcec` light, `#0b2b4c` dark.
+### Glass
 
-### Secondary
+- **Glass** (`glass` at 62%, `glass-strong` at 84%): every panel, the header, the caption bar, the map frame and controls. Always with `glass-line` (a 10% white hairline), `glass-hi` (a 14% white rim on the top edge) and an 18px backdrop blur.
 
-- **Stage Accent** (`stage-accent`): the single interaction accent on the stage. The outline of the pointed distrito, focus rings on the stage, the forecast pictograms and the earthquake rings. Bulletin Blue `#0b5cad` on the light sea; **Studio Cyan** `#8fd6ff` on the night sea.
-- **Bulletin Blue** (`accent`): the single interaction accent on the page ground. Links, text buttons, focus rings, selection tint, caret. `#0b5cad` light, `#7fc7ff` dark.
+### Interaction
 
-### Tertiary: the IPMA scale
+- **Signal Cyan** (`accent` `#6fe3ff`, `#0060c7` in Dia): links, focus rings, the active nav pill, selected chips, the primary button (with `accent-ink` text), the live dot and the quake rings. Its glow (`glow`) is used only behind the active pill and the primary button.
 
-Two parallel sets of the same four levels, one per ground. Never mix them.
+### The IPMA scale
 
-- **Map fills** (`land-none`, `land-yellow`, `land-orange`, `land-red`, `land-unknown`): saturated broadcast fills for the map, the level marks and legend chips on the stage. Fixed across themes. Text on them is `ink-on-land`, except on red, which takes white.
-- **Information** (`land-info`, `#8fd6ff`): the level mark for a topic that is notable but not a warning (for example, a felt earthquake).
-- **Dimmed land** (`land-dim`): the other distritos on a district page, so the focused one stands out. `#b5cbdd` light, `#2b4f75` dark.
-- **Fire** (`fire`, `#e2401b`): the active-wildfire marker on the bulletin map and in its legend. A hazard of its own, not a level.
-- **Page severity** (`sev-*`, `sev-*-bg`, `sev-*-ink`): the solid / soft background / readable ink triplet for each level on the page ground; used by the severity badge and the source-failure notices. These are theme-aware.
-
-### Neutral
-
-- **Cool Paper** (`bg`): the page ground below the stage; also the wash over the rest of the country on a district's detailed map.
-- **Card White** (`surface`): header and section tabs, inputs, unselected map chips, map overlay panels.
-- **Mist** (`surface-2`): selected list rows, map chip hover, the map frame while it loads, quiet fills.
-- **Night Ink** (`ink`): body text and headings on the page; also the ink on map colours (`ink-on-land`).
-- **Slate Ink** (`ink-2`): secondary text, source lines, meta.
-- **Hairline** (`line`): every rule and border on the page.
-- **Stage Inks** (`stage-ink`, `stage-ink-2`, `stage-line`): text, secondary text and rules on the stage. Navy `#0a1d2e`, slate blue `#3a5168` and 15% navy rules on the light sea; white, pale blue `#b8cbe0` and 16% white rules on the night sea.
-- **Caption White** (`caption`, `#ffffff`): the lower-third bar, white in both themes like a broadcast caption. Its text is `ink-on-land`.
+- **Map fills** (`land-*`): the 3D districts, level marks and legend chips; fixed across themes. Text on them is `ink-on-land` (white on red).
+- **Page severity** (`sev-*`, `sev-*-bg`, `sev-*-ink`): the badge triplets; in dark the backgrounds are translucent tints of the level.
+- **Fire** (`fire`): the columns of light on the scene and the fire legend.
 
 ### Named Rules
 
-**The Only Colour Is Severity Rule.** Saturated colour appears only as an IPMA level (or the fire marker, which is a hazard of its own). Decoration, emphasis and branding stay inside the blues and greys.
+**The Only Colour Is Severity Rule.** Saturated colour is an IPMA level or a hazard; cyan is interaction and live data; decoration stays in near-black, blue-grey and glass.
 
-**The Caption Stays White Rule.** The lower third uses `caption`, never `stage-ink`: `stage-ink` is navy in the light theme, so as a background it would put navy text on navy.
+**The Three Ways Rule.** No level is ever shown by colour alone: every mark carries its icon shape (circle-check, triangle, diamond, octagon, question circle) and, nearby or in assistive text, its word.
 
-**The Two Grounds Rule.** Stage components use `stage-*` and `land-*` tokens; page components use the neutrals and `sev-*`. A component placed on the stage adds the `on-stage` context so links, focus and selection switch to stage colours.
-
-**The Three Ways Rule.** No level is ever shown by colour alone: every mark carries its icon shape (circle-check, triangle, diamond, octagon, question circle) and, nearby or in assistive text, its word (Sem aviso, Amarelo, Laranja, Vermelho, Sem dados).
+**The Glass Over Light Rule.** Text never sits directly on the 3D scene: it sits on glass, and a vignette darkens the edges of the scene behind the panels.
 
 ## Typography
 
-**Display Font:** Barlow Semi Condensed 500/600/700 (`--font-display`)
-**Body Font:** Atkinson Hyperlegible Next (`--font-sans`)
+**Display:** Geist 500–700 (`--font-display`). **Data:** Geist Mono 500 (`--font-data`, Tailwind `font-mono`). **Body:** Atkinson Hyperlegible Next (`--font-sans`).
 
-**Character:** Barlow is the caption face of a broadcast graphic: condensed, upright, bold, good with numbers. Atkinson is designed for low-vision readers and carries every sentence a visitor actually reads.
+- **Display** (600, fluid 2.4rem to 4.75rem, 1.0, -0.035em): one page title. The home and district headlines use a smaller clamp (2.1rem to 3.6rem) inside their panel.
+- **Title** (600, fluid 1.6rem to 2.5rem, -0.025em): section and panel titles, the big value of each topic panel.
+- **Label** (500, 1rem): nav pills, chips, buttons, row titles.
+- **Kicker** (Geist Mono 500, 0.72rem, 0.14em tracking, uppercase, `ink-2`): step counters ("02 / 04 · Incêndios"), timestamps, data read-outs, legend labels on the scene.
+- **Body** (Atkinson 400, 1rem = 18px root, 1.55): every sentence.
 
-### Hierarchy
-
-- **Display** (700, fluid 2.1rem to 3.5rem, 1.04, -0.01em): the bulletin headline only, one per page, balanced.
-- **Headline** (700, 2.25rem, 1.25): section titles in the main column below the stage.
-- **Title** (700, 1.5rem, 1.25): topic values on the stage, caption names in the lower third, warning group titles, sidebar section titles, forecast heading.
-- **Title small** (700, 1.25rem, 1.25): event rows (fires, quakes).
-- **Label** (600, 1.125rem): bulletin stamp, section tabs, district picker, solid buttons, map chips, forecast day names.
-- **Body** (400, 1rem = 18px, 1.55, tabular numerals): reading text; warning descriptions held to 70ch.
-- **Body small** (400, 0.875rem): source lines, legend, notes under the stage.
-
-### Named Rules
-
-**The Caption Face Rule.** Barlow is for what a TV graphic would set: headlines, numbers, names, labels, controls. Sentences are always Atkinson, even inside a Barlow line (the topic detail drops to Atkinson at body size).
-
-**The Generous Root Rule.** The root is 112.5% of the user's setting; never set text in px, and never go below body small.
+**The Generous Root Rule.** The root is 112.5% of the visitor's setting; never set reading text in px, never below body small.
 
 ## Layout
 
-One centred container (80rem, gutters 1rem, 1.5rem from 640px). The stage is full-bleed colour with the container inside it.
+One centred container (80rem; 1rem gutters, 1.5rem from 640px).
 
-- **National stage:** at 1024px and up, a 12-column grid: map in the left 7 columns, the bulletin panel (headline, stamp, topic list, note) in the right 5, vertically centred; the lower third and legend span all 12 below. Below 1024px, headline and topic lines come first and the map follows at full width (max 380px, 440px at 640px, 480px at 1280px).
-- **District stage:** the split inverts in weight (map 5, panel 7); the forecast strip spans all 12 at the bottom.
-- **Topic pages:** a stage page head (back link on district pages, display title, intro), then the detailed map first and the lists after it. From 1024px the two sit side by side in two equal columns (2.5rem gap): the map section sticks to the top of the viewport on the left while the list scrolls on the right. Below 1024px they stack, map on top. A "Saltar o mapa" skip link, visible only on keyboard focus, jumps from the map heading straight to the list. Sections in the list stack 3.5rem apart; on the risk page fire risk and air split into two columns when the list column is wide enough.
-- **Rhythm:** 2rem stage padding and gaps, 1.75rem inside the bulletin panel, 1rem to 1.25rem row padding in lists.
+- **Header:** a glass bar. From 1280px one row (logo, nav pills, district picker, "Perto de mim", theme, language), sticky. From 1024px two rows (nav below). Below 1024px three rows (district and "Perto de mim" get their own row, then the nav) and it scrolls away with the page.
+- **Home:** the scene is fixed behind the whole page. A full-height hero: on wide screens the bulletin panel on the left (6 of 12 columns) with the country on the right; on phones the country fills the top and the panel rises from the bottom. Then one stop per topic (92% of the viewport each), panel on the left, and finally all the distritos.
+- **District page:** the same, with the camera on the distrito and the forecast below.
+- **Topic pages:** title block, then the map (sticky under the header on wide screens) beside the lists in glass panels.
 
 ## Elevation & Depth
 
-Depth comes from the two grounds (sea above, paper below), from hairline rules and from relief, not from shadow. The bulletin map and the topic maps are 3D scenes: height repeats a level or a class, or shows a real depth or terrain, and it is never decoration. One exception is native to the world: the lower third and the overlay panel on the detailed map float above their ground with a soft broadcast drop, the way a caption graphic sits over the picture.
+Depth is the 3D scene (perspective, fog, a faint grid floor), the glass over it, and one shadow (`0 24px 60px -24px` black at 75%) that every glass surface carries. No other shadows.
 
-### Shadow Vocabulary
-
-- **Caption drop** (`box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.55)`): the lower third on the stage (0.45 alpha for the map overlay panel on the page).
-
-### Named Rules
-
-**The Relief Rule.** Height on a map always means something and is always said. On the bulletin map each distrito is a flat-coloured block (top in its `land-*` fill, walls the same fill at 70%, white borders; island districts take a 5px outline in their own fill so they hold up at inset scale) raised to a height that repeats its level: no warning 8, unknown 5, amarelo 22, laranja 38, vermelho 56 viewBox units; dimmed distritos on a district page lie almost flat in `land-dim`. No gradients, glows or drop shadows; emphasis is a lift (12 units) plus a thicker outline (white for the focused distrito, `stage-accent` for the pointed one). On the topic maps, every 3D legend states the exaggeration. The relief is an enhancement: the flat SVG map comes first, stays underneath for the keyboard and screen readers, and remains the whole map without WebGL.
-
-## Shapes
-
-Small, square-ish corners everywhere (0.25rem): lower third, level marks, forecast strip, buttons, select, map chips, the detailed map frame. Legend and index chips go tighter (3px). Full rounds are reserved for things that are round by nature: the severity badge pill, fire and earthquake markers, icon-only buttons. On the map, the warning pictograms keep distinct silhouettes per level: triangle (amarelo), diamond (laranja), octagon (vermelho). The Açores and Madeira insets are plain rectangles drawn in `stage-line`, cropped tight around the islands so they render large; each is named above its frame in Barlow semibold `stage-ink-2` (30 viewBox units on phones, about 13px on a 390px screen; 24 from 1024px). Island shapes carry their own-colour outline as a halo and a wider invisible touch area.
+**The Relief Rule.** Height on a map always means something and the legend always says what: on the home and district scene it repeats the warning level (none 8, unknown 5, amarelo 24, laranja 40, vermelho 58 units) or, in the risk stop, the risk class (11 units per class); on the topic maps it is a real depth (earthquakes, ×3), real terrain (wildfires, ×2) or the risk class (concelhos). Emphasis is a lift and a cyan outline, never a glow on the land.
 
 ## Components
 
-### Lower Third (signature)
+### Glass Panel (signature)
 
-The bulletin's caption bar. A white bar (`caption`) on the stage with a level block on the left (map fill, icon and level word in Barlow) and the caption beside it: distrito name at title size, one sentence of status in body, and an "Abrir [distrito]" link. Pointing at a distrito (hover, keyboard focus, first tap on touch) swaps the caption; with nothing pointed, it shows the national caption. Enters once on load like a broadcast caption: it flips up from its bottom edge while wiping open left to right (950ms, expo-out, 350ms delay); each caption change turns down into place like a split-flap board (340ms). Minimum 64px tall; on phones the action drops under the text with a 44px target.
+The container for everything a visitor reads: `glass`, 1.5rem corners on the home and district panels (1rem for sections), 24 to 32px padding. Sections inside pages are glass panels with a Geist title and their source line.
 
-### Topic List
+### Bulletin Panel
 
-Four rows on the stage between translucent white rules: a 40px level mark, a small pale label, the value in Barlow at title size with optional detail in Atkinson, and an arrow that nudges right on hover. Each row links to its section below. On load the rows turn up into place one after another (800ms each, 90ms apart); on hover a row comes forward in depth.
+Kicker with a static cyan live dot ("Boletim nacional · ao vivo"), the headline, the mono timestamp, the compact topic rows (a 32px level mark, a small label, the value in Geist with Atkinson detail, an arrow) and the level rule.
 
-### Level Mark and Legend Chips
+### Caption Bar (lower third)
 
-Square blocks in the map fill with the level icon: 40px with a 20px icon in topic rows, 24px in the district index, 20px with a white ring in the map legend.
+`glass-strong`, a rounded level block (map fill, icon, word) and the caption: distrito name in Geist, one sentence in Atkinson, an "Abrir [distrito]" link. Pointing at a distrito on the scene swaps it; a floating glass tag with the name and level also appears above that distrito.
+
+### Topic Stop
+
+One per topic on the home page: a kicker step ("02 / 04 · Incêndios"), a 48px level mark beside the value at title size, the detail, a short summary (the warned distritos as pills; the three largest active fires; the three latest notable earthquakes; the risk distribution bar), a one-line legend saying what the scene shows, and the primary button to the topic page.
+
+### Header and Navigation
+
+Glass header; the logo (mainland silhouette in `ink`, with a dot in the national level ringed in `bg`) and "Portugal Agora" in Geist 600. The nav is a pill group: 44px pills, `ink-2` text, the active one with a cyan-tinted fill, cyan hairline and glow; the active pill is the `nav-indicator` view transition, so it slides to the new page. Under 640px the labels are short and the five pills fit 360px. Buttons: "Perto de mim" is the primary cyan pill; theme and language are 44px round glass buttons; the district picker is a glass pill select.
+
+### Buttons and Chips
+
+- **Primary:** cyan pill, `accent-ink` label in Geist 600, 44 to 48px, soft cyan glow, brighter on hover.
+- **Glass:** glass pill or circle with a hairline that turns cyan on hover.
+- **Map chips:** 44px glass pills; selected chips take a cyan tint and hairline. A disabled 3D chip gets a dashed hairline and `ink-2`.
+- **Focus:** a 3px `accent` outline at 3px offset everywhere.
+
+### Lists
+
+Ruled lists inside glass panels: hairlines between items, no inner boxes. Event rows: severity badge, title in Geist, meta in Atkinson, and a "Ver no mapa" glass pill; the selected row takes a cyan tint with rounded corners. Empty states are a dashed rounded box with large slate text.
+
+### District Index
+
+A grid of rounded glass tiles (2 columns, 3 from 640px, 4 from 1024px), each with a level chip and the name; the keyboard path to every distrito.
+
+### Forecast Strip
+
+Five days in one glass panel with hairline dividers: day name in Geist, a cyan weather pictogram, max and min, rain chance in body small.
 
 ### Severity Badge
 
-The page-ground expression of a level: a pill with the soft background and readable ink of the level, icon plus word in bold. Medium (body small) in lists, large (body) where a level needs more weight.
-
-### Buttons
-
-- **Solid button:** `ink` fill with a `bg` label in Barlow with icon, 48px tall, small corners; hover lowers the opacity. Navy with a white label in the light theme, near-white with a navy label in the dark one. Used for "Perto de mim" in the header, which always shows its text label beside the icon (shortened to "Perto" under 400px; the accessible name stays "Perto de mim").
-- **Text button:** accent-blue bold body text with icon, 44px target, underline on hover ("Ver no mapa").
-- **Focus:** a 3px accent outline at 3px offset everywhere; `stage-accent` on the stage, `ink-on-land` on the lower third.
-
-### Inputs / Fields
-
-- **District picker:** a native select, 48px, white with hairline border, Barlow label weight, chevron at right; border darkens to ink on hover. Below 1024px it fills its row beside "Perto de mim"; from 1024px it sits in the header bar at 15rem.
-
-### Navigation
-
-- **Header:** white bar; brand mark (the mainland outline in `ink` with a dot in the national level colour) and the name in Barlow bold at normal leading, so descenders are never clipped (below 360px only the mark shows; the name stays for screen readers). From 1024px the district picker and "Perto de mim" sit in the bar beside the theme toggle and the PT | EN switch; below 1024px they move to their own row under the logo, the picker filling the width and the button beside it.
-- **Section tabs:** a row under the header on `surface` with a hairline bottom: Resumo, Avisos, Incêndios, Sismos, Risco e ar (on a district page the same tabs lead to that district's pages). Barlow label, 48px tall, a 3px bottom rule: `accent` with `ink` text on the current page (drawn as its own element named `nav-indicator` so it slides to the new tab during the page handover, 280ms expo-out; `CanvasText` in forced colours), transparent with `ink-2` text otherwise, hairline and `ink` on hover. Under 640px all five fit a 360px screen: short labels ("Risco"; in English "Quakes" and "Risk"), 0.375rem side padding, no gap, spread edge to edge, and the text drops one step (0.945rem, 17px at the default size). The full name stays as the accessible name; if the row still overflows it scrolls sideways with the current tab centred.
-- **Emergency bar:** a thin ink band above the header with the 112 line; it inverts to mist in dark.
-
-### Lists (instead of cards)
-
-Detail is set as ruled lists: a hairline above the list, a hairline under each item, no boxes. Warning groups show badge plus type at title size, the IPMA text once, and each time window with its places. Event rows add a meta line and a "Ver no mapa" text button; the selected row fills with mist. Empty states are a line of large slate text between two rules. Items that start below the screen enter once when they scroll into view, tilting up from depth (750ms, 60ms apart); items already on screen never move.
+A pill in the level's soft tint with its readable ink, icon plus word.
 
 ### Detailed Map (topic pages)
 
-The interactive map on every topic page shows one layer only: that page's topic. The risk page offers fire risk or air quality as a radio pair of map chips, one at a time, and, for fire risk on the continente, a Hoje | Amanhã radio pair; national pages add a Continente / Açores / Madeira choice. Map chips are 44px, small corners, Barlow label: `ink` fill with a `bg` label when selected, `surface` with a hairline border (mist on hover) otherwise. The frame has a hairline border and small corners; it is 45vh tall on phones (at least 300px), 62vh from 640px, and at most 680px from 1024px. Under it, a legend for the shown layer only, in body small slate: round swatches for levels, square ones for the five fire-risk classes.
+The interactive map on every topic page shows one layer only: that page's topic. The risk page offers fire risk or air quality as a radio pair of map chips, one at a time, and, for fire risk on the continente, a Hoje | Amanhã radio pair; national pages add a Continente / Açores / Madeira choice. Map chips are the glass pills described above. The frame is a glass panel with 1rem corners; it is 45vh tall on phones (at least 300px), 62vh from 640px, and at most 680px from 1024px. Under it, a legend for the shown layer only, in body small slate: round swatches for levels, square ones for the five fire-risk classes.
 
-On a district page the rest of the country is washed over with the page ground and the district is outlined in a heavy dark line; a link leads to the same topic for the whole country. Selecting a distrito, fire or quake outlines or rings it and opens a white overlay panel with the caption drop at the foot of the map; selecting the same thing again, or closing the panel, clears it and zooms back out.
+On a district page the rest of the country is washed over with the page ground and the district is outlined in a heavy dark line; a link leads to the same topic for the whole country. Selecting a distrito, fire or quake outlines or rings it and opens a glass overlay panel at the foot of the map; selecting the same thing again, or closing the panel, clears it and zooms back out.
 
 #### The 3D view
 
@@ -322,49 +268,41 @@ The earthquake, wildfire and fire-risk maps (the risk page only on its fire-risk
 
 Every 3D legend opens with one bold `ink` line saying what it exaggerates ("Profundidade exagerada 3×", "Relevo exagerado 2×", or that the height repeats the class and is not relief), then the usual level scale. The detail panel and the list still give each level by word and icon (the Three Ways Rule), and the selection is the one the flat map uses, so "Ver no mapa", the list and the panel behave the same in both views.
 
-**Camera.** Each 3D view opens with one entry (1.8s, ease-in-out): on the earthquake block the camera comes down from overhead, further out and turned, to its home view while each quake sinks from the surface to its depth (a quake that arrives later sinks too); on the wildfire and risk maps the map tilts to 55° and turns 12°, and on the risk map the concelhos rise from the ground to their class. After that the camera moves only when the visitor moves it or chooses an event: choosing (or clearing) a quake glides there in 600ms, ease-out, and so do "Repor vista" and later switches between Mapa and 3D. With reduced motion every move is a jump. On the earthquake block, dragging orbits within limits (never under the sea plane, never upside down); zooming needs Ctrl/⌘ with the wheel or two fingers, as on the flat map, and a wheel without the key shows the same hint. Seven 44px buttons in two rows at the top right, clear of the detail panel even on a phone (`surface`, hairline border, small corners) zoom, rotate, tilt and reset. The canvas is focusable: arrows rotate and tilt, + and − zoom. It is `role="img"` with a generated summary (how many quakes, the deepest in km); the list stays the text equivalent and "Saltar o mapa" still skips it.
+**Camera.** Each 3D view opens with one entry (1.8s, ease-in-out): on the earthquake block the camera comes down from overhead, further out and turned, to its home view while each quake sinks from the surface to its depth (a quake that arrives later sinks too); on the wildfire and risk maps the map tilts to 55° and turns 12°, and on the risk map the concelhos rise from the ground to their class. After that the camera moves only when the visitor moves it or chooses an event: choosing (or clearing) a quake glides there in 600ms, ease-out, and so do "Repor vista" and later switches between Mapa and 3D. With reduced motion every move is a jump. On the earthquake block, dragging orbits within limits (never under the sea plane, never upside down); zooming needs Ctrl/⌘ with the wheel or two fingers, as on the flat map, and a wheel without the key shows the same hint. Seven 44px buttons in two rows at the top right, clear of the detail panel even on a phone (round glass buttons) zoom, rotate, tilt and reset. The canvas is focusable: arrows rotate and tilt, + and − zoom. It is `role="img"` with a generated summary (how many quakes, the deepest in km); the list stays the text equivalent and "Saltar o mapa" still skips it.
 
 ### Share Image
 
 The 1200 x 630 image each page shares, per locale. The light soft background of the national or district level fills the card, with a 28px bar in that level's solid colour down the left edge. Top row: the site logo as a silhouette (the mainland in ink with the level dot ringed in the background colour), "Portugal Agora" in Barlow Semi Condensed bold, the place in Atkinson. Middle: the headline in Barlow Semi Condensed bold (size steps down with length, 1.08 leading, at most four lines). Foot: the data timestamp in Atkinson bold, then the sources line in slate. No level pill: the bar, the dot and the headline carry the level. Fonts come from the project's own font files, not the network.
 
-### Forecast Strip
-
-Five days in one `stage-2` panel with `stage-line` dividers: day name in Barlow, a `stage-accent` weather pictogram, max in Barlow bold with min in `stage-ink-2`, rain chance in body small. The days turn in like cards from their left edge, one after another.
-
-### District Index
-
-A two-column ruled list of every distrito and região, sorted by level then name, each with a 24px level chip; the text path to the map.
-
 ## Motion
 
-Broadcast graphics in 3D: strong entrances that each happen once, then a still picture. Every transform is a perspective rotation or a move in depth, eased with expo-out (`cubic-bezier(0.16, 1, 0.3, 1)`) unless noted.
+Cinematic once, then still. Every transform is a perspective rotation or a move in depth, eased with expo-out (`cubic-bezier(0.16, 1, 0.3, 1)`) unless noted.
 
-- **Bulletin relief:** the flat SVG map paints first; the 3D scene replaces it on its first, identical frame, then tilts to 38° (1.7s, ease-in-out) while the distritos rise to their levels, red last. Pointing a distrito lifts it 12 units in 180ms.
-- **Stage titles:** the display headline tilts up into place (1000ms); only its transform moves, so the text is readable from the first frame.
-- **Lower third, caption, topic rows, forecast:** see their components.
+- **Home and district scene:** fades in over the flat SVG map that painted first; the camera comes down from overhead, further out and turned, to its first view while the distritos rise to their heights (1.6s). Then it moves only with the visitor: each section on the home page has a camera position, and the camera blends between them as the page scrolls (damped, never ahead of the scroll); the mouse tilts it a few degrees; pointing a distrito lifts it. In the risk stop the distritos recolour and re-extrude to the risk class; the fire columns and quake rings brighten in their own stops.
+- **Titles:** tilt up into place (1000ms); only the transform moves, so the text reads from the first frame.
+- **Caption bar:** flips up from its bottom edge while wiping open (950ms, 350ms delay); a caption change turns down into place like a split-flap board (340ms).
+- **Topic rows and forecast days:** turn into place one after another (rows 800ms, 90ms apart; days from their left edge, 80ms apart).
+- **Lists:** items below the screen tilt up from depth once as they scroll into view.
 - **Topic maps:** see Detailed Map, Camera.
-- **Page handover:** the old page recedes in depth and fades (300ms); the new one rises from below, straightening (750ms, 120ms delay). The current-tab rule slides to the new tab (280ms).
-- **Lists:** items below the screen tilt up from depth as they scroll into view, once.
-- **Live data:** a list item that arrived in the last refresh is tinted once (2.4s), with no movement.
-- **Reduced motion:** every animation jumps to its end, the relief appears already tilted and raised, the cameras jump, and nothing waits hidden for a scroll.
+- **Page handover:** the old page recedes in depth (300ms); the new one rises from below, straightening (750ms, 120ms delay). The active nav pill slides to the new tab (280ms).
+- **Live data:** a list item that arrived in the last refresh is tinted once (2.4s).
+- **Reduced motion:** every animation jumps to its end; the scene appears in its final state with the camera at the overview and no parallax; topic maps jump; nothing waits hidden for a scroll.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** open every hazard page with the stage: sea ground, level map in relief, one display headline, the lower third.
-- **Do** show each level with its map fill or severity triplet, its icon shape and its word.
-- **Do** set headlines, numbers, names and controls in Barlow Semi Condensed and every sentence in Atkinson Hyperlegible Next.
-- **Do** keep one interaction accent per ground: `stage-accent` on the stage, `accent` on the page.
-- **Do** group repeated official text once and list its places, in ruled lists.
+- **Do** put everything a visitor reads on glass, never directly on the scene.
+- **Do** show each level with its colour, its icon shape and its word.
+- **Do** say in a legend what every height or exaggeration on a map means.
+- **Do** keep the flat SVG map as the first paint and the no-WebGL fallback, and the district index as the keyboard path.
+- **Do** set the interface in Geist, data and times in Geist Mono, and every sentence in Atkinson Hyperlegible Next.
 - **Do** keep touch targets at 44px or more and respect reduced motion.
 
 ### Don't:
 
-- **Don't** use saturated colour for anything that is not a level or a hazard marker.
-- **Don't** put `land-*` fills on the page ground or `sev-*` triplets on the stage.
-- **Don't** use `stage-ink` as a background; it flips from navy to white between themes. Fixed white surfaces on the stage use `caption`.
-- **Don't** wrap detail in cards or columns of equal-weight boxes; use rules.
-- **Don't** add shadows beyond the caption drop, or gradients and glows to the maps. Height on a map always repeats a level or a class, or shows a real depth or terrain, and the legend says so.
-- **Don't** add motion outside the vocabulary in Motion, and never let anything move on its own after its entrance. Never pulse, blink, rotate continuously or loop, least of all on the red and orange levels.
+- **Don't** use saturated colour for anything that is not a level or a hazard; cyan is only interaction and live data.
+- **Don't** let anything move on its own after its entrance: no idle orbit, no pulsing live dot, no loops, least of all on the red and orange levels.
+- **Don't** add shadows beyond the glass shadow, or glows on the land.
+- **Don't** put `land-*` fills behind reading text or use them for decoration.
+- **Don't** make the scene the only way to reach information: every number on it is also in a panel or a list.
