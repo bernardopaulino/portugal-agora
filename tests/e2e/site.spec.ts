@@ -105,6 +105,34 @@ test("'Perto de mim' mostra texto e o distrito cabe ao lado a 360 px", async ({ 
   }
 });
 
+test("em ecrãs largos, o logótipo, os separadores e os controlos não se sobrepõem", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "Só em computador.");
+  type Box = { x: number; y: number; width: number; height: number };
+  const overlap = (a: Box, b: Box) =>
+    a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+  for (const width of [1024, 1280, 1366, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 800 });
+    for (const path of ["/", "/en"]) {
+      await page.goto(path);
+      const header = page.locator("[data-site-header]");
+      const logo = (await header.getByRole("link").first().boundingBox())!;
+      const nav = (await header.getByRole("navigation").getByRole("list").boundingBox())!;
+      const picker = (await header.getByRole("combobox").boundingBox())!;
+      expect(overlap(logo, nav), `${path} a ${width} px: logótipo e separadores`).toBe(false);
+      expect(overlap(nav, picker), `${path} a ${width} px: separadores e distrito`).toBe(false);
+      // Os separadores cabem sem deslizar.
+      const fits = await header
+        .getByRole("navigation")
+        .getByRole("list")
+        .evaluate((el) => el.scrollWidth <= el.clientWidth);
+      expect(fits, `${path} a ${width} px: separadores cabem`).toBe(true);
+    }
+  }
+});
+
 test("nas páginas de tema, o mapa vem antes da lista e pode ser saltado", async ({ page }) => {
   await page.goto("/lisboa/incendios");
   const map = page.locator("#mapa");

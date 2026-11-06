@@ -226,6 +226,83 @@ test("página inicial imersiva: o país em 3D atrás do boletim, um painel por t
   expect(errors).toEqual([]);
 });
 
+const sceneFrames = (page: Page) => page.locator("[data-scene-frame]");
+
+test("no telemóvel, o país fica entre o cabeçalho e cada painel", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "Só em ecrãs estreitos os painéis ocupam a largura toda.");
+  await page.goto("/");
+  await expect(sceneLayer(page)).toHaveAttribute("data-scene-ready", "on");
+  // O espaço do país vem antes do painel do boletim, e o título aparece no primeiro ecrã.
+  const frame = (await sceneFrames(page).first().boundingBox())!;
+  const title = (await pageTitleOf(page).boundingBox())!;
+  const viewport = page.viewportSize()!;
+  expect(frame.height).toBeGreaterThan(100);
+  expect(frame.y + frame.height).toBeLessThan(title.y);
+  expect(title.y + 40).toBeLessThan(viewport.height);
+  // Cada tema e o índice dos distritos têm o seu espaço por cima do painel.
+  for (const id of ["avisos", "incendios", "sismos", "risco", "distritos"]) {
+    await expect(page.locator(`[data-scene="${id}"] [data-scene-frame]`)).toHaveCount(1);
+  }
+});
+
+test("num telemóvel baixo, o título vem antes do país", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "Só em ecrãs estreitos.");
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("/");
+  await expect(sceneFrames(page).first()).toBeHidden();
+  const title = (await pageTitleOf(page).boundingBox())!;
+  expect(title.y + 80).toBeLessThan(568);
+});
+
+test("sem WebGL, o telemóvel mostra o mapa plano e os painéis seguidos", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile, "Em ecrãs largos o mapa plano fica ao lado do painel.");
+  // Um browser sem WebGL2.
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
+      value(this: HTMLCanvasElement, type: string, ...rest: unknown[]) {
+        return type === "webgl2" ? null : Reflect.apply(original, this, [type, ...rest]);
+      },
+    });
+  });
+  await page.goto("/");
+  await expect(pageTitleOf(page)).toBeVisible();
+  await expect(
+    sceneFrames(page).getByRole("group", { name: /Mapa de Portugal com o nível de aviso/ }),
+  ).toBeVisible();
+  await expect(page.locator("[data-scene-ready]")).toHaveCount(0);
+  // Sem a cena, os temas não guardam espaço vazio para ela.
+  await expect(page.locator("[data-scene='avisos'] [data-scene-frame]")).toHaveCount(0);
+});
+
+test("com o dedo, o primeiro toque mostra o distrito e a etiqueta abre-o", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile, "Toque.");
+  await page.goto("/");
+  await expect(sceneLayer(page)).toHaveAttribute("data-scene-ready", "on");
+  const frame = (await sceneFrames(page).first().boundingBox())!;
+  const label = sceneLayer(page).locator("[data-slug]");
+  // Um ponto no continente; enquanto a câmara acaba a entrada, pode calhar no mar.
+  await expect(async () => {
+    await page.touchscreen.tap(frame.x + frame.width * 0.66, frame.y + frame.height * 0.62);
+    await expect(label).toBeVisible({ timeout: 500 });
+  }).toPass({ timeout: 15_000 });
+  const slug = await label.getAttribute("data-slug");
+  // O primeiro toque não sai da página; a etiqueta diz como abrir.
+  await expect(page).toHaveURL(/\/$/);
+  await expect(label).toContainText("Abrir");
+  // A etiqueta vai para cima do distrito no desenho seguinte da cena.
+  await expect.poll(async () => ((await label.boundingBox())?.y ?? 0) > frame.y - 120).toBe(true);
+  const box = (await label.boundingBox())!;
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height - 12);
+  await expect(page).toHaveURL(new RegExp(`/${slug}$`));
+});
+
 test("o índice dos distritos é o caminho do teclado para cada distrito", async ({ page }) => {
   await page.goto("/");
   const lisboa = page
