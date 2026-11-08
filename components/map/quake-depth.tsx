@@ -259,13 +259,21 @@ function Rig({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size.width, size.height]);
   // A entrada: ao abrir (e ao mudar de região), a câmara parte de cima, mais
-  // longe e rodada, e desce até à vista inicial. Uma vez por região; depois
-  // fica quieta. Se o bloco mudar de tamanho a seguir (chegam dados novos com
-  // outro sismo mais fundo), não repete a entrada: ajusta-se com uma viagem
-  // curta, e só se a pessoa ainda não mexeu na câmara.
+  // longe e rodada, e desce até à vista inicial; depois fica quieta.
+  // Dois casos que não são "abrir":
+  // - o bloco muda de tamanho com a cena à vista (chegam dados novos com outro
+  //   sismo mais fundo): ajusta-se com uma viagem curta, sem voltar ao topo;
+  // - a página volta a aparecer (o Next guarda escondidas as páginas já
+  //   visitadas e mostra-as outra vez ao regressar): o efeito corre de novo
+  //   com o mesmo bloco, e aí é uma entrada como as outras.
   const enteredKey = useRef<string | null>(null);
+  const lastLayout = useRef<{ home: THREE.Vector3; radius: number } | null>(null);
   useEffect(() => {
-    if (enteredKey.current === entryKey) {
+    const layoutChanged =
+      lastLayout.current !== null &&
+      (lastLayout.current.home !== home || lastLayout.current.radius !== radius);
+    lastLayout.current = { home, radius };
+    if (enteredKey.current === entryKey && layoutChanged) {
       if (!touched.current) animateTo(homeView(), cameraDuration());
       return;
     }

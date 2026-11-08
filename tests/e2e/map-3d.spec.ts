@@ -148,6 +148,43 @@ test("sismos em profundidade: entrada, ver no mapa e voltar ao 2D", async ({ pag
   expect(errors).toEqual([]);
 });
 
+test("voltar a um distrito já visitado repete a entrada da câmara", async ({ page }) => {
+  // O Next guarda escondidas as páginas já visitadas e volta a mostrá-las:
+  // a cena 3D é a mesma, mas a entrada tem de acontecer outra vez.
+  // Cada movimento fica com a página em que aconteceu.
+  await page.addInitScript(() => {
+    const w = window as unknown as { __moves: [string, string][] };
+    w.__moves = [];
+    new MutationObserver((records) => {
+      for (const r of records)
+        w.__moves.push([location.pathname, (r.target as HTMLElement).dataset.cameraDuration ?? ""]);
+    }).observe(document, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ["data-camera-duration"],
+    });
+  });
+  const moves = () =>
+    page.evaluate(() => (window as unknown as { __moves: [string, string][] }).__moves);
+  const pick = async (district: string) => {
+    await page.locator("select:visible").selectOption(district);
+    await expect(page).toHaveURL(new RegExp(`/${district}/sismos$`));
+  };
+  await page.goto("/acores/sismos");
+  await expect.poll(moves).toContainEqual(["/acores/sismos", "1800"]);
+  await pick("braga");
+  await expect.poll(moves).toContainEqual(["/braga/sismos", "1800"]);
+  await pick("acores");
+  // Os movimentos depois do regresso aos Açores: o primeiro é a entrada longa.
+  await expect
+    .poll(async () => {
+      const all = await moves();
+      const back = all.slice(all.findLastIndex(([path]) => path === "/braga/sismos") + 1);
+      return back.find(([path]) => path === "/acores/sismos")?.[1] ?? null;
+    })
+    .toBe("1800");
+});
+
 test("dados novos não repetem a entrada da câmara dos sismos", async ({ page }) => {
   // O estado atual chega depois de a página abrir, com um sismo mais fundo:
   // o bloco cresce e a câmara ajusta-se com uma viagem curta, sem voltar ao topo.
