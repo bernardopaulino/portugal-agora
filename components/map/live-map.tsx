@@ -18,6 +18,7 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { MAP_3D_PITCH, quakeRadiusPx, RELIEF_EXAGGERATION, riskHeight } from "@/lib/geo/scales";
 import { cameraDuration } from "@/lib/hooks/webgl";
 import type { CountryState } from "@/lib/state/aggregate";
+import { formatNumber } from "@/lib/time/format";
 
 import { riskColors } from "../cards/fire-risk";
 import { isSameSelection, type OnSelect, type Selection } from "../cards/types";
@@ -119,6 +120,8 @@ const layerIds: Record<LayerId, string[]> = {
   air: ["air-circle"],
   quakes: ["quakes-circle"],
   fires: ["fires-halo", "fires-circle"],
+  observed: ["observed-circle", "observed-label"],
+  sea: ["sea-circle", "sea-label"],
 };
 
 function collection(features: Feature[]): Collection {
@@ -182,7 +185,7 @@ export default function LiveMap({
   /** O contexto WebGL perdeu-se: a vista 3D deixa de estar disponível. */
   onWebglLost?: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const onSelectRef = useRef(onSelect);
@@ -282,6 +285,10 @@ export default function LiveMap({
       "fires-circle",
       "quakes-circle",
       "air-circle",
+      "observed-circle",
+      "observed-label",
+      "sea-circle",
+      "sea-label",
       "warnings-fill",
       "risk-fill",
       "risk-extrusion",
@@ -435,8 +442,35 @@ export default function LiveMap({
           : [];
       }),
     );
-    return { districtsFc, concelhosFc, fires, quakes, air };
-  }, [state, districtGeo, concelhoGeo, focus, riskDay]);
+    // Tempo agora: a estação de cada distrito, com a temperatura por cima.
+    const observed = collection(
+      Object.entries(state.observations.data ?? {})
+        .filter(([district]) => inFocus(district))
+        .map(([district, o]) => ({
+          type: "Feature" as const,
+          geometry: { type: "Point" as const, coordinates: o.coordinates },
+          properties: { district, label: `${Math.round(o.temperature)}°` },
+        })),
+    );
+    // Mar: cada ponto de previsão, com a altura das ondas de hoje.
+    const sea = collection(
+      Object.entries(state.sea.data ?? {})
+        .filter(([district]) => inFocus(district))
+        .flatMap(([district, spots]) =>
+          spots.map((spot) => {
+            const today = spot.days[0];
+            const values = [today?.seaMin, today?.seaMax].filter((v): v is number => v != null);
+            const [a, b] = [...new Set(values.map((v) => formatNumber(v, 1, locale)))];
+            return {
+              type: "Feature" as const,
+              geometry: { type: "Point" as const, coordinates: spot.coordinates },
+              properties: { district, label: a ? `${b ? `${a}–${b}` : a} m` : "" },
+            };
+          }),
+        ),
+    );
+    return { districtsFc, concelhosFc, fires, quakes, air, observed, sea };
+  }, [state, districtGeo, concelhoGeo, focus, riskDay, locale]);
 
   // (Re)criar fontes e camadas sempre que o estilo carrega.
   useEffect(() => {
@@ -465,6 +499,8 @@ export default function LiveMap({
     addSource("fires", data.fires);
     addSource("quakes", data.quakes);
     addSource("air", data.air);
+    addSource("observed", data.observed);
+    addSource("sea", data.sea);
     addSource("selected", collection([]));
 
     const add = (layer: AddLayerObject, below?: string) => {
@@ -606,6 +642,45 @@ export default function LiveMap({
         "circle-stroke-width": 2,
       },
     });
+    // As etiquetas usam a letra do próprio estilo (o OpenFreeMap só serve as suas).
+    const styleFont = map
+      .getStyle()
+      .layers.filter((l) => l.type === "symbol")
+      .map((l) => map.getLayoutProperty(l.id, "text-font") as string[] | undefined)
+      .find((font) => Array.isArray(font));
+    const pointLabel = (id: string, source: string): AddLayerObject => ({
+      id,
+      type: "symbol",
+      source,
+      layout: {
+        "text-field": ["get", "label"],
+        "text-font": styleFont ?? ["Noto Sans Regular"],
+        "text-size": 14,
+        "text-offset": [0, -1.3],
+        "text-anchor": "bottom",
+        "text-allow-overlap": true,
+      },
+      paint: {
+        "text-color": theme === "dark" ? "#e3ecf0" : "#0d2b3a",
+        "text-halo-color": theme === "dark" ? "#0b1a23" : "#ffffff",
+        "text-halo-width": 2,
+      },
+    });
+    const pointCircle = (id: string, source: string, color: string): AddLayerObject => ({
+      id,
+      type: "circle",
+      source,
+      paint: {
+        "circle-radius": 7,
+        "circle-color": color,
+        "circle-stroke-color": theme === "dark" ? "#0b1a23" : "#ffffff",
+        "circle-stroke-width": 2,
+      },
+    });
+    add(pointCircle("observed-circle", "observed", theme === "dark" ? "#7bc4ee" : "#185f8c"));
+    add(pointLabel("observed-label", "observed"));
+    add(pointCircle("sea-circle", "sea", theme === "dark" ? "#4fb3bf" : "#0e6f7a"));
+    add(pointLabel("sea-label", "sea"));
     add({
       id: "quakes-circle",
       type: "circle",
@@ -671,6 +746,8 @@ export default function LiveMap({
     set("fires", data.fires);
     set("quakes", data.quakes);
     set("air", data.air);
+    set("observed", data.observed);
+    set("sea", data.sea);
   }, [data, styleVersion]);
 
   // Visibilidade das camadas. No risco em 3D, a extrusão substitui o preenchimento.

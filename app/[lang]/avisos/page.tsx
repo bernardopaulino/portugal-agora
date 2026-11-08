@@ -21,7 +21,7 @@ export async function generateMetadata(props: PageProps<"/[lang]/avisos">): Prom
     image: inheritedOgImage(lang, t.site.ogAlt),
     feed: {
       title: t.feed.title(t.feed.national),
-      url: feedPath(lang),
+      url: feedPath(lang, "avisos"),
     },
   });
 }

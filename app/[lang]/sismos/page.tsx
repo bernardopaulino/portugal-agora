@@ -6,6 +6,7 @@ import { QuakesView } from "@/components/topic-views";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
+import { feedPath } from "@/lib/feeds/paths";
 import { getPageState } from "@/lib/state/get-state";
 
 export async function generateMetadata(props: PageProps<"/[lang]/sismos">): Promise<Metadata> {
@@ -18,6 +19,10 @@ export async function generateMetadata(props: PageProps<"/[lang]/sismos">): Prom
     title: t.meta.quakesTitle,
     description: t.pages.quakesIntro,
     image: inheritedOgImage(lang, t.site.ogAlt),
+    feed: {
+      title: t.feed.quakesTitle(t.feed.national),
+      url: feedPath(lang, "sismos"),
+    },
   });
 }
 

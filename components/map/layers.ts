@@ -1,4 +1,4 @@
-export type LayerId = "warnings" | "fires" | "quakes" | "risk" | "air";
+export type LayerId = "warnings" | "fires" | "quakes" | "risk" | "air" | "observed" | "sea";
 
 /** Dia do risco de incêndio mostrado no mapa. */
 export type RiskDay = "today" | "tomorrow";
@@ -10,4 +10,6 @@ export const layerTopic: Record<LayerId, string> = {
   quakes: "/sismos",
   risk: "/risco",
   air: "/risco",
+  observed: "/avisos",
+  sea: "/avisos",
 };

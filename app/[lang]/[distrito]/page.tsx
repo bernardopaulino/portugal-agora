@@ -7,7 +7,7 @@ import { districts, getDistrict } from "@/data/districts";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { pageMetadata } from "@/lib/i18n/metadata";
-import { getForecast, getObservations, getSea } from "@/lib/sources/registry";
+import { getForecast } from "@/lib/sources/registry";
 import { districtHeadline } from "@/lib/state/bulletin";
 import { getPageState } from "@/lib/state/get-state";
 
@@ -36,11 +36,9 @@ export default async function DistrictPage(props: PageProps<"/[lang]/[distrito]"
   const district = getDistrict(distrito);
   if (!district || !isLocale(lang)) notFound();
   const t = getDictionary(lang);
-  const [state, forecast, observations, sea] = await Promise.all([
+  const [state, forecast] = await Promise.all([
     getPageState(),
     getForecast(district.globalIdLocal),
-    getObservations(),
-    getSea(),
   ]);
   return (
     <>
@@ -49,13 +47,7 @@ export default async function DistrictPage(props: PageProps<"/[lang]/[distrito]"
           { name: t.districtName(district), path: `/${district.slug}` },
         ])}
       />
-      <DistrictView
-        district={district}
-        initial={state}
-        forecast={forecast}
-        observations={observations}
-        sea={sea}
-      />
+      <DistrictView district={district} initial={state} forecast={forecast} />
     </>
   );
 }

@@ -10,8 +10,6 @@ import { getDistrict, type District } from "@/data/districts";
 import { useWebGLEnhancement } from "@/lib/hooks/webgl";
 import { useI18n } from "@/lib/i18n/client";
 import type { ForecastDay } from "@/lib/sources/ipma-forecast";
-import type { StationObservation } from "@/lib/sources/ipma-observations";
-import type { SeaSpot } from "@/lib/sources/ipma-sea";
 import type { SourceResult } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
 import { districtHeadline, districtTopics, type TopicId } from "@/lib/state/bulletin";
@@ -44,14 +42,10 @@ export function DistrictStage({
   district,
   state,
   forecast,
-  observations,
-  sea,
 }: {
   district: District;
   state: CountryState;
   forecast: SourceResult<ForecastDay[]>;
-  observations: SourceResult<Record<string, StationObservation>>;
-  sea: SourceResult<Record<string, SeaSpot[]>>;
 }) {
   const { t, path } = useI18n();
   const router = useRouter();
@@ -187,8 +181,8 @@ export function DistrictStage({
         )}
         <NowAndSea
           district={district}
-          observations={observations}
-          sea={sea}
+          observations={state.observations}
+          sea={state.sea}
           reference={reference}
         />
       </div>

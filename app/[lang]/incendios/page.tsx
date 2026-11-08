@@ -6,6 +6,7 @@ import { FiresView } from "@/components/topic-views";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
+import { feedPath } from "@/lib/feeds/paths";
 import { getPageState } from "@/lib/state/get-state";
 
 export async function generateMetadata(props: PageProps<"/[lang]/incendios">): Promise<Metadata> {
@@ -18,6 +19,10 @@ export async function generateMetadata(props: PageProps<"/[lang]/incendios">): P
     title: t.meta.firesTitle,
     description: t.pages.firesIntro,
     image: inheritedOgImage(lang, t.site.ogAlt),
+    feed: {
+      title: t.feed.firesTitle(t.feed.national),
+      url: feedPath(lang, "incendios"),
+    },
   });
 }
 

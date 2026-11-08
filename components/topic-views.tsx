@@ -130,7 +130,7 @@ export function useTopic(initial: CountryState, views: LayerId[], region?: Regio
 
 export function WarningsView({ initial }: { initial: CountryState }) {
   const { t } = useI18n();
-  const { state, controls, mapRef, reference } = useTopic(initial, ["warnings"]);
+  const { state, controls, mapRef, reference } = useTopic(initial, ["warnings", "observed", "sea"]);
   return (
     <TopicLayout
       title={t.pages.warningsTitle}
@@ -146,7 +146,7 @@ export function WarningsView({ initial }: { initial: CountryState }) {
         ) : (
           <EmptyState>{t.empty.warningsDown}</EmptyState>
         )}
-        <FeedLink />
+        <FeedLink topic="avisos" />
       </Section>
     </TopicLayout>
   );
@@ -180,6 +180,7 @@ export function FiresView({ initial }: { initial: CountryState }) {
             .
           </EmptyState>
         )}
+        <FeedLink topic="incendios" />
       </Section>
     </TopicLayout>
   );
@@ -208,6 +209,7 @@ export function QuakesView({ initial }: { initial: CountryState }) {
         ) : (
           <EmptyState>{t.empty.quakesDown}</EmptyState>
         )}
+        <FeedLink topic="sismos" />
       </Section>
     </TopicLayout>
   );

@@ -175,7 +175,19 @@ const pt = {
     item: (level: string, type: string) => `Aviso ${level} de ${type}`,
     range: (from: string, to: string) => `De ${from} a ${to}`,
     places: "Locais",
-    subscribe: "Subscrever estes avisos por RSS",
+    subscribe: {
+      avisos: "Subscrever estes avisos por RSS",
+      incendios: "Subscrever estes incêndios por RSS",
+      sismos: "Subscrever estes sismos por RSS",
+    } as Record<"avisos" | "incendios" | "sismos", string>,
+    firesTitle: (where: string) => `Incêndios ${where} · Portugal Agora`,
+    firesDescription: (where: string) =>
+      `Incêndios em curso ${where}, com dados do Fogos.pt (ANEPC). Informativo: não substitui as autoridades. Em emergência, ligue 112.`,
+    fireStart: (when: string) => `Início: ${when}.`,
+    quakesTitle: (where: string) => `Sismos ${where} · Portugal Agora`,
+    quakesDescription: (where: string) =>
+      `Sismos dos últimos 7 dias ${where}, com dados do IPMA. Informativo: não substitui as autoridades. Em emergência, ligue 112.`,
+    felt: "sentido",
   },
   /** Nome de um distrito ou região, como aparece no texto. */
   districtName: (d: District) => d.name,
@@ -406,7 +418,13 @@ const pt = {
       quakes: "Sismos",
       risk: "Risco de incêndio",
       air: "Qualidade do ar",
+      observed: "Tempo agora",
+      sea: "Mar",
     },
+    observedLegend:
+      "Temperatura agora na estação do IPMA mais próxima da capital de cada distrito. Toque numa estação para o resto.",
+    seaLegend:
+      "Altura das ondas hoje, previsão do IPMA para a costa. Toque num ponto para os próximos dias.",
     risk: "Risco:",
     quakeLegend: "Círculo maior, magnitude maior; mais transparente, mais antigo.",
     fireLegend: {
@@ -435,6 +453,8 @@ const pt = {
       quakes: "Ver os sismos em todo o país",
       risk: "Ver o risco de incêndio em todo o país",
       air: "Ver a qualidade do ar em todo o país",
+      observed: "Ver o tempo em todo o país",
+      sea: "Ver o mar em todo o país",
     },
     close: "Fechar detalhe",
     noWarnings: "Sem avisos meteorológicos.",
@@ -670,7 +690,19 @@ const en: Dictionary = {
     item: (level, type) => `${level} warning: ${type}`,
     range: (from, to) => `From ${from} to ${to}`,
     places: "Places",
-    subscribe: "Subscribe to these warnings by RSS",
+    subscribe: {
+      avisos: "Subscribe to these warnings by RSS",
+      incendios: "Subscribe to these wildfires by RSS",
+      sismos: "Subscribe to these earthquakes by RSS",
+    },
+    firesTitle: (where) => `Wildfires ${where} · Portugal Agora`,
+    firesDescription: (where) =>
+      `Active wildfires ${where}, with data from Fogos.pt (ANEPC). For information only: it does not replace the authorities. In an emergency, call 112.`,
+    fireStart: (when) => `Started: ${when}.`,
+    quakesTitle: (where) => `Earthquakes ${where} · Portugal Agora`,
+    quakesDescription: (where) =>
+      `Earthquakes from the last 7 days ${where}, with data from IPMA. For information only: it does not replace the authorities. In an emergency, call 112.`,
+    felt: "felt",
   },
   districtName: enDistrictName,
   inPlace: (d) => d.en?.inName ?? `in ${enDistrictName(d)}`,
@@ -893,7 +925,12 @@ const en: Dictionary = {
       quakes: "Earthquakes",
       risk: "Wildfire risk",
       air: "Air quality",
+      observed: "Weather now",
+      sea: "Sea",
     },
+    observedLegend:
+      "Current temperature at the IPMA station closest to each district capital. Tap a station for the rest.",
+    seaLegend: "Wave height today, IPMA coastal forecast. Tap a point for the next days.",
     risk: "Risk:",
     quakeLegend: "Bigger circle, bigger magnitude; more transparent, older.",
     fireLegend: {
@@ -922,6 +959,8 @@ const en: Dictionary = {
       quakes: "See earthquakes across the country",
       risk: "See wildfire risk across the country",
       air: "See air quality across the country",
+      observed: "See the weather across the country",
+      sea: "See the sea across the country",
     },
     close: "Close details",
     noWarnings: "No weather warnings.",

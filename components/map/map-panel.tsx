@@ -13,7 +13,13 @@ import { useI18n } from "@/lib/i18n/client";
 import { fireRiskLabels } from "@/lib/sources/labels";
 import type { EarthquakeEvent } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
-import { capitalize, formatDayTime, formatNumber } from "@/lib/time/format";
+import {
+  capitalize,
+  formatDayTime,
+  formatNumber,
+  formatTime,
+  formatWeekday,
+} from "@/lib/time/format";
 import { cn } from "@/lib/utils";
 
 import { riskColors } from "../cards/fire-risk";
@@ -90,17 +96,85 @@ function Chip({
 function Detail({
   state,
   selection,
+  layer,
   onClose,
 }: {
   state: CountryState;
   selection: Selection;
+  layer: LayerId;
   onClose: () => void;
 }) {
   const { t, locale, path } = useI18n();
   const reference = new Date(state.generatedAt);
   let body: React.ReactNode = null;
+  const observation =
+    selection.type === "district" ? state.observations.data?.[selection.slug] : undefined;
+  const spots = selection.type === "district" ? state.sea.data?.[selection.slug] : undefined;
 
-  if (selection.type === "district") {
+  if (selection.type === "district" && layer === "observed" && observation) {
+    const d = getDistrict(selection.slug);
+    const dir = observation.windDir ? t.compass[observation.windDir] : undefined;
+    const parts = [
+      `${formatNumber(observation.temperature, 1, locale)} °C`,
+      observation.windKmh === null
+        ? null
+        : observation.windKmh === 0
+          ? t.observed.calm
+          : dir
+            ? t.observed.windFrom(String(observation.windKmh), dir)
+            : `${observation.windKmh} km/h`,
+      observation.humidity === null
+        ? null
+        : `${t.observed.humidity.toLowerCase()} ${Math.round(observation.humidity)} %`,
+      observation.rainMm ? `${formatNumber(observation.rainMm, 1, locale)} mm` : null,
+    ].filter(Boolean);
+    body = (
+      <>
+        <p className="text-lg font-extrabold">{d ? t.districtName(d) : null}</p>
+        <p className="text-base">{capitalize(parts.join(", "))}.</p>
+        <p className="text-sm text-ink-2">
+          {t.observed.station(
+            observation.station,
+            formatTime(observation.time, d?.region === "acores" ? "acores" : undefined),
+          )}
+        </p>
+        {d ? (
+          <Link href={path(`/${d.slug}`)} className="text-base font-bold">
+            {t.map.seeAllAbout(t.districtName(d))}
+          </Link>
+        ) : null}
+      </>
+    );
+  } else if (selection.type === "district" && layer === "sea" && spots?.length) {
+    const d = getDistrict(selection.slug);
+    const range = (min: number | null, max: number | null) => {
+      const values = [min, max].filter((v): v is number => v !== null);
+      const [a, b] = [...new Set(values.map((v) => formatNumber(v, 1, locale)))];
+      return a ? `${b ? `${a}–${b}` : a} m` : "—";
+    };
+    body = (
+      <>
+        <p className="text-lg font-extrabold">{d ? t.districtName(d) : null}</p>
+        {spots.map((spot) => (
+          <p key={spot.name} className="text-base">
+            <span className="font-bold">{spot.name}:</span>{" "}
+            {spot.days
+              .slice(0, 3)
+              .map(
+                (day, i) =>
+                  `${i === 0 ? t.stage.today : i === 1 ? t.stage.tomorrow : formatWeekday(day.date, locale)} ${range(day.seaMin, day.seaMax)}`,
+              )
+              .join(" · ")}
+          </p>
+        ))}
+        {d ? (
+          <Link href={path(`/${d.slug}`)} className="text-base font-bold">
+            {t.map.seeAllAbout(t.districtName(d))}
+          </Link>
+        ) : null}
+      </>
+    );
+  } else if (selection.type === "district") {
     const d = getDistrict(selection.slug);
     const status = state.districts[selection.slug];
     const warnings = (state.warnings.data ?? []).filter((w) => w.place.district === selection.slug);
@@ -234,6 +308,8 @@ function Legend({
   if (layer === "warnings") items = scale(t.levels, "none");
   else if (layer === "fires") items = scale(t.map.fireLegend, "unknown");
   else if (layer === "air") items = scale(t.map.airLegend, "none");
+  else if (layer === "observed") items = <span>{t.map.observedLegend}</span>;
+  else if (layer === "sea") items = <span>{t.map.seaLegend}</span>;
   else if (layer === "quakes")
     items = (
       <>
@@ -427,7 +503,7 @@ export function MapPanel({
           />
         )}
         {selection ? (
-          <Detail state={state} selection={selection} onClose={onClearSelection} />
+          <Detail state={state} selection={selection} layer={layer} onClose={onClearSelection} />
         ) : null}
       </div>
       <Legend layer={layer} region={shownRegion} mode3d={active3d} quakes={quakes} focus={focus} />

@@ -38,7 +38,13 @@ export const ipmaSeaDaySchema = z.object({
 });
 
 export const ipmaSeaLocationsSchema = z.array(
-  z.object({ globalIdLocal: z.number(), idAreaAviso: z.string(), local: z.string() }),
+  z.object({
+    globalIdLocal: z.number(),
+    idAreaAviso: z.string(),
+    local: z.string(),
+    latitude: z.coerce.number(),
+    longitude: z.coerce.number(),
+  }),
 );
 
 export interface SeaDay {
@@ -59,6 +65,8 @@ export interface SeaSpot {
   /** "Lisboa", "Sagres", "Ponta Delgada" (sem o ", costa" do IPMA). */
   name: string;
   district: string;
+  /** [lon, lat] do ponto de previsão. */
+  coordinates: [number, number];
   days: SeaDay[];
 }
 
@@ -72,7 +80,12 @@ export function normalizeSea(
     const district = districtForIpmaArea(l.idAreaAviso);
     if (!district) continue;
     const name = l.local.replace(/,\s*costa$/i, "").trim();
-    spots.set(l.globalIdLocal, { name, district: district.slug, days: [] });
+    spots.set(l.globalIdLocal, {
+      name,
+      district: district.slug,
+      coordinates: [l.longitude, l.latitude],
+      days: [],
+    });
   }
   for (const day of [...days].sort((a, b) => a.forecastDate.localeCompare(b.forecastDate))) {
     for (const d of day.data) {

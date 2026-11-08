@@ -13,6 +13,9 @@ import type {
   WarningEvent,
 } from "@/lib/sources/types";
 
+import type { StationObservation } from "@/lib/sources/ipma-observations";
+import type { SeaSpot } from "@/lib/sources/ipma-sea";
+
 import { countryHeadline, placesPhrase as phrase } from "./bulletin";
 
 const pt = getDictionary("pt");
@@ -39,6 +42,10 @@ export interface CountryState {
   fireRisk: SourceResult<FireRisk>;
   uv: SourceResult<UvReading[]>;
   airQuality: SourceResult<AirQualityReading[]>;
+  /** Estação do IPMA mais próxima da capital, por distrito. */
+  observations: SourceResult<Record<string, StationObservation>>;
+  /** Pontos de previsão do estado do mar, por distrito com costa. */
+  sea: SourceResult<Record<string, SeaSpot[]>>;
 }
 
 export interface StateInputs {
@@ -48,6 +55,9 @@ export interface StateInputs {
   fireRisk: SourceResult<FireRisk>;
   uv: SourceResult<UvReading[]>;
   airQuality: SourceResult<AirQualityReading[]>;
+  /** Opcionais: sem eles (ex.: nos testes), ficam "indisponíveis". */
+  observations?: SourceResult<Record<string, StationObservation>>;
+  sea?: SourceResult<Record<string, SeaSpot[]>>;
 }
 
 /** Sismos que entram na lista: magnitude ≥ 2 ou sentidos. */
@@ -160,6 +170,12 @@ export function aggregate(inputs: StateInputs, now: Date): CountryState {
     districts: statuses,
     ...inputs,
     earthquakes,
+    observations: inputs.observations ?? {
+      id: "ipma-observations",
+      status: "unavailable",
+      data: null,
+    },
+    sea: inputs.sea ?? { id: "ipma-sea", status: "unavailable", data: null },
   };
 }
 

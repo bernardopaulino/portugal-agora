@@ -30,7 +30,7 @@ export async function generateMetadata(
     image: inheritedOgImage(lang, t.site.ogAlt, district.slug),
     feed: {
       title: t.feed.title(t.inPlace(district)),
-      url: feedPath(lang, district),
+      url: feedPath(lang, "avisos", district),
     },
   });
 }

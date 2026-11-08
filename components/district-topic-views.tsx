@@ -51,7 +51,7 @@ export function DistrictWarningsView({ district, initial }: Props) {
         ) : (
           <EmptyState>{t.empty.warningsDown}</EmptyState>
         )}
-        <FeedLink district={district} />
+        <FeedLink topic="avisos" district={district} />
       </Section>
     </TopicLayout>
   );
@@ -102,6 +102,7 @@ export function DistrictFiresView({ district, initial }: Props) {
             .
           </EmptyState>
         )}
+        {covered ? <FeedLink topic="incendios" district={district} /> : null}
       </Section>
     </TopicLayout>
   );
@@ -134,6 +135,7 @@ export function DistrictQuakesView({ district, initial }: Props) {
         ) : (
           <EmptyState>{t.empty.quakesDown}</EmptyState>
         )}
+        <FeedLink topic="sismos" district={district} />
       </Section>
     </TopicLayout>
   );

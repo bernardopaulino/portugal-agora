@@ -257,8 +257,18 @@ test("API de fontes só aceita fontes conhecidas", async ({ request }) => {
   }
 });
 
-test("feeds RSS dos avisos, do país e de um distrito", async ({ page, request }) => {
-  for (const path of ["/avisos/rss", "/en/lisboa/avisos/rss"]) {
+test("feeds RSS dos avisos, incêndios e sismos, do país e de um distrito", async ({
+  page,
+  request,
+}) => {
+  for (const path of [
+    "/avisos/rss",
+    "/en/lisboa/avisos/rss",
+    "/incendios/rss",
+    "/sismos/rss",
+    "/en/porto/sismos/rss",
+    "/faro/incendios/rss",
+  ]) {
     const response = await request.get(path);
     expect(response.ok()).toBe(true);
     expect(response.headers()["content-type"]).toContain("application/rss+xml");

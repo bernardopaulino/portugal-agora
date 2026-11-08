@@ -41,6 +41,8 @@ export type IpmaObservationsRaw = z.infer<typeof ipmaObservationsSchema>;
 
 export interface StationObservation {
   station: string;
+  /** [lon, lat] da estação. */
+  coordinates: [number, number];
   /** Hora da observação (ISO, UTC). */
   time: string;
   /** Distância da estação à capital do distrito, em km (arredondada). */
@@ -83,6 +85,7 @@ export function normalizeObservations(
       const wind = valid(p.intensidadeVentoKM);
       best = {
         station: p.localEstacao,
+        coordinates: point,
         time: `${p.time.slice(0, 19)}Z`,
         distanceKm: Math.round(km),
         temperature: Math.round(temperature * 10) / 10,
