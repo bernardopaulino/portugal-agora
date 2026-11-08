@@ -9,6 +9,7 @@ import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
 import { feedPath } from "@/lib/feeds/paths";
 import { getPageState } from "@/lib/state/get-state";
+import { slimState } from "@/lib/state/slim";
 
 export function generateStaticParams() {
   return districts.map((d) => ({ distrito: d.slug }));
@@ -51,7 +52,10 @@ export default async function DistrictIncendiosPage(
           { name: t.pages.firesTitle, path: `/${district.slug}/incendios` },
         ])}
       />
-      <DistrictFiresView district={district} initial={state} />
+      <DistrictFiresView
+        district={district}
+        initial={slimState(state, "incendios", district.slug)}
+      />
     </>
   );
 }

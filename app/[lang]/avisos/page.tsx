@@ -8,6 +8,7 @@ import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
 import { feedPath } from "@/lib/feeds/paths";
 import { getPageState } from "@/lib/state/get-state";
+import { slimState } from "@/lib/state/slim";
 
 export async function generateMetadata(props: PageProps<"/[lang]/avisos">): Promise<Metadata> {
   const { lang } = await props.params;
@@ -36,7 +37,7 @@ export default async function AvisosPage(props: PageProps<"/[lang]/avisos">) {
       <JsonLd
         data={breadcrumbJsonLd(lang, t, [{ name: t.pages.warningsTitle, path: "/avisos" }])}
       />
-      <WarningsView initial={state} />
+      <WarningsView initial={slimState(state, "avisos")} />
     </>
   );
 }

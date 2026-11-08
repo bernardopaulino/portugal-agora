@@ -8,6 +8,7 @@ import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
 import { feedPath } from "@/lib/feeds/paths";
 import { getPageState } from "@/lib/state/get-state";
+import { slimState } from "@/lib/state/slim";
 
 export async function generateMetadata(props: PageProps<"/[lang]/incendios">): Promise<Metadata> {
   const { lang } = await props.params;
@@ -36,7 +37,7 @@ export default async function IncendiosPage(props: PageProps<"/[lang]/incendios"
       <JsonLd
         data={breadcrumbJsonLd(lang, t, [{ name: t.pages.firesTitle, path: "/incendios" }])}
       />
-      <FiresView initial={state} />
+      <FiresView initial={slimState(state, "incendios")} />
     </>
   );
 }

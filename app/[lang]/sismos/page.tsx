@@ -8,6 +8,7 @@ import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
 import { feedPath } from "@/lib/feeds/paths";
 import { getPageState } from "@/lib/state/get-state";
+import { slimState } from "@/lib/state/slim";
 
 export async function generateMetadata(props: PageProps<"/[lang]/sismos">): Promise<Metadata> {
   const { lang } = await props.params;
@@ -34,7 +35,7 @@ export default async function SismosPage(props: PageProps<"/[lang]/sismos">) {
   return (
     <>
       <JsonLd data={breadcrumbJsonLd(lang, t, [{ name: t.pages.quakesTitle, path: "/sismos" }])} />
-      <QuakesView initial={state} />
+      <QuakesView initial={slimState(state, "sismos")} />
     </>
   );
 }

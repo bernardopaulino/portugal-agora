@@ -8,6 +8,7 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
 import { getPageState } from "@/lib/state/get-state";
+import { slimState } from "@/lib/state/slim";
 
 export function generateStaticParams() {
   return districts.map((d) => ({ distrito: d.slug }));
@@ -53,7 +54,7 @@ export default async function DistrictRiscoPage(props: PageProps<"/[lang]/[distr
           { name: topic, path: `/${district.slug}/risco` },
         ])}
       />
-      <DistrictRiskView district={district} initial={state} />
+      <DistrictRiskView district={district} initial={slimState(state, "risco", district.slug)} />
     </>
   );
 }
