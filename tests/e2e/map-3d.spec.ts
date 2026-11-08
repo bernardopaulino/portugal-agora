@@ -148,6 +148,22 @@ test("sismos em profundidade: entrada, ver no mapa e voltar ao 2D", async ({ pag
   expect(errors).toEqual([]);
 });
 
+test("mudar de distrito no mesmo tema volta a inclinar o mapa 3D", async ({ page }) => {
+  // O Next reaproveitava o mapa do distrito anterior (ou reconstruía-o ao voltar
+  // a uma página já vista): o mapa ficava plano, sem a entrada, e com os
+  // contornos do distrito antigo. Cada distrito tem agora a sua vista.
+  const pick = async (district: string) => {
+    await page.locator("select:visible").selectOption(district);
+    await expect(page).toHaveURL(new RegExp(`/${district}/risco$`));
+  };
+  await page.goto("/lisboa/risco");
+  await expect(liveMap(page)).toHaveAttribute("data-pitch", "55", { timeout: 20_000 });
+  for (const district of ["porto", "lisboa"]) {
+    await pick(district);
+    await expect(liveMap(page)).toHaveAttribute("data-pitch", "55", { timeout: 20_000 });
+  }
+});
+
 test("voltar a um distrito já visitado repete a entrada da câmara", async ({ page }) => {
   // O Next guarda escondidas as páginas já visitadas e volta a mostrá-las:
   // a cena 3D é a mesma, mas a entrada tem de acontecer outra vez.

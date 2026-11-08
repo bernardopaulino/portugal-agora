@@ -53,7 +53,7 @@ export default async function ConcelhoPage(props: PageProps<"/[lang]/[distrito]/
           { name, path: `/${district.slug}/${concelho.slug}` },
         ])}
       />
-      <ConcelhoView concelho={concelho} district={district} />
+      <ConcelhoView key={concelho.dico} concelho={concelho} district={district} />
     </>
   );
 }

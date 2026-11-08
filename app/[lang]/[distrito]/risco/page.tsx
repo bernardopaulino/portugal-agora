@@ -54,7 +54,12 @@ export default async function DistrictRiscoPage(props: PageProps<"/[lang]/[distr
           { name: topic, path: `/${district.slug}/risco` },
         ])}
       />
-      <DistrictRiskView district={district} initial={slimState(state, "risco", district.slug)} />
+      {/* Uma vista nova por distrito (ver o comentário em avisos/page.tsx). */}
+      <DistrictRiskView
+        key={district.slug}
+        district={district}
+        initial={slimState(state, "risco", district.slug)}
+      />
     </>
   );
 }

@@ -50,7 +50,12 @@ export default async function DistrictSismosPage(props: PageProps<"/[lang]/[dist
           { name: t.pages.quakesTitle, path: `/${district.slug}/sismos` },
         ])}
       />
-      <DistrictQuakesView district={district} initial={slimState(state, "sismos", district.slug)} />
+      {/* Uma vista nova por distrito (ver o comentário em avisos/page.tsx). */}
+      <DistrictQuakesView
+        key={district.slug}
+        district={district}
+        initial={slimState(state, "sismos", district.slug)}
+      />
     </>
   );
 }

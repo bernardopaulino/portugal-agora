@@ -207,6 +207,10 @@ export default function LiveMap({
   const onClearRef = useRef(onClear);
   // Havia uma seleção? Quando sai, o mapa volta ao enquadramento inicial.
   const hadSelection = useRef(false);
+  const pendingRefit = useRef(false);
+  // Vista 3D: se já está em 3D e se a entrada longa já foi feita (neste mapa).
+  const was3d = useRef(false);
+  const entered = useRef(false);
   const theme = useResolvedTheme();
   const colors = mapColors[theme];
   // Os reenquadramentos (fitBounds) mantêm a inclinação e a orientação da vista atual.
@@ -239,9 +243,33 @@ export default function LiveMap({
     }
   }, [layer, concelhoGeo, focus]);
 
-  // Criar o mapa uma vez.
+  // Reenquadrar sem animação (mudou o tamanho, chegaram os limites), se a pessoa
+  // não mexeu no mapa. Durante uma viagem da câmara (a entrada no 3D), espera
+  // que ela acabe: um fitBounds a meio cancelava-a e o mapa ficava plano.
+  const refit = (map: MapLibreMap) => {
+    if (userMoved.current) return;
+    if (!map.isMoving()) {
+      fitTarget.current?.(0);
+      return;
+    }
+    if (pendingRefit.current) return;
+    pendingRefit.current = true;
+    map.once("moveend", () => {
+      pendingRefit.current = false;
+      if (!userMoved.current) fitTarget.current?.(0);
+    });
+  };
+
+  // Criar o mapa uma vez. (O efeito volta a correr quando a página reaparece:
+  // o Next guarda escondidas as páginas já visitadas e o React desmonta e volta
+  // a montar os efeitos. Cada mapa novo começa do zero, também na vista 3D.)
   useEffect(() => {
     if (!container.current) return;
+    delete container.current.dataset.pitch;
+    was3d.current = false;
+    entered.current = false;
+    userMoved.current = false;
+    hadSelection.current = false;
     const focusFeatureBounds = focus ? getDistrict(focus) : undefined;
     const map = new MapLibreMap({
       container: container.current,
@@ -339,9 +367,13 @@ export default function LiveMap({
     map.on("movestart", (e) => {
       if ((e as { originalEvent?: Event }).originalEvent) userMoved.current = true;
     });
+    // A inclinação no fim de cada movimento (para os testes verem a vista 3D).
+    map.on("moveend", () => {
+      if (container.current) container.current.dataset.pitch = String(Math.round(map.getPitch()));
+    });
     const observer = new ResizeObserver(() => {
       map.resize();
-      if (!userMoved.current) fitTarget.current?.(0);
+      refit(map);
     });
     observer.observe(container.current);
 
@@ -806,8 +838,6 @@ export default function LiveMap({
 
   // Vista 3D: relevo (incêndios) ou só inclinação (risco em altura); rotação
   // e compasso só aqui. A câmara move-se uma vez, quando a vista muda.
-  const was3d = useRef(false);
-  const entered = useRef(false);
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !styleReady.current) return;
@@ -957,7 +987,7 @@ export default function LiveMap({
     if (!bounds) return;
     fitTarget.current = (duration) =>
       map.fitBounds(bounds, { padding: 32, duration, ...tilt(map) });
-    if (!userMoved.current) fitTarget.current(0);
+    refit(map);
   }, [focus, districtGeo]);
 
   return (

@@ -53,6 +53,9 @@ export default async function DistrictIncendiosPage(
         ])}
       />
       <DistrictFiresView
+        // Uma vista nova por distrito: ao mudar de distrito no mesmo tema, o Next
+        // reaproveitava o mapa do distrito anterior (filtros, entrada 3D, câmara).
+        key={district.slug}
         district={district}
         initial={slimState(state, "incendios", district.slug)}
       />
