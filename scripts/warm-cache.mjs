@@ -1,15 +1,16 @@
 /*
- * Aquece a cache da Vercel depois de um deploy de produção.
+ * Aquece a cache da Vercel (corre de 6 em 6 horas, ver
+ * .github/workflows/warm-cache.yml).
  *
- * As páginas são pré-geradas no build e renovadas (ISR) só quando alguém
- * as visita. Uma página que ninguém visitou desde o deploy ainda é a do
- * build e a CDN entrega-a com os dados dessa hora (X-Vercel-Cache:
- * PRERENDER). Este script visita cada página do sitemap e a sua imagem
- * de partilha uma vez: a visita dispara a renovação em segundo plano e a
- * pessoa seguinte já recebe dados do próprio dia.
+ * As páginas são renovadas (ISR) só quando alguém as visita depois de
+ * passarem 15 min. Uma página que ninguém visitou durante muito tempo é
+ * entregue pela CDN com a última versão gerada, que pode ter dias (às
+ * vezes a do build: X-Vercel-Cache: PRERENDER). Este script visita cada
+ * página do sitemap e a sua imagem de partilha: a visita dispara a
+ * renovação em segundo plano e a pessoa seguinte recebe dados recentes.
  *
  * Uso: node scripts/warm-cache.mjs [https://portugalagora.pt]
- * Cada página renovada conta como uma "ISR write" (~430 por deploy).
+ * Cada página renovada conta como uma "ISR write" (~300 por passagem).
  */
 
 const base = (process.argv[2] ?? process.env.SITE_URL ?? "https://portugalagora.pt").replace(

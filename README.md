@@ -183,7 +183,7 @@ O repositório é público, por isso os workflows agendados não têm custo. Os 
 
 - **Tick** (`.github/workflows/tick.yml`, de 10 em 10 min): chama `/api/cron/tick` com o `CRON_SECRET`. Guarda um ponto do histórico e envia as notificações quando o nível de um distrito sobe. Só corre com a variável `TICK_ENABLED=true`.
 - **Vigiar as fontes** (`.github/workflows/sources.yml`, de 15 em 15 min): se `/api/health/sources` falhar em duas verificações seguidas, abre uma issue com a etiqueta `fonte-em-baixo` (email para o dono do repositório); quando tudo volta ao normal, fecha-a.
-- **Aquecer a cache** (`.github/workflows/warm-cache.yml`, depois de cada deploy de produção): visita as páginas do sitemap e as imagens de partilha, para a CDN não entregar o HTML do build com os dados da hora do deploy.
+- **Aquecer a cache** (`.github/workflows/warm-cache.yml`, de 6 em 6 horas): visita as páginas do sitemap e as imagens de partilha, para a CDN nunca entregar HTML com mais de ~6 h (sem isto, uma página pouco visitada podia ter os dados do deploy, com dias). Custa ~36 mil renovações ISR por mês.
 
 ## Licença
 

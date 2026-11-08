@@ -1,31 +1,32 @@
 name: Aquecer a cache
 
-# Depois de cada deploy de produção, visita todas as páginas para a CDN
-# não entregar o HTML do build (com os dados da hora do deploy). Ver
+# De 6 em 6 horas, visita todas as páginas e imagens de partilha. Uma página
+# que ninguém visitou durante muito tempo ainda é a última versão gerada
+# (às vezes a do build, com dias); a visita dispara a renovação, por isso
+# o HTML que a CDN entrega nunca tem mais de ~6 h. Custa ~300 renovações
+# ISR por passagem (~36 mil/mês; limite Hobby: 200 mil). Ver
 # scripts/warm-cache.mjs.
 on:
-  deployment_status:
+  schedule:
+    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: warm-cache
+  cancel-in-progress: false
+
 jobs:
   warm:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.deployment_status.state == 'success' &&
-       github.event.deployment.environment == 'Production')
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-
-      # A CDN pode ainda estar a propagar o deploy novo.
-      - run: sleep 30
 
       - run: node scripts/warm-cache.mjs https://portugalagora.pt
