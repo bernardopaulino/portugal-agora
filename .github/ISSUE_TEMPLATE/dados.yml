@@ -1,0 +1,34 @@
+name: Dado errado ou em falta
+description: Um aviso, incêndio, sismo ou valor que não bate certo com a fonte oficial.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: O Portugal Agora mostra os dados como as fontes os publicam. Se o erro estiver na própria fonte (IPMA, Fogos.pt, Open-Meteo), não o podemos corrigir aqui.
+  - type: dropdown
+    id: tema
+    attributes:
+      label: Tema
+      options:
+        - Avisos meteorológicos
+        - Incêndios
+        - Sismos
+        - Risco de incêndio
+        - Qualidade do ar ou UV
+        - Tempo, previsão ou mar
+        - Limites de distritos ou concelhos
+        - Outro
+    validations:
+      required: true
+  - type: textarea
+    id: diferenca
+    attributes:
+      label: O que está errado?
+      description: O que o site mostra e o que a fonte oficial mostra, com a hora a que viu.
+    validations:
+      required: true
+  - type: input
+    id: endereco
+    attributes:
+      label: Endereço da página
+      placeholder: https://portugalagora.pt/faro/risco

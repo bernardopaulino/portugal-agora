@@ -1,0 +1,14 @@
+name: Sugestão
+description: Uma ideia para tornar o site mais útil ou mais claro.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: O projeto é sem fins lucrativos e não terá publicidade, donativos nem qualquer forma de monetização.
+  - type: textarea
+    id: ideia
+    attributes:
+      label: A ideia
+      description: Que problema resolve e para quem?
+    validations:
+      required: true

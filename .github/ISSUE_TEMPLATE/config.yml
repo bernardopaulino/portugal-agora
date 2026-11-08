@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Emergência? Ligue 112
+    url: https://www.112.pt
+    about: O Portugal Agora é informativo e não substitui as autoridades.
+  - name: Avisos oficiais do IPMA
+    url: https://www.ipma.pt/pt/otempo/prev-sam/
+    about: A fonte oficial dos avisos meteorológicos.

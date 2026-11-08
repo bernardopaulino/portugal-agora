@@ -1,0 +1,28 @@
+name: Algo não funciona
+description: Uma página, um mapa ou um botão que não faz o que devia.
+labels: [bug]
+body:
+  - type: textarea
+    id: o-que
+    attributes:
+      label: O que aconteceu?
+      description: E o que esperava que acontecesse.
+    validations:
+      required: true
+  - type: input
+    id: endereco
+    attributes:
+      label: Endereço da página
+      placeholder: https://portugalagora.pt/lisboa/avisos
+    validations:
+      required: true
+  - type: input
+    id: dispositivo
+    attributes:
+      label: Dispositivo e browser
+      placeholder: iPhone 15, Safari / Windows, Chrome
+  - type: textarea
+    id: capturas
+    attributes:
+      label: Capturas de ecrã
+      description: Se ajudarem, arraste-as para aqui.
