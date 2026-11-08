@@ -156,12 +156,15 @@ const SINK_MS = 1200;
 
 /** Câmara em órbita à volta de um alvo, com limites (nunca por baixo nem de pernas para o ar). */
 function Rig({
+  entryKey,
   apiRef,
   home,
   radius,
   focusPoint,
   onMove,
 }: {
+  /** Região (e distrito) da cena: a entrada da câmara toca uma vez por cada. */
+  entryKey: string;
   apiRef: RefObject<RigApi | null>;
   /** Alvo da vista inicial. */
   home: THREE.Vector3;
@@ -256,8 +259,17 @@ function Rig({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size.width, size.height]);
   // A entrada: ao abrir (e ao mudar de região), a câmara parte de cima, mais
-  // longe e rodada, e desce até à vista inicial. Uma vez; depois fica quieta.
+  // longe e rodada, e desce até à vista inicial. Uma vez por região; depois
+  // fica quieta. Se o bloco mudar de tamanho a seguir (chegam dados novos com
+  // outro sismo mais fundo), não repete a entrada: ajusta-se com uma viagem
+  // curta, e só se a pessoa ainda não mexeu na câmara.
+  const enteredKey = useRef<string | null>(null);
   useEffect(() => {
+    if (enteredKey.current === entryKey) {
+      if (!touched.current) animateTo(homeView(), cameraDuration());
+      return;
+    }
+    enteredKey.current = entryKey;
     touched.current = false;
     const h = homeView();
     if (prefersReducedMotion()) {
@@ -275,7 +287,7 @@ function Rig({
     apply();
     animateTo(h, ENTRY_MS, easeInOut);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [home, radius]);
+  }, [home, radius, entryKey]);
 
   // Escolher um sismo leva a câmara até ele; tirar a seleção volta à vista geral.
   const hadFocus = useRef(false);
@@ -821,7 +833,14 @@ export default function QuakeDepth({
           >
             <ambientLight intensity={2.2} />
             <directionalLight position={[-radius, radius * 2, radius]} intensity={1.4} />
-            <Rig apiRef={rig} home={home} radius={radius} focusPoint={focusPoint} onMove={onMove} />
+            <Rig
+              entryKey={`${region}|${focus ?? ""}`}
+              apiRef={rig}
+              home={home}
+              radius={radius}
+              focusPoint={focusPoint}
+              onMove={onMove}
+            />
             <LabelAnchors labels={labels} depths={grid} halfW={halfW} halfD={halfD} />
             <mesh rotation-x={-Math.PI / 2} renderOrder={1}>
               <planeGeometry args={[halfW * 2, halfD * 2]} />

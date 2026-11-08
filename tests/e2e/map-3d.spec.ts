@@ -148,6 +148,37 @@ test("sismos em profundidade: entrada, ver no mapa e voltar ao 2D", async ({ pag
   expect(errors).toEqual([]);
 });
 
+test("dados novos não repetem a entrada da câmara dos sismos", async ({ page }) => {
+  // O estado atual chega depois de a página abrir, com um sismo mais fundo:
+  // o bloco cresce e a câmara ajusta-se com uma viagem curta, sem voltar ao topo.
+  await page.route("**/api/state", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    const state = await (await route.fetch()).json();
+    // Um sismo mais fundo do que qualquer um real, dentro do bloco do continente.
+    state.earthquakes.data = [
+      ...(state.earthquakes.data ?? []),
+      {
+        kind: "earthquake",
+        id: "sismo-teste-fundo",
+        title: "Sismo de teste",
+        severity: "none",
+        magnitude: 2.5,
+        depthKm: 150,
+        felt: false,
+        occurredAt: state.generatedAt,
+        coordinates: [-9.6, 38.65],
+        place: { district: "lisboa", region: "continente", label: "a oeste de Cascais" },
+      },
+    ];
+    await route.fulfill({ json: state });
+  });
+  await page.goto("/sismos");
+  await expect(depthScene(page)).toHaveAttribute("data-camera-duration", "1800");
+  await expect(depthScene(page)).toHaveAttribute("data-camera-duration", "600", {
+    timeout: 10_000,
+  });
+});
+
 test("sismos em 3D numa página de distrito", async ({ page }) => {
   const errors = consoleErrors(page);
   await withTestQuakes(page);
