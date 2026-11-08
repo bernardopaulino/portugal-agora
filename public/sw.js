@@ -1,11 +1,19 @@
 /*
  * Service worker do Portugal Agora.
- * - Ficheiros estáticos (JS, CSS, fontes, limites geográficos): cache primeiro.
+ * - /_next/static/: cache primeiro (o nome muda a cada versão, nunca envelhece).
+ * - Limites geográficos (/geo/): rede primeiro; sem rede, a cópia guardada.
+ *   Antes eram "cache primeiro" e não tinham o nome versionado: quem visitou o
+ *   site ficava para sempre com o ficheiro antigo (os concelhos das ilhas, que
+ *   vieram depois, não apareciam). A Vercel responde 304 quando não mudou.
+ * - Logótipos e ícones (/fontes/, /icons/): a cópia guardada logo, e atualiza-se
+ *   por trás para a próxima vez.
  * - Páginas e /api/state: rede primeiro; sem rede, a última versão guardada.
  * - Notificações de avisos (push), no fim do ficheiro.
  * Os mosaicos do mapa (outro domínio) não são guardados.
+ *
+ * Mudar VERSION apaga as caches antigas na ativação.
  */
-const VERSION = "pa-v1";
+const VERSION = "pa-v2";
 const STATIC_CACHE = `${VERSION}-static`;
 const PAGES_CACHE = `${VERSION}-pages`;
 const PRECACHE = ["/", "/geo/distritos.json", "/fontes"];
@@ -30,15 +38,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-function isStatic(url) {
-  return (
-    url.pathname.startsWith("/_next/static/") ||
-    url.pathname.startsWith("/geo/") ||
-    url.pathname.startsWith("/fontes/") ||
-    url.pathname.startsWith("/icons/")
-  );
-}
-
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
@@ -47,10 +46,22 @@ async function cacheFirst(request) {
   return response;
 }
 
-async function networkFirst(request, fallbackUrl) {
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(STATIC_CACHE);
+  const cached = await cache.match(request);
+  const update = fetch(request)
+    .then((response) => {
+      if (response.ok) cache.put(request, response.clone());
+      return response;
+    })
+    .catch(() => undefined);
+  return cached ?? (await update) ?? Response.error();
+}
+
+async function networkFirst(request, cacheName, fallbackUrl) {
   try {
     const response = await fetch(request);
-    if (response.ok) (await caches.open(PAGES_CACHE)).put(request, response.clone());
+    if (response.ok) (await caches.open(cacheName)).put(request, response.clone());
     return response;
   } catch {
     const cached =
@@ -65,10 +76,14 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  const path = url.pathname;
 
-  if (isStatic(url)) event.respondWith(cacheFirst(request));
-  else if (url.pathname === "/api/state") event.respondWith(networkFirst(request));
-  else if (request.mode === "navigate") event.respondWith(networkFirst(request, "/"));
+  if (path.startsWith("/_next/static/")) event.respondWith(cacheFirst(request));
+  else if (path.startsWith("/geo/")) event.respondWith(networkFirst(request, STATIC_CACHE));
+  else if (path.startsWith("/fontes/") || path.startsWith("/icons/"))
+    event.respondWith(staleWhileRevalidate(request));
+  else if (path === "/api/state") event.respondWith(networkFirst(request, PAGES_CACHE));
+  else if (request.mode === "navigate") event.respondWith(networkFirst(request, PAGES_CACHE, "/"));
 });
 
 /*
