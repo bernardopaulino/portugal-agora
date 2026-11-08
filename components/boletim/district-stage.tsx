@@ -10,6 +10,8 @@ import { getDistrict, type District } from "@/data/districts";
 import { useWebGLEnhancement } from "@/lib/hooks/webgl";
 import { useI18n } from "@/lib/i18n/client";
 import type { ForecastDay } from "@/lib/sources/ipma-forecast";
+import type { StationObservation } from "@/lib/sources/ipma-observations";
+import type { SeaSpot } from "@/lib/sources/ipma-sea";
 import type { SourceResult } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
 import { districtHeadline, districtTopics, type TopicId } from "@/lib/state/bulletin";
@@ -18,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { districtRisk, sceneMarkers } from "../home/immersive-home";
 import { BulletinMap } from "./bulletin-map";
 import { ForecastStrip } from "./forecast-strip";
+import { NowAndSea } from "./now-and-sea";
 import { BulletinStamp, mapLevels, mapMarkers } from "./national-stage";
 import { MapLegend, TopicList } from "./parts";
 
@@ -41,10 +44,14 @@ export function DistrictStage({
   district,
   state,
   forecast,
+  observations,
+  sea,
 }: {
   district: District;
   state: CountryState;
   forecast: SourceResult<ForecastDay[]>;
+  observations: SourceResult<Record<string, StationObservation>>;
+  sea: SourceResult<Record<string, SeaSpot[]>>;
 }) {
   const { t, path } = useI18n();
   const router = useRouter();
@@ -158,7 +165,7 @@ export function DistrictStage({
         </div>
       </section>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+      <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-4 pt-6 sm:px-6">
         {forecast.data ? (
           <ForecastStrip
             days={forecast.data}
@@ -178,6 +185,12 @@ export function DistrictStage({
             </p>
           </section>
         )}
+        <NowAndSea
+          district={district}
+          observations={observations}
+          sea={sea}
+          reference={reference}
+        />
       </div>
     </div>
   );

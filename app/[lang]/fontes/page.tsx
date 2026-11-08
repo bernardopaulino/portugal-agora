@@ -60,7 +60,7 @@ function Portuguese() {
         mas a classificação é nossa, explicada abaixo. Não são avisos oficiais.
       </p>
 
-      <h2>Avisos meteorológicos, sismos, risco de incêndio, UV e previsão</h2>
+      <h2>Avisos meteorológicos, sismos, risco de incêndio, UV, previsão, tempo observado e mar</h2>
       <p>
         Fonte:{" "}
         <a href="https://www.ipma.pt" rel="noopener">
@@ -84,6 +84,17 @@ function Portuguese() {
         <li>
           Risco de incêndio rural por concelho (hoje e amanhã), índice UV e previsão a 5 dias:
           consultados de hora a hora.
+        </li>
+        <li>
+          Tempo agora: a observação mais recente da estação meteorológica do IPMA mais próxima da
+          capital de cada distrito (temperatura, vento, humidade e chuva na última hora). O IPMA
+          publica as observações de hora a hora, cerca de 35 minutos depois da hora certa.
+        </li>
+        <li>
+          Estado do mar: a previsão do IPMA para hoje e os 2 dias seguintes em 12 pontos da costa
+          (Viana do Castelo, Porto, Figueira da Foz, Lisboa, Sines, Sagres, Faro, Funchal, Porto
+          Santo, Ponta Delgada, Horta e Santa Cruz das Flores): altura significativa das ondas,
+          direção e período da ondulação e temperatura da água.
         </li>
       </ul>
       <h3>Como classificamos os sismos</h3>
@@ -241,7 +252,7 @@ function English() {
         quality classes).
       </p>
 
-      <h2>Weather warnings, earthquakes, wildfire risk, UV and forecast</h2>
+      <h2>Weather warnings, earthquakes, wildfire risk, UV, forecast, current weather and sea</h2>
       <p>
         Source:{" "}
         <a href="https://www.ipma.pt" rel="noopener">
@@ -265,6 +276,17 @@ function English() {
         <li>
           Rural wildfire risk by municipality (today and tomorrow), UV index and 5-day forecast:
           checked every hour.
+        </li>
+        <li>
+          Weather now: the latest reading from the IPMA weather station closest to each district
+          capital (temperature, wind, humidity and rain in the last hour). IPMA publishes readings
+          every hour, about 35 minutes past the hour.
+        </li>
+        <li>
+          Sea conditions: the IPMA forecast for today and the next 2 days at 12 coastal points
+          (Viana do Castelo, Porto, Figueira da Foz, Lisbon, Sines, Sagres, Faro, Funchal, Porto
+          Santo, Ponta Delgada, Horta and Santa Cruz das Flores): significant wave height, swell
+          direction and period, and sea temperature.
         </li>
       </ul>
       <h3>How we classify earthquakes</h3>

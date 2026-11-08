@@ -13,7 +13,21 @@ import {
   normalizeForecast,
   type ForecastDay,
 } from "./ipma-forecast";
+import {
+  IPMA_OBSERVATIONS_URL,
+  ipmaObservationsSchema,
+  normalizeObservations,
+  type StationObservation,
+} from "./ipma-observations";
 import { IPMA_RCM_URLS, ipmaRcmSchema, normalizeFireRisk } from "./ipma-rcm";
+import {
+  IPMA_SEA_LOCATIONS_URL,
+  IPMA_SEA_URLS,
+  ipmaSeaDaySchema,
+  ipmaSeaLocationsSchema,
+  normalizeSea,
+  type SeaSpot,
+} from "./ipma-sea";
 import { IPMA_SEISMIC_URLS, ipmaSeismicSchema, normalizeSeismic } from "./ipma-seismic";
 import { IPMA_UV_URL, ipmaUvSchema, normalizeUv } from "./ipma-uv";
 import { IPMA_WARNINGS_URL, ipmaWarningsSchema, normalizeWarnings } from "./ipma-warnings";
@@ -174,3 +188,39 @@ async function cachedForecast(globalIdLocal: number): Promise<Outcome<ForecastDa
 }
 export const loadForecast = async (globalIdLocal: number) =>
   unwrap(await cachedForecast(globalIdLocal));
+
+/** Observações das estações: o IPMA publica de hora a hora (por volta de :35). */
+async function cachedObservations(): Promise<Outcome<Record<string, StationObservation>>> {
+  "use cache";
+  cacheTag("ipma-observations");
+  const outcome = await attempt(async () => {
+    const raw = await fetchJson(IPMA_OBSERVATIONS_URL, {
+      schema: ipmaObservationsSchema,
+      timeoutMs: 6000,
+    });
+    const result = stamp(normalizeObservations(raw));
+    await saveSnapshot("ipma-observations", result);
+    return result;
+  });
+  cacheLife(outcome.ok ? { stale: 300, revalidate: 1200, expire: 7200 } : FAILURE_LIFE);
+  return outcome;
+}
+export const loadObservations = async () => unwrap(await cachedObservations());
+
+/** Estado do mar: hoje e os 2 dias seguintes, em 12 pontos da costa. */
+async function cachedSea(): Promise<Outcome<Record<string, SeaSpot[]>>> {
+  "use cache";
+  cacheTag("ipma-sea");
+  const outcome = await attempt(async () => {
+    const [locations, days] = await Promise.all([
+      fetchJson(IPMA_SEA_LOCATIONS_URL, { schema: ipmaSeaLocationsSchema }),
+      Promise.all(IPMA_SEA_URLS.map((url) => fetchJson(url, { schema: ipmaSeaDaySchema }))),
+    ]);
+    const result = stamp(normalizeSea(days, locations));
+    await saveSnapshot("ipma-sea", result);
+    return result;
+  });
+  cacheLife(outcome.ok ? { stale: 300, revalidate: 3600, expire: 86400 } : FAILURE_LIFE);
+  return outcome;
+}
+export const loadSea = async () => unwrap(await cachedSea());

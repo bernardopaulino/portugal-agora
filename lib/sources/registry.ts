@@ -9,6 +9,8 @@ import {
   loadFireRisk,
   loadFires,
   loadForecast,
+  loadObservations,
+  loadSea,
   loadUv,
   loadWarnings,
 } from "./loaders";
@@ -20,6 +22,8 @@ export const sourceNames: Record<SourceId, string> = {
   "ipma-rcm": "IPMA",
   "ipma-uv": "IPMA",
   "ipma-forecast": "IPMA",
+  "ipma-observations": "IPMA",
+  "ipma-sea": "IPMA",
   fogos: "Fogos.pt",
   "openmeteo-aq": "Open-Meteo",
 };
@@ -81,3 +85,6 @@ export const getForecast = (globalIdLocal: number) =>
     () => loadForecast(globalIdLocal),
     `ipma-forecast-${globalIdLocal}`,
   );
+
+export const getObservations = () => resolveSource("ipma-observations", loadObservations);
+export const getSea = () => resolveSource("ipma-sea", loadSea);

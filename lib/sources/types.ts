@@ -21,6 +21,8 @@ export type SourceId =
   | "ipma-rcm"
   | "ipma-uv"
   | "ipma-forecast"
+  | "ipma-observations"
+  | "ipma-sea"
   | "fogos"
   | "openmeteo-aq";
 

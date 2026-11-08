@@ -1,0 +1,221 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -9.14,
+     38.72
+    ]
+   },
+   "type": "Feature",
+   "properties": {
+    "intensidadeVentoKM": 6.1,
+    "temperatura": -99,
+    "idEstacao": 1,
+    "pressao": 1009.9,
+    "humidade": 100,
+    "localEstacao": "Estação sem dados",
+    "precAcumulada": 0,
+    "idDireccVento": 4,
+    "radiacao": 178.3,
+    "time": "2026-11-08T14:00:00",
+    "intensidadeVento": 1.7,
+    "descDirVento": "SE"
+   }
+  },
+  {
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -9.1497,
+     38.7191
+    ]
+   },
+   "type": "Feature",
+   "properties": {
+    "intensidadeVentoKM": 6.1,
+    "temperatura": 17.4,
+    "idEstacao": 1200535,
+    "pressao": 1009.9,
+    "humidade": 100,
+    "localEstacao": "Lisboa (Geofísico)",
+    "precAcumulada": 0,
+    "idDireccVento": 4,
+    "radiacao": 178.3,
+    "time": "2026-11-08T14:00:00",
+    "intensidadeVento": 1.7,
+    "descDirVento": "SE"
+   }
+  },
+  {
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -9.1649,
+     38.7239
+    ]
+   },
+   "type": "Feature",
+   "properties": {
+    "intensidadeVentoKM": 5,
+    "temperatura": 17.3,
+    "idEstacao": 7240919,
+    "pressao": -99,
+    "humidade": 99,
+    "localEstacao": "Lisboa, Amoreiras (Lic. Francês)",
+    "precAcumulada": 1,
+    "idDireccVento": 4,
+    "radiacao": -99,
+    "time": "2026-11-08T14:00:00",
+    "intensidadeVento": 1.4,
+    "descDirVento": "SE"
+   }
+  },
+  {
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -9.1828,
+     38.7096
+    ]
+   },
+   "type": "Feature",
+   "properties": {
+    "intensidadeVentoKM": 4.7,
+    "temperatura": 17.6,
+    "idEstacao": 1210762,
+    "pressao": -99,
+    "humidade": 99,
+    "localEstacao": "Lisboa, Tapada da Ajuda",
+    "precAcumulada": 2.5,
+    "idDireccVento": 3,
+    "radiacao": 233.5,
+    "time": "2026-11-08T14:00:00",
+    "intensidadeVento": 1.3,
+    "descDirVento": "E"
+   }
+  },
+  {
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -8.6025,
+     41.1385
+    ]
+   },
+   "type": "Feature",
+   "properties": {
+    "intensidadeVentoKM": -99,
+    "temperatura": 23.2,
+    "idEstacao": 1240546,
+    "pressao": -99,
+    "humidade": 61,
+    "localEstacao": "Serra do Pilar",
+    "precAcumulada": 0,
+    "idDireccVento": 0,
+    "radiacao": -99,
+    "time": "2026-11-08T14:00:00",
+    "intensidadeVento": -99,
+    "descDirVento": "---"
+   }
+  },
+  {
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -8.626,
+     41.1526
+    ]
+   },
+   "type": "Feature",
+   "properties": {
+    "intensidadeVentoKM": -99,
+    "temperatura": 23.3,
+    "idEstacao": 1240903,
+    "pressao": -99,
+    "humidade": 46,
+    "localEstacao": "Porto, Massarelos",
+    "precAcumulada": 0,
+    "idDireccVento": 0,
+    "radiacao": -99,
+    "time": "2026-11-08T14:00:00",
+    "intensidadeVento": -99,
+    "descDirVento": "---"
+   }
+  },
+  {
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -25.6953,
+     37.7441
+    ]
+   },
+   "type": "Feature",
+   "properties": {
+    "intensidadeVentoKM": 56.5,
+    "temperatura": 18,
+    "idEstacao": 1200512,
+    "pressao": 997.2,
+    "humidade": 66,
+    "localEstacao": "Ponta Delgada (Aeroporto)",
+    "precAcumulada": 0,
+    "idDireccVento": 8,
+    "radiacao": 1662.5,
+    "time": "2026-11-08T14:00:00",
+    "intensidadeVento": 15.7,
+    "descDirVento": "NW"
+   }
+  },
+  {
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -25.7512,
+     37.819
+    ]
+   },
+   "type": "Feature",
+   "properties": {
+    "intensidadeVentoKM": 53.3,
+    "temperatura": 10.6,
+    "idEstacao": 1210518,
+    "pressao": 997.1,
+    "humidade": 84,
+    "localEstacao": "São Miguel / Pico Santos De Cima",
+    "precAcumulada": 0.3,
+    "idDireccVento": 8,
+    "radiacao": -99,
+    "time": "2026-11-08T14:00:00",
+    "intensidadeVento": 14.8,
+    "descDirVento": "NW"
+   }
+  },
+  {
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -16.888,
+     32.6479
+    ]
+   },
+   "type": "Feature",
+   "properties": {
+    "intensidadeVentoKM": 15.8,
+    "temperatura": 21.5,
+    "idEstacao": 1200522,
+    "pressao": 1005.8,
+    "humidade": 81,
+    "localEstacao": "Funchal",
+    "precAcumulada": 0,
+    "idDireccVento": 7,
+    "radiacao": 993,
+    "time": "2026-11-08T14:00:00",
+    "intensidadeVento": 4.4,
+    "descDirVento": "W"
+   }
+  }
+ ]
+}

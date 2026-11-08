@@ -13,7 +13,7 @@ Projeto **sem fins lucrativos**: sem publicidade, sem donativos, sem monetizaç�
 - **Página inicial imersiva:** Portugal em 3D, sozinho no escuro, com cada distrito na cor e na altura do seu nível de aviso; por cima, um painel de vidro com o título em português simples ("Aviso amarelo em 6 distritos."), a hora e uma linha por tema. Ao descer, a câmara viaja até cada tema: os avisos, os incêndios (colunas de luz), os sismos (anéis) e o risco de incêndio (os distritos mudam de cor e de altura). Apontar um distrito levanta-o e mostra o seu resumo; no fim, todos os distritos. Os Açores e a Madeira têm a sua caixa no mar. Sem WebGL, fica o mapa plano.
 - **Uma página por tema**, para não ter tudo numa só página: `/avisos`, `/incendios`, `/sismos` e `/risco` (risco de incêndio e qualidade do ar). Cada uma abre com um mapa detalhado só com esse tema e, por baixo, a lista; em ecrãs largos, mapa e lista ficam lado a lado, com o mapa sempre à vista.
 - **Páginas por distrito** (18 distritos + Açores + Madeira), com a mesma divisão:
-  - `/lisboa`: o boletim do distrito e a previsão a 5 dias.
+  - `/lisboa`: o boletim do distrito, a previsão a 5 dias, o tempo agora (a estação do IPMA mais próxima da capital) e, nos distritos com costa, o estado do mar para 3 dias.
   - `/lisboa/avisos`, `/lisboa/incendios`, `/lisboa/sismos` e `/lisboa/risco` (risco de incêndio por concelho, hoje e amanhã, qualidade do ar e UV), com o mapa enquadrado no distrito.
   - O menu do cabeçalho acompanha o distrito, e o seletor mantém o tema ao mudar de sítio (de `/lisboa/avisos` para `/porto/avisos`).
 - **Mapa detalhado** (MapLibre + OpenFreeMap) com 5 camadas: avisos por distrito, incêndios, sismos, risco de incêndio por concelho e qualidade do ar. Cada página mostra só a camada do seu tema (na página do risco escolhe-se entre risco de incêndio e qualidade do ar), com a legenda dessa camada. Nas páginas de distrito, o mapa mostra só o que é do distrito, esbate o resto do país e tem uma ligação para o mesmo tema em todo o país. No risco de incêndio, escolhe-se hoje ou amanhã. Liga-se às listas: "Ver no mapa" enquadra o evento, um clique no mapa mostra o detalhe e um segundo clique no mesmo sítio tira a seleção e volta à vista geral.
@@ -41,6 +41,8 @@ Projeto **sem fins lucrativos**: sem publicidade, sem donativos, sem monetizaç�
 | Sismos (continente, Madeira, Açores)   | IPMA                                                               | 5 min       |
 | Risco de incêndio rural por concelho   | IPMA (só continente)                                               | 1 h         |
 | Índice UV e previsão a 5 dias          | IPMA                                                               | 1 h         |
+| Tempo observado (estações)             | IPMA (estação mais próxima da capital de cada distrito)            | 20 min      |
+| Estado do mar (12 pontos da costa)     | IPMA (hoje e os 2 dias seguintes)                                  | 1 h         |
 | Incêndios ativos                       | [Fogos.pt](https://fogos.pt) (dados ANEPC), requer chave           | 2 min       |
 | Qualidade do ar (estimativa de modelo) | [Open-Meteo](https://open-meteo.com) / Copernicus CAMS, CC BY 4.0  | 10 min      |
 | Mapa base                              | [OpenFreeMap](https://openfreemap.org), © OpenStreetMap            | —           |

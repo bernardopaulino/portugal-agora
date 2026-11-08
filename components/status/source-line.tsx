@@ -12,6 +12,8 @@ const credit: Record<SourceId, { label: string; url: string; logo?: string }> = 
   "ipma-rcm": { ...attributions.ipma, logo: "/fontes/ipma.svg" },
   "ipma-uv": { ...attributions.ipma, logo: "/fontes/ipma.svg" },
   "ipma-forecast": { ...attributions.ipma, logo: "/fontes/ipma.svg" },
+  "ipma-observations": { ...attributions.ipma, logo: "/fontes/ipma.svg" },
+  "ipma-sea": { ...attributions.ipma, logo: "/fontes/ipma.svg" },
   fogos: attributions.fogos,
   "openmeteo-aq": attributions.openMeteo,
 };

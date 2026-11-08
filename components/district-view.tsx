@@ -3,6 +3,8 @@
 import type { District } from "@/data/districts";
 import { useLiveState } from "@/lib/hooks/live-state";
 import type { ForecastDay } from "@/lib/sources/ipma-forecast";
+import type { StationObservation } from "@/lib/sources/ipma-observations";
+import type { SeaSpot } from "@/lib/sources/ipma-sea";
 import type { SourceResult } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
 
@@ -17,11 +19,23 @@ export function DistrictView({
   district,
   initial,
   forecast,
+  observations,
+  sea,
 }: {
   district: District;
   initial: CountryState;
   forecast: SourceResult<ForecastDay[]>;
+  observations: SourceResult<Record<string, StationObservation>>;
+  sea: SourceResult<Record<string, SeaSpot[]>>;
 }) {
   const state = useLiveState(initial);
-  return <DistrictStage district={district} state={state} forecast={forecast} />;
+  return (
+    <DistrictStage
+      district={district}
+      state={state}
+      forecast={forecast}
+      observations={observations}
+      sea={sea}
+    />
+  );
 }
