@@ -26,6 +26,8 @@ Projeto **sem fins lucrativos**: sem publicidade, sem donativos, sem monetizaç�
 - **Português e inglês:** o português fica na raiz (`/`, `/lisboa`) e o inglês em `/en` (`/en`, `/en/lisboa`). O botão PT | EN leva à mesma página no outro idioma. Os textos que vêm das fontes (descrições dos avisos, nomes de locais) ficam em português, como publicados; o vocabulário fixo (tipos de aviso, estado dos incêndios, classes de qualidade do ar) é traduzido.
 - **Perto de mim:** a localização é convertida em distrito **no próprio dispositivo** (ponto-em-polígono com os limites da CAOP). Nada é enviado ao servidor.
 - **Resiliência:** se uma fonte falhar, o site mostra os últimos dados obtidos, assinalados como desatualizados. Nunca fica em branco.
+- **Histórico dos últimos 7 dias:** na página dos avisos, uma faixa por distrito com o nível ao longo de 24 h ou 7 dias e o tempo em cada nível por extenso; na página dos incêndios, o número de incêndios ativos. Registado de 10 em 10 min no Redis pelo tick (ver "Tarefas agendadas").
+- **Notificações de avisos** (web push) na página de avisos de cada distrito: a pessoa escolhe o nível a partir do qual quer ser avisada e recebe uma notificação quando o nível do distrito sobe até lá. Guarda-se só o endereço técnico de notificação, os distritos e o nível (ver /privacidade).
 - **RSS** dos avisos, dos incêndios e dos sismos, do país e de cada distrito: `/avisos/rss`, `/incendios/rss`, `/sismos/rss`, `/lisboa/avisos/rss`… (e `/en/...`). Horas absolutas; incêndios só os em curso; sismos do país só os sentidos ou em território português. Gerados a pedido e 5 min na CDN.
 - **Funciona sem rede** (PWA com service worker): mostra os últimos dados guardados.
 - **Imagens de partilha dinâmicas**, em cada idioma: ao partilhar um link no WhatsApp ou no LinkedIn, a pré-visualização mostra o estado atual e a hora dos dados, com o logótipo e as letras do site (TTF em `assets/fonts`, licença OFL).
@@ -173,13 +175,15 @@ npm install --no-save pmtiles && node scripts/build-relief-index.mjs
 3. Variáveis de ambiente: `NEXT_PUBLIC_SITE_URL`, `CONTACT_EMAIL` e, quando chegar, `FOGOS_API_KEY`.
 4. Em _Settings → Domains_, adicionar `portugalagora.pt` e `www.portugalagora.pt` e seguir as instruções de DNS no registo do domínio. Escolher um como principal (o outro redireciona) e usar **esse mesmo endereço** em `NEXT_PUBLIC_SITE_URL`: é o que aparece nos endereços canónicos, no sitemap e no `robots.txt`.
 5. Confirmar em `https://portugalagora.pt/api/health` e `https://portugalagora.pt/api/health/sources`.
-6. As fontes são vigiadas pelo GitHub Actions (ver abaixo). Em alternativa, um monitor externo pode consultar `/api/health/sources`, que responde 503 quando uma fonte está em baixo ou com dados mais antigos do que o seu limite (`lib/state/health.ts`).
-7. No [Google Search Console](https://search.google.com/search-console), validar o domínio e submeter o `sitemap.xml`.
+6. Notificações e histórico: gerar as chaves com `npx web-push generate-vapid-keys` e um segredo longo; na Vercel, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` e `CRON_SECRET` (produção) e um novo deploy; no GitHub, o secret `CRON_SECRET` (o mesmo valor) e a variável `TICK_ENABLED=true`.
+7. As fontes são vigiadas pelo GitHub Actions (ver abaixo). Em alternativa, um monitor externo pode consultar `/api/health/sources`, que responde 503 quando uma fonte está em baixo ou com dados mais antigos do que o seu limite (`lib/state/health.ts`).
+8. No [Google Search Console](https://search.google.com/search-console), validar o domínio e submeter o `sitemap.xml`.
 
 ## Tarefas agendadas (GitHub Actions)
 
 O repositório é público, por isso os workflows agendados não têm custo. Os cron da Vercel no plano Hobby só correm uma vez por dia.
 
+- **Tick** (`.github/workflows/tick.yml`, de 10 em 10 min): chama `/api/cron/tick` com o `CRON_SECRET`. Guarda um ponto do histórico e envia as notificações quando o nível de um distrito sobe. Só corre com a variável `TICK_ENABLED=true`.
 - **Vigiar as fontes** (`.github/workflows/sources.yml`, de 15 em 15 min): se `/api/health/sources` falhar em duas verificações seguidas, abre uma issue com a etiqueta `fonte-em-baixo` (email para o dono do repositório); quando tudo volta ao normal, fecha-a.
 - **Aquecer a cache** (`.github/workflows/warm-cache.yml`, de 6 em 6 horas): visita as páginas do sitemap e as imagens de partilha, para a CDN nunca entregar HTML com mais de ~6 h (sem isto, uma página pouco visitada podia ter os dados do deploy, com dias). Custa ~36 mil renovações ISR por mês.
 

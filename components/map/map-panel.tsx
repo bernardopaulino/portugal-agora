@@ -21,6 +21,7 @@ import {
   formatWeekday,
 } from "@/lib/time/format";
 import { cn } from "@/lib/utils";
+import { Chip } from "../status/chip";
 
 import { riskColors } from "../cards/fire-risk";
 import type { OnSelect, Selection } from "../cards/types";
@@ -58,40 +59,6 @@ function MapLoading() {
 }
 
 const regions: Region[] = ["continente", "acores", "madeira"];
-
-function Chip({
-  pressed,
-  onClick,
-  children,
-  role,
-  disabled,
-}: {
-  pressed: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  role?: "radio";
-  disabled?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      role={role}
-      disabled={disabled}
-      aria-pressed={role ? undefined : pressed}
-      aria-checked={role ? pressed : undefined}
-      onClick={onClick}
-      className={cn(
-        "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 font-display text-base font-medium tracking-[-0.01em] transition-colors",
-        pressed
-          ? "border-[color-mix(in_srgb,var(--accent)_55%,transparent)] bg-[color-mix(in_srgb,var(--accent)_16%,transparent)] text-ink shadow-[0_0_24px_-8px_var(--glow)]"
-          : "glass-button",
-        "disabled:cursor-not-allowed disabled:border-dashed disabled:text-ink-2",
-      )}
-    >
-      {children}
-    </button>
-  );
-}
 
 function Detail({
   state,

@@ -166,6 +166,45 @@ const pt = {
     W: "oeste",
     NW: "noroeste",
   } as Record<string, string>,
+  /** Notificações de avisos (web push) na página de cada distrito. */
+  push: {
+    title: (name: string, level: string) => `${name}: aviso ${level}`,
+    heading: "Notificações",
+    intro: (inPlace: string) =>
+      `Receba uma notificação neste dispositivo quando o IPMA emitir ou subir um aviso ${inPlace}.`,
+    enable: "Ativar notificações",
+    disable: "Desativar notificações",
+    on: (inPlace: string) => `Notificações ativas para os avisos ${inPlace}.`,
+    threshold: "Avisar a partir de",
+    working: "A tratar…",
+    denied:
+      "As notificações estão bloqueadas neste browser. Pode desbloqueá-las nas definições do site.",
+    unsupported:
+      "Este browser não suporta notificações. No iPhone e no iPad, adicione primeiro o site ao ecrã principal.",
+    error: "Não foi possível guardar a escolha. Tente de novo daqui a pouco.",
+    privacy:
+      "Guardamos só o endereço técnico de notificação deste browser, os distritos escolhidos e o nível. Ao desativar, apagamos tudo.",
+  },
+  /** Histórico dos últimos 7 dias (avisos e incêndios). */
+  history: {
+    heading: "Últimos 7 dias",
+    headingDay: "Últimas 24 horas",
+    ranges: { day: "24 h", week: "7 dias" },
+    range: "Período",
+    starting:
+      "O histórico começou a ser registado há pouco; fica mais completo com o passar das horas.",
+    since: (when: string) => `Registado desde ${when}.`,
+    calm: "sem aviso",
+    noData: "sem dados",
+    during: (level: string, time: string) => `${level} durante ${time}`,
+    firesHeading: "Incêndios ativos",
+    firesSummary: (now: number, max: number, when: string) =>
+      `Agora ${now}; no período, o máximo foi ${max} (${when}).`,
+    firesAria: (n: number) => `${n} ${n === 1 ? "incêndio ativo" : "incêndios ativos"}`,
+    days: (n: number) => `${n} d`,
+    hours: (n: number) => `${n} h`,
+    minutes: (n: number) => `${n} min`,
+  },
   /** Feed RSS dos avisos (/avisos/rss, /lisboa/avisos/rss). */
   feed: {
     national: "em Portugal",
@@ -681,6 +720,40 @@ const en: Dictionary = {
     SW: "southwest",
     W: "west",
     NW: "northwest",
+  },
+  push: {
+    title: (name, level) => `${name}: ${level} warning`,
+    heading: "Notifications",
+    intro: (inPlace) =>
+      `Get a notification on this device when IPMA issues or raises a warning ${inPlace}.`,
+    enable: "Turn on notifications",
+    disable: "Turn off notifications",
+    on: (inPlace) => `Notifications are on for warnings ${inPlace}.`,
+    threshold: "Notify from",
+    working: "Working…",
+    denied: "Notifications are blocked in this browser. You can allow them in the site settings.",
+    unsupported:
+      "This browser does not support notifications. On iPhone and iPad, add the site to the Home Screen first.",
+    error: "Could not save your choice. Please try again shortly.",
+    privacy:
+      "We only store this browser’s technical notification address, the chosen districts and the level. Turning it off deletes everything.",
+  },
+  history: {
+    heading: "Last 7 days",
+    headingDay: "Last 24 hours",
+    ranges: { day: "24 h", week: "7 days" },
+    range: "Period",
+    starting: "The history started recording recently; it fills in over the coming hours.",
+    since: (when) => `Recorded since ${when}.`,
+    calm: "no warning",
+    noData: "no data",
+    during: (level, time) => `${level} for ${time}`,
+    firesHeading: "Active wildfires",
+    firesSummary: (now, max, when) => `Now ${now}; the peak in this period was ${max} (${when}).`,
+    firesAria: (n) => `${n} active ${n === 1 ? "wildfire" : "wildfires"}`,
+    days: (n) => `${n} d`,
+    hours: (n) => `${n} h`,
+    minutes: (n) => `${n} min`,
   },
   feed: {
     national: "in Portugal",

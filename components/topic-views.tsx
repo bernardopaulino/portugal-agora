@@ -5,6 +5,7 @@ import type { ReactNode, RefObject } from "react";
 import type { District, Region } from "@/data/districts";
 import { useI18n } from "@/lib/i18n/client";
 import { useLiveState, useMapControls } from "@/lib/hooks/live-state";
+import { HISTORY_ORDER } from "@/lib/history/points";
 import type { CountryState } from "@/lib/state/aggregate";
 
 import { PageHead } from "./boletim/page-head";
@@ -14,6 +15,7 @@ import { FireRiskSummary } from "./cards/fire-risk";
 import { QuakeList } from "./cards/quake-list";
 import { WarningGroups } from "./cards/warning-groups";
 import { FeedLink } from "./cards/feed-link";
+import { FiresHistorySection, WarningsHistorySection } from "./history/history-sections";
 import type { LayerId } from "./map/layers";
 import { MapPanel } from "./map/map-panel";
 import { EmptyState, Section } from "./status/section";
@@ -148,6 +150,7 @@ export function WarningsView({ initial }: { initial: CountryState }) {
         )}
         <FeedLink topic="avisos" />
       </Section>
+      <WarningsHistorySection slugs={HISTORY_ORDER} linkDistricts />
     </TopicLayout>
   );
 }
@@ -182,6 +185,7 @@ export function FiresView({ initial }: { initial: CountryState }) {
         )}
         <FeedLink topic="incendios" />
       </Section>
+      <FiresHistorySection />
     </TopicLayout>
   );
 }

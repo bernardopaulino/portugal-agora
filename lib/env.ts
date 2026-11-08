@@ -16,6 +16,11 @@ const schema = z.object({
   KV_REST_API_TOKEN: z.string().min(1).optional(),
   UPSTASH_REDIS_REST_URL: z.url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+  /** Chaves VAPID das notificações (npx web-push generate-vapid-keys). */
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().min(1).optional(),
+  VAPID_PRIVATE_KEY: z.string().min(1).optional(),
+  /** Segredo que o GitHub Actions envia ao /api/cron/tick. */
+  CRON_SECRET: z.string().min(16).optional(),
 });
 
 export type ServerEnv = z.infer<typeof schema>;
@@ -60,5 +65,8 @@ export function features(e: ServerEnv = env()) {
   return {
     fires: Boolean(e.FOGOS_API_KEY),
     redis: redisCredentials(e) !== null,
+    push:
+      Boolean(e.NEXT_PUBLIC_VAPID_PUBLIC_KEY && e.VAPID_PRIVATE_KEY) &&
+      redisCredentials(e) !== null,
   };
 }

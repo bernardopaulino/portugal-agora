@@ -45,7 +45,14 @@ describe("redisCredentials", () => {
 
 describe("features", () => {
   it("desliga incêndios sem chave do Fogos.pt", () => {
-    expect(features(parseEnv({}))).toEqual({ fires: false, redis: false });
+    expect(features(parseEnv({}))).toEqual({ fires: false, redis: false, push: false });
+  });
+
+  it("as notificações precisam das chaves VAPID e do Redis", () => {
+    const keys = { NEXT_PUBLIC_VAPID_PUBLIC_KEY: "pub", VAPID_PRIVATE_KEY: "priv" };
+    expect(features(parseEnv(keys)).push).toBe(false);
+    const redis = { KV_REST_API_URL: "https://x.upstash.io", KV_REST_API_TOKEN: "t" };
+    expect(features(parseEnv({ ...keys, ...redis })).push).toBe(true);
   });
 
   it("liga incêndios com chave", () => {
