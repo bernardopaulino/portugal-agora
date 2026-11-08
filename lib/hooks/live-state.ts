@@ -38,6 +38,20 @@ export function useLiveState(initial: CountryState): CountryState {
 }
 
 /**
+ * Se o pedido a /api/state está a caminho. Lê o mesmo estado do SWR que o
+ * useLiveState, sem fazer pedidos seus.
+ */
+export function useStateRefreshing(): boolean {
+  const { isValidating } = useSWR<CountryState>("/api/state", null, {
+    revalidateOnMount: false,
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
+  return isValidating;
+}
+
+/**
  * Estado do mapa detalhado de uma página: a camada mostrada (uma de cada
  * vez, a do tema da página), o que está selecionado e a zona. `showOnMap`
  * seleciona e desce até ao mapa.
