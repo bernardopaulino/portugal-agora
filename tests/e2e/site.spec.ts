@@ -8,8 +8,10 @@ const pageTitle = (page: Page) => page.getByRole("heading", { level: 1 });
 
 // O seletor existe duas vezes no HTML (cabeçalho em computador, linha própria em
 // telemóvel); getByRole só encontra o que está visível.
+// Espera que o seletor já reaja (data-ready): escolher antes disso, com a máquina
+// carregada pelos testes em paralelo, podia perder-se.
 const picker = (page: Page, name = "Escolher distrito ou região") =>
-  page.getByRole("combobox", { name });
+  page.getByRole("combobox", { name }).and(page.locator("[data-ready]"));
 
 test("página inicial mostra o boletim do país", async ({ page }) => {
   await page.goto("/");
@@ -298,9 +300,17 @@ test("página de um concelho: dados ao abrir, sem dados no HTML", async ({ page,
   expect(html).not.toContain("generatedAt");
   await page.goto("/lisboa/sintra");
   await expect(page.getByRole("heading", { level: 1, name: "Sintra" })).toBeVisible();
-  for (const name of ["Avisos meteorológicos", "Risco de incêndio", "Incêndios no concelho"])
-    await expect(page.getByRole("heading", { name })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /Sismos a menos de 30 km/ })).toBeVisible();
+  for (const name of ["No mapa", "Agora", "Avisos meteorológicos", "Risco de incêndio"])
+    await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
+  // O mapa: os concelhos do distrito, cada um com ligação (Sintra realçado, sem ligação).
+  const map = page.getByRole("group", { name: /Mapa dos concelhos de Lisboa/ });
+  await expect(map.getByRole("link").first()).toBeVisible();
+  // Incêndios e sismos: uma caixa cada quando há algum; senão, uma linha em "Agora".
+  const fires = page.getByRole("heading", { name: /Incêndios no concelho e até 15 km/ });
+  const calm = page.getByText(/Sem incêndios em curso no concelho/);
+  await expect(fires.or(calm).first()).toBeVisible();
+  // A tabela do risco compara com os concelhos mais próximos.
+  await expect(page.locator("#risco tbody tr")).toHaveCount(5);
   await expectAccessible(page);
   expect((await request.get("/lisboa/nao-existe")).status()).toBe(404);
 });

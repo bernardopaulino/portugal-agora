@@ -230,13 +230,14 @@ export default function LiveMap({
       .catch(() => {});
   }, []);
   useEffect(() => {
-    if (layer === "risk" && !concelhoGeo) {
+    // Os concelhos: na camada do risco e nas páginas de distrito (contornos por dentro).
+    if ((layer === "risk" || focus) && !concelhoGeo) {
       fetch("/geo/concelhos.json")
         .then((r) => r.json())
         .then(setConcelhoGeo)
         .catch(() => {});
     }
-  }, [layer, concelhoGeo]);
+  }, [layer, concelhoGeo, focus]);
 
   // Criar o mapa uma vez.
   useEffect(() => {
@@ -295,6 +296,7 @@ export default function LiveMap({
       "warnings-fill",
       "risk-fill",
       "risk-extrusion",
+      "concelho-fill",
     ];
     for (const id of clickable) {
       map.on("mouseenter", id, () => (map.getCanvas().style.cursor = "pointer"));
@@ -622,6 +624,26 @@ export default function LiveMap({
         },
         firstLabel,
       );
+      // Os concelhos do distrito, em todas as camadas: linhas finas por dentro
+      // do contorno e uma área invisível para se tocar num concelho.
+      add({
+        id: "concelho-fill",
+        type: "fill",
+        source: "concelhos",
+        filter: ["==", ["get", "district"], focus],
+        paint: { "fill-color": "#000000", "fill-opacity": 0 },
+      });
+      add({
+        id: "concelho-lines",
+        type: "line",
+        source: "concelhos",
+        filter: ["==", ["get", "district"], focus],
+        paint: {
+          "line-color": theme === "dark" ? "#e3ecf0" : "#0d2b3a",
+          "line-width": 0.8,
+          "line-opacity": 0.45,
+        },
+      });
       add({
         id: "focus-line",
         type: "line",

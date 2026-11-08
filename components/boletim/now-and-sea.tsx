@@ -89,7 +89,7 @@ export function ObservationCard({
   );
 }
 
-function SeaCard({
+export function SeaCard({
   spots,
   result,
   reference,

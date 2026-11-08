@@ -215,10 +215,11 @@ const pt = {
   },
   /** Páginas dos concelhos (/lisboa/sintra). */
   concelho: {
+    /** `region`: "continente", "acores" ou "madeira" (o código, não o nome traduzido). */
     kicker: (region: string, district: string) =>
       region === "continente"
         ? `Concelho do distrito de ${district}`
-        : `Concelho da Região Autónoma ${district === "Açores" ? "dos Açores" : "da Madeira"}`,
+        : `Concelho da Região Autónoma ${region === "acores" ? "dos Açores" : "da Madeira"}`,
     intro:
       "O que se passa agora no concelho: os avisos do IPMA para o distrito, o risco de incêndio, os incêndios em curso, os sismos perto e o tempo na estação mais próxima.",
     loading: "A carregar os dados…",
@@ -244,6 +245,21 @@ const pt = {
     metaDescription: (name: string, inPlace: string) =>
       `O que se passa agora no concelho de ${name} (${inPlace.replace(/^(em|no|na|nos|nas) /, "")}): avisos do IPMA, risco de incêndio, incêndios, sismos perto e o tempo.`,
     seeConcelho: (name: string) => `Ver o concelho de ${name}`,
+    mapTitle: "No mapa",
+    mapAria: (name: string, district: string) =>
+      `Mapa dos concelhos de ${district}, com ${name} realçado. Cada concelho leva à sua página.`,
+    mapCaption: "Toque num concelho para ver a sua página.",
+    mapFires: "Incêndio",
+    mapQuakes: "Sismo",
+    nowTitle: "Agora",
+    calmBoth: (fireKm: number, quakeKm: number) =>
+      `Sem incêndios em curso no concelho nem a menos de ${fireKm} km, e sem sismos a menos de ${quakeKm} km nos últimos 7 dias.`,
+    calmFires: (km: number) => `Sem incêndios em curso no concelho nem a menos de ${km} km.`,
+    calmQuakes: (km: number) => `Sem sismos a menos de ${km} km nos últimos 7 dias.`,
+    firesNearTitle: (km: number) => `Incêndios no concelho e até ${km} km`,
+    riskNeighbours: "Com os concelhos mais próximos, para comparar.",
+    airTitle: "Ar e raios UV",
+    seaTitle: "Estado do mar",
   },
   /** Feed RSS dos avisos (/avisos/rss, /lisboa/avisos/rss). */
   feed: {
@@ -807,7 +823,7 @@ const en: Dictionary = {
     kicker: (region, district) =>
       region === "continente"
         ? `Municipality in ${district} district`
-        : `Municipality in the ${district === "Açores" ? "Azores" : "Madeira"}`,
+        : `Municipality in ${region === "acores" ? "the Azores" : "Madeira"}`,
     intro:
       "What is happening in the municipality now: IPMA warnings for the district, wildfire risk, active wildfires, nearby earthquakes and the weather at the closest station.",
     loading: "Loading the data…",
@@ -833,6 +849,21 @@ const en: Dictionary = {
     metaDescription: (name, inPlace) =>
       `What is happening now in ${name} (${inPlace.replace(/^in (the )?/, "")}): IPMA warnings, wildfire risk, wildfires, nearby earthquakes and the weather.`,
     seeConcelho: (name) => `See ${name}`,
+    mapTitle: "On the map",
+    mapAria: (name, district) =>
+      `Map of the municipalities of ${district}, with ${name} highlighted. Each municipality links to its page.`,
+    mapCaption: "Tap a municipality to see its page.",
+    mapFires: "Wildfire",
+    mapQuakes: "Earthquake",
+    nowTitle: "Now",
+    calmBoth: (fireKm, quakeKm) =>
+      `No active wildfires in the municipality or within ${fireKm} km, and no earthquakes within ${quakeKm} km in the last 7 days.`,
+    calmFires: (km) => `No active wildfires in the municipality or within ${km} km.`,
+    calmQuakes: (km) => `No earthquakes within ${km} km in the last 7 days.`,
+    firesNearTitle: (km) => `Wildfires in the municipality and within ${km} km`,
+    riskNeighbours: "With the closest municipalities, for comparison.",
+    airTitle: "Air and UV",
+    seaTitle: "Sea conditions",
   },
   feed: {
     national: "in Portugal",

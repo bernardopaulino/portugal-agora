@@ -15,7 +15,7 @@ Projeto **sem fins lucrativos**: sem publicidade, sem donativos, sem monetizaç�
 - **Páginas por distrito** (18 distritos + Açores + Madeira), com a mesma divisão:
   - `/lisboa`: o boletim do distrito, a previsão a 5 dias, o tempo agora (a estação do IPMA mais próxima da capital) e, nos distritos com costa, o estado do mar para 3 dias.
   - `/lisboa/avisos`, `/lisboa/incendios`, `/lisboa/sismos` e `/lisboa/risco` (risco de incêndio por concelho, hoje e amanhã, qualidade do ar e UV), com o mapa enquadrado no distrito.
-  - `/lisboa/sintra`: uma página por concelho (308), com os avisos do distrito (o IPMA não os emite por concelho), o risco de incêndio, os incêndios em curso no concelho, os sismos a menos de 30 km, o tempo na estação mais próxima e a previsão da capital do distrito. Sem dados no HTML: tudo chega ao abrir (`/api/state`, `/api/weather`, `/api/forecast`), por isso as ~600 páginas são estáticas e não contam como ISR writes. Chega-se lá pela lista no resumo do distrito, pela tabela do risco e tocando num concelho no mapa do risco. Os pontos de cada concelho vêm de `scripts/build-concelhos.mjs`.
+  - `/lisboa/sintra`: uma página por concelho (308), com os avisos do distrito (o IPMA não os emite por concelho), o risco de incêndio, os incêndios em curso no concelho, os sismos a menos de 30 km, o tempo na estação mais próxima e a previsão da capital do distrito. Sem dados no HTML: tudo chega ao abrir (`/api/state`, `/api/weather`, `/api/forecast`), por isso as ~600 páginas são estáticas e não contam como ISR writes. Chega-se lá pelo seletor do cabeçalho (com um distrito à vista, mostra os seus concelhos), pelo "Perto de mim" (calcula o concelho no dispositivo), pela lista logo a seguir ao boletim do distrito, pela tabela do risco e tocando num concelho em qualquer mapa de distrito (que desenha os concelhos por dentro do contorno, também no bloco 3D dos sismos). A página tem um mapa do distrito com o concelho realçado, o que está calmo numa só linha, o tempo, o ar e o UV, o risco comparado com os concelhos mais próximos, os incêndios no concelho e até 15 km e o mar (nos concelhos com costa). Os pontos de cada concelho vêm de `scripts/build-concelhos.mjs`.
   - O menu do cabeçalho acompanha o distrito, e o seletor mantém o tema ao mudar de sítio (de `/lisboa/avisos` para `/porto/avisos`).
 - **Mapa detalhado** (MapLibre + OpenFreeMap) com 7 camadas: avisos por distrito, incêndios, sismos, risco de incêndio por concelho, qualidade do ar, tempo agora (a temperatura na estação do IPMA de cada distrito) e mar (a altura das ondas hoje nos 12 pontos da costa). Na página dos avisos escolhe-se entre avisos, tempo agora e mar. Cada página mostra só a camada do seu tema (na página do risco escolhe-se entre risco de incêndio e qualidade do ar), com a legenda dessa camada. Nas páginas de distrito, o mapa mostra só o que é do distrito, esbate o resto do país e tem uma ligação para o mesmo tema em todo o país. No risco de incêndio, escolhe-se hoje ou amanhã. Liga-se às listas: "Ver no mapa" enquadra o evento, um clique no mapa mostra o detalhe e um segundo clique no mesmo sítio tira a seleção e volta à vista geral.
 - **Design "mission control":** fundo escuro (o tema da casa; há um tema claro "Dia" no cabeçalho), painéis de vidro, letra Geist na interface, Geist Mono nas horas e etiquetas e Atkinson Hyperlegible Next no texto. Motion design 3D: cada página entra uma vez e depois fica quieta; a câmara só se move com o scroll, o rato ou uma escolha. As páginas passam umas às outras em profundidade e os itens das listas entram ao chegar ao ecrã. Nada anda em loop; com "reduzir movimento", tudo aparece no estado final.
@@ -38,19 +38,19 @@ Projeto **sem fins lucrativos**: sem publicidade, sem donativos, sem monetizaç�
 
 ## Fontes de dados
 
-| Dados                                  | Fonte                                                              | Atualização |
-| -------------------------------------- | ------------------------------------------------------------------ | ----------- |
-| Avisos meteorológicos                  | [IPMA](https://api.ipma.pt)                                        | 5 min       |
-| Sismos (continente, Madeira, Açores)   | IPMA                                                               | 5 min       |
-| Risco de incêndio rural por concelho   | IPMA (só continente)                                               | 1 h         |
-| Índice UV e previsão a 5 dias          | IPMA                                                               | 1 h         |
-| Tempo observado (estações)             | IPMA (estação mais próxima da capital de cada distrito)            | 20 min      |
-| Estado do mar (12 pontos da costa)     | IPMA (hoje e os 2 dias seguintes)                                  | 1 h         |
-| Incêndios ativos                       | [Fogos.pt](https://fogos.pt) (dados ANEPC), requer chave           | 2 min       |
-| Qualidade do ar (estimativa de modelo) | [Open-Meteo](https://open-meteo.com) / Copernicus CAMS, CC BY 4.0  | 10 min      |
-| Mapa base                              | [OpenFreeMap](https://openfreemap.org), © OpenStreetMap            | —           |
-| Relevo (vista 3D dos incêndios)        | [Mapterhorn](https://mapterhorn.com) (DGT, IGP, Copernicus GLO-30) | —           |
-| Limites de distritos e concelhos       | CAOP 2025, [DGT](https://www.dgterritorio.gov.pt), CC BY           | estático    |
+| Dados                                  | Fonte                                                                                               | Atualização |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------- |
+| Avisos meteorológicos                  | [IPMA](https://api.ipma.pt)                                                                         | 5 min       |
+| Sismos (continente, Madeira, Açores)   | IPMA                                                                                                | 5 min       |
+| Risco de incêndio rural por concelho   | IPMA (só continente)                                                                                | 1 h         |
+| Índice UV e previsão a 5 dias          | IPMA                                                                                                | 1 h         |
+| Tempo observado (estações)             | IPMA (estação mais próxima da capital de cada distrito)                                             | 20 min      |
+| Estado do mar (12 pontos da costa)     | IPMA (hoje e os 2 dias seguintes)                                                                   | 1 h         |
+| Incêndios ativos                       | [Fogos.pt](https://fogos.pt) (dados ANEPC), requer chave                                            | 2 min       |
+| Qualidade do ar (estimativa de modelo) | [Open-Meteo](https://open-meteo.com) / Copernicus CAMS, CC BY 4.0                                   | 10 min      |
+| Mapa base                              | [OpenFreeMap](https://openfreemap.org), © OpenStreetMap                                             | —           |
+| Relevo (vista 3D dos incêndios)        | [Mapterhorn](https://mapterhorn.com) (DGT, IGP, Copernicus GLO-30)                                  | —           |
+| Limites de distritos e concelhos       | CAOP 2025, [DGT](https://www.dgterritorio.gov.pt), CC BY; concelhos das ilhas: OpenStreetMap (ODbL) | estático    |
 
 A página `/fontes` explica cada fonte e como classificamos incêndios, sismos e qualidade do ar. O nível principal segue sempre a escala oficial do IPMA.
 

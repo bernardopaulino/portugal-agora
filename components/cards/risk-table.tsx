@@ -24,8 +24,19 @@ function RiskCell({ level }: { level: number }) {
   );
 }
 
-/** `link`: o nome de cada concelho leva à sua página (não na própria página do concelho). */
-export function RiskTable({ rows, link = true }: { rows: ConcelhoRisk[]; link?: boolean }) {
+/**
+ * `link`: o nome de cada concelho leva à sua página. `current`: o concelho da
+ * página onde a tabela está (a negrito e sem ligação para si próprio).
+ */
+export function RiskTable({
+  rows,
+  link = true,
+  current,
+}: {
+  rows: ConcelhoRisk[];
+  link?: boolean;
+  current?: string;
+}) {
   const { t, path } = useI18n();
   return (
     // Focável para quem usa teclado conseguir deslocar a tabela em ecrãs estreitos.
@@ -53,9 +64,13 @@ export function RiskTable({ rows, link = true }: { rows: ConcelhoRisk[]; link?: 
         <tbody>
           {rows.map((r) => (
             <tr key={r.dico} className="border-b border-line last:border-0">
-              <th scope="row" className="px-4 py-2.5 font-normal">
+              <th
+                scope="row"
+                aria-current={r.dico === current ? "page" : undefined}
+                className={r.dico === current ? "px-4 py-2.5 font-bold" : "px-4 py-2.5 font-normal"}
+              >
                 {(() => {
-                  const c = link ? concelhoForDico(r.dico) : undefined;
+                  const c = link && r.dico !== current ? concelhoForDico(r.dico) : undefined;
                   const label = t.concelhoName(r.dico, r.name);
                   return c ? <Link href={path(`/${c.district}/${c.slug}`)}>{label}</Link> : label;
                 })()}

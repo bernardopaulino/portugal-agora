@@ -180,11 +180,13 @@ function Detail({
     body = c ? (
       <>
         <p className="text-lg font-extrabold">{t.concelhoName(c.dico, c.name)}</p>
-        <p className="text-base">
-          {t.concelho.riskTitle}: {t.lists.today.toLowerCase()}{" "}
-          {label(level("today")).toLowerCase()}, {t.lists.tomorrow.toLowerCase()}{" "}
-          {label(level("tomorrow")).toLowerCase()}.
-        </p>
+        {level("today") || level("tomorrow") ? (
+          <p className="text-base">
+            {t.concelho.riskTitle}: {t.lists.today.toLowerCase()}{" "}
+            {label(level("today")).toLowerCase()}, {t.lists.tomorrow.toLowerCase()}{" "}
+            {label(level("tomorrow")).toLowerCase()}.
+          </p>
+        ) : null}
         <Link href={path(`/${c.district}/${c.slug}`)} className="text-base font-bold">
           {t.concelho.seeConcelho(t.concelhoName(c.dico, c.name))}
         </Link>

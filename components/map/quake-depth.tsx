@@ -35,6 +35,10 @@ import { mapColors } from "../status/severity";
  */
 
 type Ring = number[][];
+type ConcelhoCollection = GeoJSON.FeatureCollection<
+  GeoJSON.Polygon | GeoJSON.MultiPolygon,
+  { dico: string; name: string; district: string }
+>;
 type DistrictCollection = GeoJSON.FeatureCollection<
   GeoJSON.Polygon | GeoJSON.MultiPolygon,
   { slug: string; region: string }
@@ -574,6 +578,7 @@ export default function QuakeDepth({
   const rig = useRef<RigApi | null>(null);
   const labels = useRef<(HTMLSpanElement | null)[]>([]);
   const [districts, setDistricts] = useState<DistrictCollection | null>(null);
+  const [concelhos, setConcelhos] = useState<ConcelhoCollection | null>(null);
   const [hovering, setHovering] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
   const mounted = useRef(true);
@@ -588,6 +593,14 @@ export default function QuakeDepth({
       mounted.current = false;
     };
   }, []);
+  // Numa página de distrito, também os concelhos (linhas finas por dentro do contorno).
+  useEffect(() => {
+    if (!focus || concelhos) return;
+    fetch("/geo/concelhos.json")
+      .then((r) => r.json())
+      .then((g: ConcelhoCollection) => mounted.current && setConcelhos(g))
+      .catch(() => {});
+  }, [focus, concelhos]);
 
   // Numa página de distrito, o bloco é o do distrito, não o da região inteira.
   const bounds = depthBoundsFor(region, focus);
@@ -669,6 +682,26 @@ export default function QuakeDepth({
     return [all, focused];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boundaryKey]);
+  const concelhoKey = `${focus ?? ""}|${concelhos ? "geo" : ""}|${halfW}`;
+  const concelhoLines = useMemo(() => {
+    const out: number[] = [];
+    for (const f of concelhos?.features ?? []) {
+      if (f.properties.district !== focus) continue;
+      const polygons: Ring[][] =
+        f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates;
+      for (const polygon of polygons)
+        for (const ring of polygon)
+          for (let i = 1; i < ring.length; i++) {
+            const a = toScene(ring[i - 1] as [number, number]);
+            const b = toScene(ring[i] as [number, number]);
+            const seg = clipSegment(a.x, a.z, b.x, b.z, halfW, halfD);
+            if (seg) out.push(seg[0], 0, seg[1], seg[2], 0, seg[3]);
+          }
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [concelhoKey]);
+  const concelhoBoundaries = useGeometry(() => segments(concelhoLines), concelhoLines);
   const boundaries = useGeometry(() => segments(boundaryLines), boundaryLines);
   const focusBoundary = useGeometry(() => segments(focusLines), focusLines);
 
@@ -865,6 +898,9 @@ export default function QuakeDepth({
             </lineSegments>
             <lineSegments geometry={boundaries}>
               <lineBasicMaterial color={palette.line} transparent opacity={0.8} />
+            </lineSegments>
+            <lineSegments geometry={concelhoBoundaries}>
+              <lineBasicMaterial color={palette.focus} transparent opacity={0.35} />
             </lineSegments>
             <lineSegments geometry={focusBoundary}>
               <lineBasicMaterial color={palette.focus} />

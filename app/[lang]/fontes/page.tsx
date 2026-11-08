@@ -153,7 +153,8 @@ function Portuguese() {
         <a href="https://www.dgterritorio.gov.pt" rel="noopener">
           Direção-Geral do Território
         </a>
-        , licença CC BY.
+        , licença CC BY. Os contornos dos concelhos dos Açores e da Madeira vêm do OpenStreetMap
+        (ODbL), simplificados.
       </p>
       <h3 id="vista-3d">A vista 3D dos mapas</h3>
       <p>
@@ -344,7 +345,8 @@ function English() {
         <a href="https://www.dgterritorio.gov.pt" rel="noopener">
           Directorate-General for Territory
         </a>
-        , CC BY licence.
+        , CC BY licence. The municipality outlines in the Azores and Madeira come from OpenStreetMap
+        (ODbL), simplified.
       </p>
       <h3 id="vista-3d">The 3D view of the maps</h3>
       <p>

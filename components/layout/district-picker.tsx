@@ -2,11 +2,14 @@
 
 import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 
 import { concelhosOf } from "@/data/concelhos";
 import { districts, getDistrict } from "@/data/districts";
 import { useCurrentPath, useI18n } from "@/lib/i18n/client";
 import { splitDistrictPath } from "@/lib/routes";
+
+const noop = () => () => {};
 
 /**
  * Seletor nativo: o mais fácil de usar no telemóvel e com leitores de ecrã.
@@ -23,17 +26,35 @@ export function DistrictPicker() {
   const { district: current = "", concelho, topic } = splitDistrictPath(pathname);
   const district = getDistrict(current);
   const value = concelho ? `${current}/${concelho}` : current;
+  const select = useRef<HTMLSelectElement>(null);
+  const hydrated = useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
+
+  const go = (next: string) => {
+    if (next.includes("/")) router.push(path(`/${next}`));
+    else router.push(path(next ? `/${next}${topic}` : topic || "/"));
+  };
+  // Escolhido antes de a página ficar pronta (telemóvel lento, página pesada):
+  // o browser já mudou o campo, mas o React ainda não ouvia. Ao ficar pronto,
+  // segue essa escolha em vez de a perder.
+  useEffect(() => {
+    const chosen = select.current?.value;
+    if (chosen !== undefined && chosen !== value) go(chosen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <label className="relative flex min-w-0 items-center">
       <span className="sr-only">{t.header.pickDistrict}</span>
       <select
+        ref={select}
         value={value}
-        onChange={(e) => {
-          const next = e.target.value;
-          if (next.includes("/")) router.push(path(`/${next}`));
-          else router.push(path(next ? `/${next}${topic}` : topic || "/"));
-        }}
+        onChange={(e) => go(e.target.value)}
+        // Para os testes saberem quando o seletor já reage.
+        data-ready={hydrated ? "" : undefined}
         // Abaixo de 360 px, menos margem dentro do botão, para "Todo o país" caber inteiro.
         className="h-11 w-full min-w-0 cursor-pointer appearance-none rounded-full glass-button pr-11 pl-4 font-display text-base font-medium max-[359px]:pr-8 max-[359px]:pl-3 lg:w-56"
       >
