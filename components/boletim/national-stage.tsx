@@ -38,7 +38,7 @@ export function BulletinStamp({ iso }: { iso: string }) {
         role="status"
         className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[0.8rem] tracking-[0.08em] text-stage-ink-2 uppercase"
       >
-        <span aria-hidden className="size-2 rounded-full bg-accent motion-safe:animate-pulse" />
+        <span aria-hidden className="size-2 rounded-full bg-stage-ink-2" />
         <span className="text-stage-ink">{t.stage.refreshing}</span>
       </p>
     );
