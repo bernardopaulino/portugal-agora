@@ -160,6 +160,18 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
             {calm ? <p className="text-base">{calm}</p> : null}
             {!firesCovered ? (
               <p className="text-base text-ink-2">{t.concelho.firesNotCovered}</p>
+            ) : state.fires.data === null ? (
+              // Fogos.pt em baixo (ou sem chave): diz-se, em vez de calar os incêndios.
+              <p className="text-base text-ink-2">
+                {t.empty.firesDown}{" "}
+                <a href="https://fogos.pt" rel="noopener">
+                  fogos.pt
+                </a>
+                .
+              </p>
+            ) : null}
+            {state.earthquakes.data === null ? (
+              <p className="text-base text-ink-2">{t.empty.quakesDown}</p>
             ) : null}
             {station && weather ? (
               <div className="flex flex-col gap-2">

@@ -305,10 +305,12 @@ test("página de um concelho: dados ao abrir, sem dados no HTML", async ({ page,
   // O mapa: os concelhos do distrito, cada um com ligação (Sintra realçado, sem ligação).
   const map = page.getByRole("group", { name: /Mapa dos concelhos de Lisboa/ });
   await expect(map.getByRole("link").first()).toBeVisible();
-  // Incêndios e sismos: uma caixa cada quando há algum; senão, uma linha em "Agora".
+  // Incêndios: uma caixa quando há algum; senão, uma linha em "Agora" (calmo, ou
+  // a fonte indisponível, como no CI, que não tem a chave do Fogos.pt).
   const fires = page.getByRole("heading", { name: /Incêndios no concelho e até 15 km/ });
   const calm = page.getByText(/Sem incêndios em curso no concelho/);
-  await expect(fires.or(calm).first()).toBeVisible();
+  const down = page.getByText(/Informação sobre incêndios indisponível/);
+  await expect(fires.or(calm).or(down).first()).toBeVisible();
   // A tabela do risco compara com os concelhos mais próximos.
   await expect(page.locator("#risco tbody tr")).toHaveCount(5);
   await expectAccessible(page);
