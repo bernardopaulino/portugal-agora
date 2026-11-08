@@ -3,6 +3,7 @@
 import { Droplets, Thermometer, Umbrella, Wind } from "lucide-react";
 
 import type { District } from "@/data/districts";
+import { useWeather } from "@/lib/hooks/weather";
 import { useI18n } from "@/lib/i18n/client";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { StationObservation } from "@/lib/sources/ipma-observations";
@@ -176,17 +177,10 @@ function SeaCard({
   );
 }
 
-export function NowAndSea({
-  district,
-  observations,
-  sea,
-  reference,
-}: {
-  district: District;
-  observations: SourceResult<Record<string, StationObservation>>;
-  sea: SourceResult<Record<string, SeaSpot[]>>;
-  reference: Date;
-}) {
+export function NowAndSea({ district, reference }: { district: District; reference: Date }) {
+  const weather = useWeather();
+  if (!weather) return null;
+  const { observations, sea } = weather;
   const observation = observations.data?.[district.slug];
   const spots = sea.data?.[district.slug];
   if (!observation && !spots?.length) return null;

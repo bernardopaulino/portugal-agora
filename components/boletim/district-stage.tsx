@@ -179,12 +179,7 @@ export function DistrictStage({
             </p>
           </section>
         )}
-        <NowAndSea
-          district={district}
-          observations={state.observations}
-          sea={state.sea}
-          reference={reference}
-        />
+        <NowAndSea district={district} reference={reference} />
       </div>
     </div>
   );

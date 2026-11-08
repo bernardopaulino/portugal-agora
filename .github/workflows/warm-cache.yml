@@ -1,14 +1,12 @@
 name: Aquecer a cache
 
-# De 6 em 6 horas, visita todas as páginas e imagens de partilha. Uma página
-# que ninguém visitou durante muito tempo ainda é a última versão gerada
-# (às vezes a do build, com dias); a visita dispara a renovação, por isso
-# o HTML que a CDN entrega nunca tem mais de ~6 h. Custa ~300 renovações
-# ISR por passagem (~36 mil/mês; limite Hobby: 200 mil). Ver
-# scripts/warm-cache.mjs.
+# Só à mão (Actions → "Aquecer a cache" → Run workflow). Visita todas as
+# páginas e imagens de partilha para a CDN deixar de servir versões antigas.
+# Cada passagem custa ~300 renovações ISR de 170–300 KB cada (contadas em
+# unidades de 8 KB), por isso já não corre sozinha: o limite de "ISR writes"
+# do plano Hobby chegava ao fim. O carimbo "A atualizar os dados…" e o
+# /api/state cobrem os dados antigos no browser. Ver scripts/warm-cache.mjs.
 on:
-  schedule:
-    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 permissions:

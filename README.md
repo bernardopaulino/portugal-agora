@@ -181,11 +181,13 @@ npm install --no-save pmtiles && node scripts/build-relief-index.mjs
 
 ## Tarefas agendadas (GitHub Actions)
 
+**ISR writes (limite do plano Hobby).** A Vercel conta as renovações das páginas em unidades de 8 KB. Por isso: `/api/state`, `/api/weather` e os feeds RSS são gerados a pedido e guardados na CDN (não contam); as páginas renovam-se no máximo de 15 em 15 min e só quando alguém as visita; o tempo observado e o mar não vão no HTML das páginas.
+
 O repositório é público, por isso os workflows agendados não têm custo. Os cron da Vercel no plano Hobby só correm uma vez por dia.
 
 - **Tick** (`.github/workflows/tick.yml`, de 10 em 10 min): chama `/api/cron/tick` com o `CRON_SECRET`. Guarda um ponto do histórico e envia as notificações quando o nível de um distrito sobe. Só corre com a variável `TICK_ENABLED=true`.
 - **Vigiar as fontes** (`.github/workflows/sources.yml`, de 15 em 15 min): se `/api/health/sources` falhar em duas verificações seguidas, abre uma issue com a etiqueta `fonte-em-baixo` (email para o dono do repositório); quando tudo volta ao normal, fecha-a.
-- **Aquecer a cache** (`.github/workflows/warm-cache.yml`, de 6 em 6 horas): visita as páginas do sitemap e as imagens de partilha, para a CDN nunca entregar HTML com mais de ~6 h (sem isto, uma página pouco visitada podia ter os dados do deploy, com dias). Custa ~36 mil renovações ISR por mês.
+- **Aquecer a cache** (`.github/workflows/warm-cache.yml`, só à mão): visita as páginas do sitemap e as imagens de partilha para a CDN deixar de servir versões antigas. Não corre sozinha porque cada passagem custa ~300 renovações ISR.
 
 ## Licença
 

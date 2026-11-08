@@ -16,6 +16,7 @@ import { getDistrict, regionBounds, type Region } from "@/data/districts";
 import { useI18n } from "@/lib/i18n/client";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { MAP_3D_PITCH, quakeRadiusPx, RELIEF_EXAGGERATION, riskHeight } from "@/lib/geo/scales";
+import { useWeather } from "@/lib/hooks/weather";
 import { cameraDuration } from "@/lib/hooks/webgl";
 import type { CountryState } from "@/lib/state/aggregate";
 import { formatNumber } from "@/lib/time/format";
@@ -186,6 +187,8 @@ export default function LiveMap({
   onWebglLost?: () => void;
 }) {
   const { t, locale } = useI18n();
+  // Tempo e mar só são pedidos quando a camada aparece.
+  const weather = useWeather(layer === "observed" || layer === "sea");
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const onSelectRef = useRef(onSelect);
@@ -444,7 +447,7 @@ export default function LiveMap({
     );
     // Tempo agora: a estação de cada distrito, com a temperatura por cima.
     const observed = collection(
-      Object.entries(state.observations.data ?? {})
+      Object.entries(weather?.observations.data ?? {})
         .filter(([district]) => inFocus(district))
         .map(([district, o]) => ({
           type: "Feature" as const,
@@ -454,7 +457,7 @@ export default function LiveMap({
     );
     // Mar: cada ponto de previsão, com a altura das ondas de hoje.
     const sea = collection(
-      Object.entries(state.sea.data ?? {})
+      Object.entries(weather?.sea.data ?? {})
         .filter(([district]) => inFocus(district))
         .flatMap(([district, spots]) =>
           spots.map((spot) => {
@@ -470,7 +473,7 @@ export default function LiveMap({
         ),
     );
     return { districtsFc, concelhosFc, fires, quakes, air, observed, sea };
-  }, [state, districtGeo, concelhoGeo, focus, riskDay, locale]);
+  }, [state, weather, districtGeo, concelhoGeo, focus, riskDay, locale]);
 
   // (Re)criar fontes e camadas sempre que o estilo carrega.
   useEffect(() => {

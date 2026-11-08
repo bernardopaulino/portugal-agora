@@ -8,6 +8,7 @@ import { useCallback, useState } from "react";
 import { fireDataRegions, fireRiskRegions, getDistrict, type Region } from "@/data/districts";
 import { depthBoundsFor, inBounds } from "@/lib/geo/projection";
 import { DEPTH_EXAGGERATION, RELIEF_EXAGGERATION } from "@/lib/geo/scales";
+import { useWeather } from "@/lib/hooks/weather";
 import { useWebGL } from "@/lib/hooks/webgl";
 import { useI18n } from "@/lib/i18n/client";
 import { fireRiskLabels } from "@/lib/sources/labels";
@@ -74,9 +75,10 @@ function Detail({
   const { t, locale, path } = useI18n();
   const reference = new Date(state.generatedAt);
   let body: React.ReactNode = null;
+  const weather = useWeather(layer === "observed" || layer === "sea");
   const observation =
-    selection.type === "district" ? state.observations.data?.[selection.slug] : undefined;
-  const spots = selection.type === "district" ? state.sea.data?.[selection.slug] : undefined;
+    selection.type === "district" ? weather?.observations.data?.[selection.slug] : undefined;
+  const spots = selection.type === "district" ? weather?.sea.data?.[selection.slug] : undefined;
 
   if (selection.type === "district" && layer === "observed" && observation) {
     const d = getDistrict(selection.slug);

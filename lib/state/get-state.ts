@@ -7,8 +7,6 @@ import {
   getEarthquakes,
   getFireRisk,
   getFires,
-  getObservations,
-  getSea,
   getUv,
   getWarnings,
 } from "@/lib/sources/registry";
@@ -16,21 +14,15 @@ import {
 import { aggregate, type CountryState } from "./aggregate";
 
 async function buildState(): Promise<CountryState> {
-  const [warnings, earthquakes, fires, fireRisk, uv, airQuality, observations, sea] =
-    await Promise.all([
-      getWarnings(),
-      getEarthquakes(),
-      getFires(),
-      getFireRisk(),
-      getUv(),
-      getAirQuality(),
-      getObservations(),
-      getSea(),
-    ]);
-  return aggregate(
-    { warnings, earthquakes, fires, fireRisk, uv, airQuality, observations, sea },
-    new Date(),
-  );
+  const [warnings, earthquakes, fires, fireRisk, uv, airQuality] = await Promise.all([
+    getWarnings(),
+    getEarthquakes(),
+    getFires(),
+    getFireRisk(),
+    getUv(),
+    getAirQuality(),
+  ]);
+  return aggregate({ warnings, earthquakes, fires, fireRisk, uv, airQuality }, new Date());
 }
 
 /**
