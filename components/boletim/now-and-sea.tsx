@@ -25,7 +25,7 @@ function windText(kmh: number | null, dir: string | undefined, t: Dictionary): s
   return dir ? t.observed.windFrom(String(kmh), dir) : `${kmh} km/h`;
 }
 
-function ObservationCard({
+export function ObservationCard({
   observation,
   result,
   district,

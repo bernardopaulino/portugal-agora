@@ -99,3 +99,29 @@ export function normalizeObservations(
   }
   return byDistrict;
 }
+
+/**
+ * Todas as estações com temperatura na última hora (para o concelho, que
+ * escolhe a mais próxima de si). distanceKm fica a 0: depende de quem pergunta.
+ */
+export function normalizeStations(raw: IpmaObservationsRaw): StationObservation[] {
+  return raw.features.flatMap((f) => {
+    const p = f.properties;
+    const temperature = valid(p.temperatura);
+    if (temperature === null) return [];
+    const wind = valid(p.intensidadeVentoKM);
+    return [
+      {
+        station: p.localEstacao,
+        coordinates: f.geometry.coordinates,
+        time: `${p.time.slice(0, 19)}Z`,
+        distanceKm: 0,
+        temperature: Math.round(temperature * 10) / 10,
+        windKmh: wind === null ? null : Math.round(wind),
+        windDir: wind && p.descDirVento && p.descDirVento !== "C" ? p.descDirVento : null,
+        humidity: valid(p.humidade),
+        rainMm: valid(p.precAcumulada),
+      },
+    ];
+  });
+}

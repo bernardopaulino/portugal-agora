@@ -17,6 +17,7 @@ import {
   IPMA_OBSERVATIONS_URL,
   ipmaObservationsSchema,
   normalizeObservations,
+  normalizeStations,
   type StationObservation,
 } from "./ipma-observations";
 import { IPMA_RCM_URLS, ipmaRcmSchema, normalizeFireRisk } from "./ipma-rcm";
@@ -206,6 +207,24 @@ async function cachedObservations(): Promise<Outcome<Record<string, StationObser
   return outcome;
 }
 export const loadObservations = async () => unwrap(await cachedObservations());
+
+/** Todas as estações (o concelho escolhe a mais próxima). Mesmo ficheiro, mesma cadência. */
+async function cachedStations(): Promise<Outcome<StationObservation[]>> {
+  "use cache";
+  cacheTag("ipma-stations");
+  const outcome = await attempt(async () => {
+    const raw = await fetchJson(IPMA_OBSERVATIONS_URL, {
+      schema: ipmaObservationsSchema,
+      timeoutMs: 6000,
+    });
+    const result = stamp(normalizeStations(raw));
+    await saveSnapshot("ipma-stations", result);
+    return result;
+  });
+  cacheLife(outcome.ok ? { stale: 300, revalidate: 1200, expire: 7200 } : FAILURE_LIFE);
+  return outcome;
+}
+export const loadStations = async () => unwrap(await cachedStations());
 
 /** Estado do mar: hoje e os 2 dias seguintes, em 12 pontos da costa. */
 async function cachedSea(): Promise<Outcome<Record<string, SeaSpot[]>>> {

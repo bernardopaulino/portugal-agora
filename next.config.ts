@@ -42,6 +42,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // O site adotou o Cache Components antes do Partial Prefetching: false mantém o
+  // prefetch de sempre (o Next 16.4.5 pede que se escolha). Ligá-lo é uma migração
+  // à parte (node_modules/next/dist/docs/01-app/02-guides/adopting-partial-prefetching.md).
+  partialPrefetching: false,
   poweredByHeader: false,
   reactStrictMode: true,
   async headers() {

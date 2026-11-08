@@ -1,8 +1,6 @@
-import { getPageState } from "@/lib/state/get-state";
-
 import { DistrictPicker } from "./district-picker";
 import { HomeLink, LanguageSwitch, MainNav } from "./header-parts";
-import { LogoMark } from "./logo";
+import { LiveLogoMark } from "./live-logo";
 import { NearMeButton } from "./near-me";
 import { ThemeToggle } from "./theme";
 
@@ -12,8 +10,7 @@ import { ThemeToggle } from "./theme";
  * telemóveis e tablets o distrito e o "Perto de mim" têm a sua linha e os
  * separadores a seguinte (ver .header-grid em globals.css).
  */
-export async function SiteHeader() {
-  const state = await getPageState();
+export function SiteHeader() {
   return (
     <header
       // A cena 3D lê a altura do cabeçalho para não pôr o país por baixo dele.
@@ -23,7 +20,7 @@ export async function SiteHeader() {
       <div className="header-grid mx-auto max-w-7xl px-4 py-2.5 sm:px-6">
         <div className="[grid-area:logo]">
           <HomeLink>
-            <LogoMark level={state.levelKnown ? state.level : "unknown"} className="h-8 sm:h-9" />
+            <LiveLogoMark className="h-8 sm:h-9" />
             {/* Abaixo de 360 px só cabe o logótipo; o nome fica para leitores de ecrã. */}
             <span className="truncate font-display text-lg leading-normal font-semibold tracking-[-0.02em] whitespace-nowrap max-[359px]:sr-only sm:text-xl">
               Portugal Agora

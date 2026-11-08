@@ -212,6 +212,38 @@ const pt = {
     hours: (n: number) => `${n} h`,
     minutes: (n: number) => `${n} min`,
   },
+  /** Páginas dos concelhos (/lisboa/sintra). */
+  concelho: {
+    kicker: (region: string, district: string) =>
+      region === "continente"
+        ? `Concelho do distrito de ${district}`
+        : `Concelho da Região Autónoma ${district === "Açores" ? "dos Açores" : "da Madeira"}`,
+    intro:
+      "O que se passa agora no concelho: os avisos do IPMA para o distrito, o risco de incêndio, os incêndios em curso, os sismos perto e o tempo na estação mais próxima.",
+    loading: "A carregar os dados…",
+    warningsTitle: "Avisos meteorológicos",
+    warningsNote: (inPlace: string) =>
+      `O IPMA emite avisos por distrito (nas ilhas, por grupo de ilhas), não por concelho. Estes são os avisos ${inPlace}.`,
+    warningsNone: (inPlace: string) => `Sem avisos meteorológicos ${inPlace}.`,
+    riskTitle: "Risco de incêndio",
+    riskMainlandOnly: "O IPMA só publica o risco de incêndio por concelho no continente.",
+    firesTitle: "Incêndios no concelho",
+    firesNone: "Sem incêndios em curso no concelho.",
+    firesNotCovered: "O Fogos.pt não tem dados dos Açores.",
+    quakesTitle: (km: number) => `Sismos a menos de ${km} km`,
+    quakesNone: (km: number) =>
+      `Sem sismos de magnitude 2 ou superior, nem sentidos, a menos de ${km} km nos últimos 7 dias.`,
+    weatherTitle: "Tempo agora",
+    stationDistance: (km: number) => `A estação fica a ${km} km do centro do concelho.`,
+    forecastNote: (capital: string) => `A previsão do IPMA é por capital de distrito: ${capital}.`,
+    listTitle: "Concelhos",
+    listIntro: (inPlace: string) =>
+      `Cada concelho ${inPlace}, com o risco de incêndio, os incêndios, os sismos perto e o tempo agora.`,
+    metaTitle: (name: string) => `${name}: avisos, incêndios e sismos agora`,
+    metaDescription: (name: string, inPlace: string) =>
+      `O que se passa agora no concelho de ${name} (${inPlace.replace(/^(em|no|na|nos|nas) /, "")}): avisos do IPMA, risco de incêndio, incêndios, sismos perto e o tempo.`,
+    seeConcelho: (name: string) => `Ver o concelho de ${name}`,
+  },
   /** Feed RSS dos avisos (/avisos/rss, /lisboa/avisos/rss). */
   feed: {
     national: "em Portugal",
@@ -768,6 +800,37 @@ const en: Dictionary = {
     days: (n) => `${n} d`,
     hours: (n) => `${n} h`,
     minutes: (n) => `${n} min`,
+  },
+  concelho: {
+    kicker: (region, district) =>
+      region === "continente"
+        ? `Municipality in ${district} district`
+        : `Municipality in the ${district === "Açores" ? "Azores" : "Madeira"}`,
+    intro:
+      "What is happening in the municipality now: IPMA warnings for the district, wildfire risk, active wildfires, nearby earthquakes and the weather at the closest station.",
+    loading: "Loading the data…",
+    warningsTitle: "Weather warnings",
+    warningsNote: (inPlace) =>
+      `IPMA issues warnings by district (by island group in the islands), not by municipality. These are the warnings ${inPlace}.`,
+    warningsNone: (inPlace) => `No weather warnings ${inPlace}.`,
+    riskTitle: "Wildfire risk",
+    riskMainlandOnly: "IPMA only publishes wildfire risk by municipality on the mainland.",
+    firesTitle: "Wildfires in the municipality",
+    firesNone: "No active wildfires in the municipality.",
+    firesNotCovered: "Fogos.pt has no data for the Azores.",
+    quakesTitle: (km) => `Earthquakes within ${km} km`,
+    quakesNone: (km) =>
+      `No earthquakes of magnitude 2 or more, or felt, within ${km} km in the last 7 days.`,
+    weatherTitle: "Weather now",
+    stationDistance: (km) => `The station is ${km} km from the centre of the municipality.`,
+    forecastNote: (capital) => `IPMA forecasts are by district capital: ${capital}.`,
+    listTitle: "Municipalities",
+    listIntro: (inPlace) =>
+      `Each municipality ${inPlace}, with wildfire risk, wildfires, nearby earthquakes and the weather now.`,
+    metaTitle: (name) => `${name}: warnings, wildfires and earthquakes now`,
+    metaDescription: (name, inPlace) =>
+      `What is happening now in ${name} (${inPlace.replace(/^in (the )?/, "")}): IPMA warnings, wildfire risk, wildfires, nearby earthquakes and the weather.`,
+    seeConcelho: (name) => `See ${name}`,
   },
   feed: {
     national: "in Portugal",

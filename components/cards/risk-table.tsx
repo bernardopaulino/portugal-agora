@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+
+import { concelhoForDico } from "@/data/concelhos";
 import { useI18n } from "@/lib/i18n/client";
 import { fireRiskLabels } from "@/lib/sources/labels";
 import type { ConcelhoRisk } from "@/lib/state/district";
@@ -21,8 +24,9 @@ function RiskCell({ level }: { level: number }) {
   );
 }
 
-export function RiskTable({ rows }: { rows: ConcelhoRisk[] }) {
-  const { t } = useI18n();
+/** `link`: o nome de cada concelho leva à sua página (não na própria página do concelho). */
+export function RiskTable({ rows, link = true }: { rows: ConcelhoRisk[]; link?: boolean }) {
+  const { t, path } = useI18n();
   return (
     // Focável para quem usa teclado conseguir deslocar a tabela em ecrãs estreitos.
     <div
@@ -50,7 +54,11 @@ export function RiskTable({ rows }: { rows: ConcelhoRisk[] }) {
           {rows.map((r) => (
             <tr key={r.dico} className="border-b border-line last:border-0">
               <th scope="row" className="px-4 py-2.5 font-normal">
-                {t.concelhoName(r.dico, r.name)}
+                {(() => {
+                  const c = link ? concelhoForDico(r.dico) : undefined;
+                  const label = t.concelhoName(r.dico, r.name);
+                  return c ? <Link href={path(`/${c.district}/${c.slug}`)}>{label}</Link> : label;
+                })()}
               </th>
               <td className="px-4 py-2.5">
                 <RiskCell level={r.today} />

@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
+import { concelhoForDico } from "@/data/concelhos";
 import { fireDataRegions, fireRiskRegions, getDistrict, type Region } from "@/data/districts";
 import { depthBoundsFor, inBounds } from "@/lib/geo/projection";
 import { DEPTH_EXAGGERATION, RELIEF_EXAGGERATION } from "@/lib/geo/scales";
@@ -171,6 +172,24 @@ function Detail({
         ) : null}
       </>
     );
+  } else if (selection.type === "concelho") {
+    const c = concelhoForDico(selection.dico);
+    const risk = state.fireRisk.data;
+    const level = (day: "today" | "tomorrow") => risk?.[day].byDico[selection.dico] ?? 0;
+    const label = (l: number) => (l ? t.term(fireRiskLabels[l]!) : t.topics.noData);
+    body = c ? (
+      <>
+        <p className="text-lg font-extrabold">{t.concelhoName(c.dico, c.name)}</p>
+        <p className="text-base">
+          {t.concelho.riskTitle}: {t.lists.today.toLowerCase()}{" "}
+          {label(level("today")).toLowerCase()}, {t.lists.tomorrow.toLowerCase()}{" "}
+          {label(level("tomorrow")).toLowerCase()}.
+        </p>
+        <Link href={path(`/${c.district}/${c.slug}`)} className="text-base font-bold">
+          {t.concelho.seeConcelho(t.concelhoName(c.dico, c.name))}
+        </Link>
+      </>
+    ) : null;
   } else {
     const fire = state.fires.data?.find((f) => f.id === selection.id);
     const quake = state.earthquakes.data?.find((q) => q.id === selection.id);

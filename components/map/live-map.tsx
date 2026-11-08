@@ -315,6 +315,9 @@ export default function LiveMap({
           coordinates: [lon, lat],
           region: (p.region as Region) ?? "continente",
         };
+      } else if (p.dico && p.district) {
+        // Camada do risco: cada concelho.
+        next = { type: "concelho", dico: p.dico, district: p.district };
       } else if (p.slug || p.district) {
         next = { type: "district", slug: p.slug || p.district! };
       }
@@ -628,6 +631,13 @@ export default function LiveMap({
       });
     }
     add({
+      id: "selected-concelho",
+      type: "line",
+      source: "concelhos",
+      filter: ["==", ["get", "dico"], ""],
+      paint: { "line-color": theme === "dark" ? "#7bc4ee" : "#185f8c", "line-width": 3 },
+    });
+    add({
       id: "selected-district",
       type: "line",
       source: "districts",
@@ -856,6 +866,8 @@ export default function LiveMap({
     const selected = map.getSource("selected") as GeoJSONSource | undefined;
     if (!selection) {
       map.setFilter("selected-district", ["==", ["get", "slug"], ""]);
+      if (map.getLayer("selected-concelho"))
+        map.setFilter("selected-concelho", ["==", ["get", "dico"], ""]);
       selected?.setData(collection([]));
       // A seleção saiu (segundo toque ou o botão de fechar): volta à vista
       // inicial, o país (ou a região), ou o distrito numa página de distrito.
@@ -869,7 +881,20 @@ export default function LiveMap({
     hadSelection.current = true;
     // A pessoa pediu para ver este evento: mudar de tamanho já não reenquadra.
     userMoved.current = true;
-    if (selection.type === "district") {
+    map.setFilter("selected-concelho", [
+      "==",
+      ["get", "dico"],
+      selection.type === "concelho" ? selection.dico : "",
+    ]);
+    if (selection.type === "concelho") {
+      map.setFilter("selected-district", ["==", ["get", "slug"], ""]);
+      selected?.setData(collection([]));
+      const features = (concelhoGeo?.features ?? []).filter(
+        (f) => f.properties.dico === selection.dico,
+      );
+      const bounds = bboxOf(features);
+      if (bounds) map.fitBounds(bounds, { padding: 60, maxZoom: 10, duration: 700, ...tilt(map) });
+    } else if (selection.type === "district") {
       map.setFilter("selected-district", ["==", ["get", "slug"], selection.slug]);
       selected?.setData(collection([]));
       const features = (districtGeo?.features ?? []).filter(
@@ -890,7 +915,7 @@ export default function LiveMap({
       );
       map.flyTo({ center: selection.coordinates, zoom: Math.max(map.getZoom(), 9), duration: 700 });
     }
-  }, [selection, styleVersion, districtGeo]);
+  }, [selection, styleVersion, districtGeo, concelhoGeo]);
 
   // Mudar de região (Continente / Açores / Madeira).
   useEffect(() => {

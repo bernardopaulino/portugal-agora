@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { districtRisk, sceneMarkers } from "../home/immersive-home";
 import { BulletinMap } from "./bulletin-map";
 import { ForecastStrip } from "./forecast-strip";
+import { ConcelhoLinks } from "./concelho-links";
 import { NowAndSea } from "./now-and-sea";
 import { BulletinStamp, mapLevels, mapMarkers } from "./national-stage";
 import { MapLegend, TopicList } from "./parts";
@@ -180,6 +181,7 @@ export function DistrictStage({
           </section>
         )}
         <NowAndSea district={district} reference={reference} />
+        <ConcelhoLinks district={district} />
       </div>
     </div>
   );

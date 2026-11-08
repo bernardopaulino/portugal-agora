@@ -115,6 +115,7 @@ export function normalizeFires(raw: FogosRaw): FireEvent[] {
         aerialUnits: f.aerial ?? 0,
         nature: f.natureza ?? "Incêndio",
         concelho,
+        dico: f.dico && /^d{4}$/.test(f.dico) ? f.dico : undefined,
         coordinates,
         place: {
           district: districtSlug(f.district, f.dico),

@@ -292,6 +292,26 @@ test("o tick só responde com o segredo", async ({ request }) => {
   expect((await request.get("/api/cron/tick", wrong)).status()).toBe(401);
 });
 
+test("página de um concelho: dados ao abrir, sem dados no HTML", async ({ page, request }) => {
+  const html = await (await request.get("/lisboa/sintra")).text();
+  // Sem o estado do país no HTML: a página é estática e não conta como ISR write.
+  expect(html).not.toContain("generatedAt");
+  await page.goto("/lisboa/sintra");
+  await expect(page.getByRole("heading", { level: 1, name: "Sintra" })).toBeVisible();
+  for (const name of ["Avisos meteorológicos", "Risco de incêndio", "Incêndios no concelho"])
+    await expect(page.getByRole("heading", { name })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Sismos a menos de 30 km/ })).toBeVisible();
+  await expectAccessible(page);
+  expect((await request.get("/lisboa/nao-existe")).status()).toBe(404);
+});
+
+test("o distrito liga aos seus concelhos", async ({ page }) => {
+  await page.goto("/lisboa");
+  const list = page.getByRole("region", { name: "Concelhos" });
+  await list.getByRole("link", { name: "Sintra" }).click();
+  await expect(page).toHaveURL(/\/lisboa\/sintra$/);
+});
+
 test("HSTS com subdomínios e preload", async ({ request }) => {
   const response = await request.get("/");
   expect(response.headers()["strict-transport-security"]).toBe(

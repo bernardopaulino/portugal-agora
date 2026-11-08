@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { concelhos } from "@/data/concelhos";
 import { districts } from "@/data/districts";
 import { site } from "@/lib/config/site";
 import { intlLocale, localePath, locales } from "@/lib/i18n/locales";
@@ -39,6 +40,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...topics.flatMap((p) => page(p, "hourly", 0.9)),
     ...districts.flatMap((d) => page(`/${d.slug}`, "hourly", 0.8)),
     ...districts.flatMap((d) => topics.flatMap((p) => page(`/${d.slug}${p}`, "hourly", 0.7))),
+    ...concelhos.map((c) => page(`/${c.district}/${c.slug}`, "daily", 0.5)).flat(),
     ...page("/fontes", "monthly", 0.4),
     ...page("/privacidade", "yearly", 0.2),
     ...page("/sobre", "yearly", 0.3),

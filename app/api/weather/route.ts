@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 
-import { getObservations, getSea } from "@/lib/sources/registry";
+import { getObservations, getSea, getStations } from "@/lib/sources/registry";
 
 /**
  * Tempo observado (estações do IPMA) e estado do mar, à parte do estado do
@@ -10,9 +10,13 @@ import { getObservations, getSea } from "@/lib/sources/registry";
  */
 export async function GET() {
   await connection();
-  const [observations, sea] = await Promise.all([getObservations(), getSea()]);
+  const [observations, sea, stations] = await Promise.all([
+    getObservations(),
+    getSea(),
+    getStations(),
+  ]);
   return Response.json(
-    { observations, sea },
+    { observations, sea, stations },
     { headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=1200" } },
   );
 }

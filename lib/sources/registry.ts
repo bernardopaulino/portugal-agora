@@ -10,6 +10,7 @@ import {
   loadFires,
   loadForecast,
   loadObservations,
+  loadStations,
   loadSea,
   loadUv,
   loadWarnings,
@@ -88,3 +89,4 @@ export const getForecast = (globalIdLocal: number) =>
 
 export const getObservations = () => resolveSource("ipma-observations", loadObservations);
 export const getSea = () => resolveSource("ipma-sea", loadSea);
+export const getStations = () => resolveSource("ipma-observations", loadStations, "ipma-stations");

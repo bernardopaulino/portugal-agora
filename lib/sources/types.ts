@@ -72,6 +72,8 @@ export interface FireEvent extends BaseEvent {
   aerialUnits: number;
   nature: string;
   concelho?: string;
+  /** Código DICO do concelho (4 dígitos), quando o Fogos.pt o dá. */
+  dico?: string;
 }
 
 export type Event = WarningEvent | EarthquakeEvent | FireEvent;

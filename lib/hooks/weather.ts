@@ -9,6 +9,8 @@ import type { SourceResult } from "@/lib/sources/types";
 export interface Weather {
   observations: SourceResult<Record<string, StationObservation>>;
   sea: SourceResult<Record<string, SeaSpot[]>>;
+  /** Todas as estações com temperatura (as páginas dos concelhos escolhem a mais próxima). */
+  stations: SourceResult<StationObservation[]>;
 }
 
 const fetcher = async (url: string): Promise<Weather> => {

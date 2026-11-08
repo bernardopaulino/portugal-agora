@@ -38,6 +38,19 @@ export function useLiveState(initial: CountryState): CountryState {
 }
 
 /**
+ * O estado do país sem estado inicial no HTML (páginas dos concelhos, que
+ * não levam dados para não contarem como "ISR writes"): null até chegar.
+ */
+export function useLiveStateOnly(): CountryState | null {
+  const { data } = useSWR("/api/state", fetcher, {
+    refreshInterval: 60_000,
+    revalidateOnFocus: true,
+    keepPreviousData: true,
+  });
+  return data ?? null;
+}
+
+/**
  * Se o pedido a /api/state está a caminho. Lê o mesmo estado do SWR que o
  * useLiveState, sem fazer pedidos seus.
  */
@@ -78,7 +91,7 @@ export function useMapControls(initialLayer: LayerId, initialRegion: Region = "c
       setSelection(s);
       if (s.type === "event") setRegion(s.region);
       else {
-        const d = getDistrict(s.slug);
+        const d = getDistrict(s.type === "concelho" ? s.district : s.slug);
         if (d) setRegion(d.region);
       }
       scrollToMap();

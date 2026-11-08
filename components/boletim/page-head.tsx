@@ -21,7 +21,8 @@ export function PageHead({
 }: {
   title: string;
   intro: string;
-  generatedAt: string;
+  /** Hora dos dados; sem ela (ainda a carregar), não há carimbo. */
+  generatedAt?: string;
   back?: { href: string; label: string };
   children?: ReactNode;
 }) {
@@ -43,7 +44,7 @@ export function PageHead({
           {title}
         </h1>
         <p className="max-w-[60ch] text-lg text-stage-ink-2">{intro}</p>
-        <BulletinStamp iso={generatedAt} />
+        {generatedAt ? <BulletinStamp iso={generatedAt} /> : null}
         {children}
       </div>
     </section>
