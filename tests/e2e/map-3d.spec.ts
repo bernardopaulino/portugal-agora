@@ -172,6 +172,12 @@ test("incêndios abrem com relevo; o botão Mapa volta ao plano", async ({ page 
   await expect(page.getByRole("button", { name: "Repor orientação" })).toHaveCount(0);
   await expect(legend(page)).not.toContainText("Relevo exagerado");
   await expect(liveMap(page)).toHaveAttribute("data-camera-duration", "600");
+
+  // Voltar ao 3D: a segunda entrada usa a curva por omissão. Já houve um erro
+  // aqui que parava o desenho do mapa (ficava plano e sem se mexer).
+  await choose(page, "3D");
+  await expect(legend(page)).toContainText("Relevo exagerado 2×.");
+  await page.waitForTimeout(1000);
   // Nenhum tile de mar pedido (a Mapterhorn responderia 404 e haveria erros aqui).
   expect(errors).toEqual([]);
 });

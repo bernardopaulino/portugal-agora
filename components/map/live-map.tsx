@@ -832,7 +832,10 @@ export default function LiveMap({
             pitch: MAP_3D_PITCH,
             bearing: first ? ENTRY_BEARING : map.getBearing(),
             duration,
-            easing: first ? cubicInOut : undefined,
+            // Só a primeira entrada leva curva própria. Não passar "easing: undefined":
+            // apagava a curva por omissão do MapLibre, que rebentava a meio do desenho
+            // ("easing is not a function") e o mapa deixava de se mexer.
+            ...(first ? { easing: cubicInOut } : {}),
           }
         : { pitch: 0, bearing: 0, duration },
     );
