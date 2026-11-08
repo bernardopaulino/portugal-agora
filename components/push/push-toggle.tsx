@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, BellOff } from "lucide-react";
+import { Bell, BellOff, BellRing } from "lucide-react";
 import { useState, useSyncExternalStore } from "react";
 
 import type { District } from "@/data/districts";
@@ -91,6 +91,25 @@ export function PushToggle({ district }: { district: District }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const [denied, setDenied] = useState(false);
+  const [testResult, setTestResult] = useState<"testSent" | "testWait" | "testFailed" | null>(null);
+
+  // Notificação de teste para este browser (o servidor só envia a uma subscrição que já existe).
+  const sendTest = async () => {
+    setTestResult(null);
+    try {
+      const subscription = await currentSubscription(false);
+      if (!subscription) throw new Error("Sem subscrição");
+      const response = await fetch("/api/push/test", {
+        method: "POST",
+        body: JSON.stringify({ endpoint: subscription.endpoint }),
+      });
+      setTestResult(
+        response.status === 204 ? "testSent" : response.status === 429 ? "testWait" : "testFailed",
+      );
+    } catch {
+      setTestResult("testFailed");
+    }
+  };
   const on = choice?.districts.includes(district.slug) ?? false;
   const min: Threshold = choice?.min ?? "yellow";
   const inPlace = t.inPlace(district);
@@ -179,6 +198,22 @@ export function PushToggle({ district }: { district: District }) {
             )}
             {busy ? t.push.working : on ? t.push.disable : t.push.enable}
           </button>
+          {on ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void sendTest()}
+              className="inline-flex min-h-11 items-center gap-2 self-start rounded-full glass-button px-5 font-display text-base font-semibold disabled:opacity-60"
+            >
+              <BellRing aria-hidden className="size-4" />
+              {t.push.test}
+            </button>
+          ) : null}
+          {testResult ? (
+            <p role="status" className="text-base">
+              {t.push[testResult]}
+            </p>
+          ) : null}
           {error ? (
             <p role="alert" className="text-base">
               {t.push.error}

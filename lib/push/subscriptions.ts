@@ -65,3 +65,17 @@ export async function allSubscriptions(): Promise<StoredSubscription[]> {
   const all = await getRedis()?.hgetall<Record<string, StoredSubscription>>(KEY);
   return all ? Object.values(all) : [];
 }
+
+export async function getSubscription(endpoint: string): Promise<StoredSubscription | null> {
+  return (await getRedis()?.hget<StoredSubscription>(KEY, idOf(endpoint))) ?? null;
+}
+
+/**
+ * Uma notificação de teste por browser e por minuto: o pedido é público e
+ * só pode chegar ao próprio browser, mas não deve servir para martelar o
+ * serviço de push. true se este pedido pode avançar.
+ */
+export async function claimTestSlot(endpoint: string): Promise<boolean> {
+  const result = await getRedis()?.set(`push:test:${idOf(endpoint)}`, 1, { nx: true, ex: 60 });
+  return result === "OK";
+}

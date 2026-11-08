@@ -18,6 +18,18 @@ export const maxAgeMinutes = {
 
 type Key = keyof typeof maxAgeMinutes;
 
+/**
+ * Fontes que não vão no estado do país (só a página do distrito e o mapa
+ * dos avisos as usam, via /api/weather). O IPMA publica as observações de
+ * hora a hora, ~35 min depois; o estado do mar muda por corrida do modelo.
+ */
+export const extraMaxAgeMinutes = {
+  observations: 120,
+  sea: 240,
+} as const;
+
+export type ExtraSources = Partial<Record<keyof typeof extraMaxAgeMinutes, SourceResult<unknown>>>;
+
 export interface SourceHealth {
   id: string;
   /** "ok"; "stale": a mostrar dados antigos; "down": sem dados ou desligada. */
@@ -49,9 +61,14 @@ function check(result: SourceResult<unknown>, max: number, now: Date): SourceHea
 }
 
 /** Estado de cada fonte para a monitorização externa (/api/health/sources). */
-export function sourcesHealth(state: CountryState, now: Date) {
-  const sources = (Object.keys(maxAgeMinutes) as Key[]).map((key) =>
-    check(state[key], maxAgeMinutes[key], now),
-  );
+export function sourcesHealth(state: CountryState, now: Date, extra: ExtraSources = {}) {
+  const sources = [
+    ...(Object.keys(maxAgeMinutes) as Key[]).map((key) =>
+      check(state[key], maxAgeMinutes[key], now),
+    ),
+    ...(Object.keys(extraMaxAgeMinutes) as (keyof typeof extraMaxAgeMinutes)[]).flatMap((key) =>
+      extra[key] ? [check(extra[key], extraMaxAgeMinutes[key], now)] : [],
+    ),
+  ];
   return { ok: sources.every((s) => s.health === "ok"), sources };
 }

@@ -169,6 +169,13 @@ const pt = {
   /** Notificações de avisos (web push) na página de cada distrito. */
   push: {
     title: (name: string, level: string) => `${name}: aviso ${level}`,
+    testTitle: "Portugal Agora: notificação de teste",
+    testBody: (inPlace: string) =>
+      `As notificações estão a funcionar. Quando o IPMA subir um aviso ${inPlace}, recebe uma assim.`,
+    test: "Enviar notificação de teste",
+    testSent: "Enviada. Deve chegar dentro de segundos.",
+    testWait: "Já enviámos uma há pouco. Tente daqui a um minuto.",
+    testFailed: "Não foi possível enviar. Desative e volte a ativar as notificações.",
     heading: "Notificações",
     intro: (inPlace: string) =>
       `Receba uma notificação neste dispositivo quando o IPMA emitir ou subir um aviso ${inPlace}.`,
@@ -723,6 +730,13 @@ const en: Dictionary = {
   },
   push: {
     title: (name, level) => `${name}: ${level} warning`,
+    testTitle: "Portugal Agora: test notification",
+    testBody: (inPlace) =>
+      `Notifications are working. When IPMA raises a warning ${inPlace}, you will get one like this.`,
+    test: "Send a test notification",
+    testSent: "Sent. It should arrive within seconds.",
+    testWait: "We sent one a moment ago. Try again in a minute.",
+    testFailed: "Could not send it. Turn notifications off and on again.",
     heading: "Notifications",
     intro: (inPlace) =>
       `Get a notification on this device when IPMA issues or raises a warning ${inPlace}.`,

@@ -39,6 +39,20 @@ describe("sourcesHealth", () => {
     expect(report.sources).toHaveLength(6);
   });
 
+  it("inclui o tempo observado e o mar quando são passados, com os seus limites", () => {
+    const fresh = sourcesHealth(aggregate(inputs(), now), now, {
+      observations: ok("ipma-observations", {}, minutesAgo(90)),
+      sea: ok("ipma-sea", {}, minutesAgo(200)),
+    });
+    expect(fresh.sources).toHaveLength(8);
+    expect(fresh.ok).toBe(true);
+    const old = sourcesHealth(aggregate(inputs(), now), now, {
+      observations: ok("ipma-observations", {}, minutesAgo(150)),
+    });
+    expect(old.ok).toBe(false);
+    expect(find(old, "ipma-observations")).toMatchObject({ health: "stale", maxAgeMinutes: 120 });
+  });
+
   it("assinala uma fonte que está a mostrar o último snapshot", () => {
     const report = health({
       warnings: { ...ok("ipma-warnings", [], minutesAgo(8)), status: "stale" },
