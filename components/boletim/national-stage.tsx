@@ -43,17 +43,24 @@ export function BulletinStamp({ iso }: { iso: string }) {
       </p>
     );
   }
+  // Texto corrido em pedaços que não se partem, com o separador no fim de cada
+  // um: a linha parte entre pedaços, o ponto fica com a data e nenhuma linha
+  // começa por "·". No telemóvel a data fica numa linha e a hora na seguinte.
   return (
-    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[0.8rem] tracking-[0.08em] text-stage-ink-2 uppercase">
-      <span aria-hidden className="size-2 rounded-full bg-accent shadow-[0_0_12px_var(--accent)]" />
+    <p className="font-mono text-[0.8rem] leading-relaxed tracking-[0.08em] text-stage-ink-2 uppercase">
       <time dateTime={iso} className="text-stage-ink">
-        {t.stage.stamp(
-          capitalize(formatLongDate(localDate(iso), locale).replace("-feira", "")),
-          formatTime(iso),
-        )}
-      </time>
-      <span>
-        · {t.stage.updated} <RelativeTime iso={iso} />
+        <span className="whitespace-nowrap max-sm:block">
+          <span
+            aria-hidden
+            className="mr-2 inline-block size-2 rounded-full bg-accent align-middle shadow-[0_0_12px_var(--accent)]"
+          />
+          {capitalize(formatLongDate(localDate(iso), locale).replace("-feira", ""))}
+          <span className="max-sm:hidden"> ·</span>
+        </span>{" "}
+        <span className="whitespace-nowrap">{formatTime(iso)} ·</span>
+      </time>{" "}
+      <span className="whitespace-nowrap">
+        {t.stage.updated} <RelativeTime iso={iso} />
       </span>
     </p>
   );

@@ -25,7 +25,8 @@ export function FireRiskSummary({ risk }: { risk: FireRisk }) {
   }));
 
   return (
-    <div className="flex flex-col gap-3">
+    // Duas colunas só quando o painel tem largura para "Muito elevado: 25 concelhos" numa linha.
+    <div className="@container flex flex-col gap-3">
       <div className="flex h-4 w-full overflow-hidden rounded-sm" aria-hidden>
         {counts
           .filter((c) => c.n > 0)
@@ -36,7 +37,7 @@ export function FireRiskSummary({ risk }: { risk: FireRisk }) {
             />
           ))}
       </div>
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-base">
+      <ul className="grid grid-cols-1 gap-x-4 gap-y-1.5 text-base @sm:grid-cols-2">
         {counts.map((c) => {
           const [label, count] = t.lists.riskLevels(t.term(fireRiskLabels[c.level]!), c.n);
           return (

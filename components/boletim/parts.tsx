@@ -111,10 +111,12 @@ export function LowerThird({
 }) {
   const Icon = levels[level].icon;
   return (
-    <div className="lower-third lower-third-in flex min-h-16 items-stretch gap-2 overflow-hidden rounded-2xl p-1.5 text-ink glass-strong">
+    // No telemóvel o nível fica numa pílula por cima da legenda (ao lado, o
+    // texto ficava estreito e o bloco de cor esticava até à altura dele).
+    <div className="lower-third lower-third-in flex min-h-16 flex-col gap-1 overflow-hidden rounded-2xl p-1.5 text-ink glass-strong sm:flex-row sm:items-stretch sm:gap-2">
       <span
         className={cn(
-          "flex shrink-0 flex-col items-center justify-center gap-1 rounded-xl px-3 font-display text-base font-semibold sm:min-w-40 sm:flex-row sm:justify-start sm:gap-2 sm:px-4",
+          "flex min-h-9 shrink-0 items-center gap-2 self-start rounded-xl px-3 font-display text-base font-semibold sm:min-w-40 sm:self-auto sm:px-4",
           levelBlock[level],
         )}
       >
@@ -123,7 +125,7 @@ export function LowerThird({
       </span>
       <div
         key={captionKey}
-        className="caption-in flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5"
+        className="caption-in flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 px-3 pt-1 pb-2.5 sm:px-4 sm:py-2.5"
         aria-live="polite"
       >
         {children}

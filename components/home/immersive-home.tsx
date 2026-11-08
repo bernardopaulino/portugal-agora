@@ -223,7 +223,8 @@ export function ImmersiveHome({ initial }: { initial: CountryState }) {
                 <span className="text-base text-ink-2">{nationalCaption(state, reference, t)}</span>
               </LowerThird>
             )}
-            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+            {/* Abaixo de 1024px a legenda fica por cima da terra: vai num vidro. */}
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 max-lg:rounded-2xl max-lg:px-4 max-lg:py-3 max-lg:glass">
               <MapLegend />
               <p className="flex items-center gap-2 kicker">
                 {t.home.scroll} <ArrowDown aria-hidden className="size-3.5" />
@@ -305,7 +306,7 @@ function TopicStop({
         <p className="border-t border-line pt-4 text-sm text-ink-2">{t.home.legend[id]}</p>
         <Link
           href={path(topicPage[id])}
-          className="inline-flex h-12 items-center gap-2 self-start rounded-full bg-accent px-5 font-display text-base font-semibold text-accent-ink no-underline shadow-[0_0_28px_-6px_var(--glow)] hover:brightness-110"
+          className="inline-flex min-h-12 items-center gap-2 self-start rounded-full bg-accent px-5 py-2 font-display text-base leading-tight font-semibold text-accent-ink no-underline shadow-[0_0_28px_-6px_var(--glow)] hover:brightness-110"
         >
           {t.home.cta[id]} <ArrowRight aria-hidden className="size-4" />
         </Link>

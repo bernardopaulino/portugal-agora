@@ -19,12 +19,12 @@ export function ConcelhoLinks({ district }: { district: District }) {
         {t.concelho.listTitle}
       </h2>
       <p className="text-base text-stage-ink-2">{t.concelho.listIntro(t.inPlace(district))}</p>
-      <ul className="grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-x-6 gap-y-1">
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] sm:gap-x-6">
         {items.map((c) => (
           <li key={c.dico}>
             <Link
               href={path(`/${district.slug}/${c.slug}`)}
-              className="inline-flex min-h-11 items-center text-base"
+              className="inline-flex min-h-11 items-center py-1 text-base leading-snug"
             >
               {t.concelhoName(c.dico, c.name)}
             </Link>

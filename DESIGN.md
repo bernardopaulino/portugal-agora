@@ -160,7 +160,7 @@ Motion is cinematic once, then still: entrances happen once, the camera only mov
 
 ### Glass
 
-- **Glass** (`glass` at 62%, `glass-strong` at 84%): every panel, the header, the caption bar, the map frame and controls. Always with `glass-line` (a 10% white hairline), `glass-hi` (a 14% white rim on the top edge) and an 18px backdrop blur.
+- **Glass** (`glass` at 62%, `glass-strong` at 84%): every panel, the header, the caption bar, the map frame and controls. Always with `glass-line` (a 10% white hairline), `glass-hi` (a 14% white rim on the top edge) and an 18px backdrop blur. Below 1024px, where the panels scroll over the country instead of beside it, `glass` takes the `glass-strong` fill so no land shows through the text; the home and district map legends sit on glass there too.
 
 ### Interaction
 
@@ -219,7 +219,7 @@ Kicker with a static cyan live dot ("Boletim nacional · ao vivo"), the headline
 
 ### Caption Bar (lower third)
 
-`glass-strong`, a rounded level block (map fill, icon, word) and the caption: distrito name in Geist, one sentence in Atkinson, an "Abrir [distrito]" link. Pointing at a distrito on the scene swaps it; a floating glass tag with the name and level also appears above that distrito. With a finger there is no pointing: the first tap shows the tag, with an "Abrir [distrito]" line, and the second tap (or a tap on the tag) opens the distrito; a tap on the sea clears it. The flat map works the same way.
+`glass-strong`, a rounded level block (map fill, icon, word; on phones a pill above the caption, beside it from 640px) and the caption: distrito name in Geist, one sentence in Atkinson, an "Abrir [distrito]" link. Pointing at a distrito on the scene swaps it; a floating glass tag with the name and level also appears above that distrito. With a finger there is no pointing: the first tap shows the tag, with an "Abrir [distrito]" line, and the second tap (or a tap on the tag) opens the distrito; a tap on the sea clears it. The flat map works the same way.
 
 ### Topic Stop
 
@@ -238,11 +238,11 @@ Glass header; the logo (mainland silhouette in `ink`, with a dot in the national
 
 ### Lists
 
-Ruled lists inside glass panels: hairlines between items, no inner boxes. Event rows: severity badge, title in Geist, meta in Atkinson, and a "Ver no mapa" glass pill; the selected row takes a cyan tint with rounded corners. Empty states are a dashed rounded box with large slate text.
+Ruled lists inside glass panels: hairlines between items, no inner boxes. Event rows: severity badge, title in Geist, meta in Atkinson, and a "Ver no mapa" glass pill; the selected row takes a cyan tint with rounded corners. Empty states are a dashed rounded box with large slate text. The fire-risk table by concelho is a table from 640px; on phones each concelho is a row with "Hoje" and "Amanhã" side by side under the name. The bulletin timestamp never starts a line with "·": on phones the date takes one line and the time and freshness the next.
 
 ### District Index
 
-A grid of rounded glass tiles (2 columns, 3 from 640px, 4 from 1024px), each with a level chip and the name; the keyboard path to every distrito.
+A grid of rounded glass tiles (2 columns, 3 from 640px, 4 from 1024px), each with a level chip and the name (on phones the name sits under the chip, with the full tile width, so no name is cut); the keyboard path to every distrito.
 
 ### Forecast Strip
 

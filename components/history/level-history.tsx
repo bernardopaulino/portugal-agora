@@ -238,14 +238,20 @@ export function LevelHistory({
           const name = t.districtName(district);
           const isHover = hover?.slug === slug && hoverPoint;
           return (
+            // Telemóvel: o nome e o resumo na mesma linha, a faixa por baixo (eram três
+            // linhas por distrito). A partir de 640px: o nome à esquerda, a faixa e o
+            // resumo à direita.
             <li
               key={slug}
-              className="grid grid-cols-1 gap-1 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-x-4"
+              className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 gap-y-1 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-center sm:gap-x-4"
             >
-              <span className="text-base font-bold">
+              <span className="col-start-1 row-start-1 text-base font-bold">
                 {linkDistricts ? <Link href={path(`/${slug}/avisos`)}>{name}</Link> : name}
               </span>
-              <div className="relative flex flex-col gap-1">
+              <span className="col-start-2 row-start-1 text-right text-sm text-ink-2 sm:row-start-2 sm:text-left">
+                {text}
+              </span>
+              <div className="relative col-span-2 row-start-2 sm:col-span-1 sm:col-start-2 sm:row-start-1">
                 <Strip
                   spans={spans}
                   start={start}
@@ -253,7 +259,6 @@ export function LevelHistory({
                   label={`${name}: ${text}`}
                   onHover={(ms) => setHover(ms === null ? null : { slug, ms })}
                 />
-                <span className="text-sm text-ink-2">{text}</span>
                 {isHover ? (
                   <span
                     aria-hidden

@@ -155,7 +155,8 @@ export function DistrictStage({
           </div>
         ) : null}
 
-        <div className="pointer-events-auto lg:col-span-12">
+        {/* Abaixo de 1024px a legenda fica por cima da terra: vai num vidro. */}
+        <div className="pointer-events-auto max-lg:rounded-2xl max-lg:px-4 max-lg:py-3 max-lg:glass lg:col-span-12">
           <MapLegend showMarkers={false} />
         </div>
       </section>

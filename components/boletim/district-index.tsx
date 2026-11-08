@@ -36,7 +36,7 @@ export function DistrictIndex({ state }: { state: CountryState }) {
           <li key={district.slug} ref={reveal}>
             <a
               href={path(`/${district.slug}`)}
-              className="flex min-h-12 items-center gap-2.5 rounded-xl border border-glass-line bg-[var(--stage-2)] px-3 py-2 text-base text-ink no-underline transition-colors hover:border-[color-mix(in_srgb,var(--accent)_50%,transparent)] hover:bg-surface-2"
+              className="flex min-h-12 flex-col items-start gap-1.5 rounded-xl border border-glass-line bg-[var(--stage-2)] px-3 py-2 text-base text-ink no-underline transition-colors hover:border-[color-mix(in_srgb,var(--accent)_50%,transparent)] hover:bg-surface-2 max-sm:py-2.5 sm:flex-row sm:items-center sm:gap-2.5"
             >
               <span
                 className={cn(
@@ -47,7 +47,8 @@ export function DistrictIndex({ state }: { state: CountryState }) {
                 <Icon aria-hidden className="size-3.5" strokeWidth={2.6} />
                 <span className="sr-only">{t.levels[level]}: </span>
               </span>
-              <span className="min-w-0 truncate">{t.districtName(district)}</span>
+              {/* No telemóvel o nome fica por baixo do ícone, com a largura toda: ao lado, "Portalegre" partia a meio. */}
+              <span className="min-w-0 leading-tight">{t.districtName(district)}</span>
             </a>
           </li>
         );

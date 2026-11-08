@@ -29,10 +29,13 @@ export function ObservationCard({
   observation,
   result,
   district,
+  inPanel = false,
 }: {
   observation: StationObservation;
   result: SourceResult<unknown>;
   district: District;
+  /** Já dentro de um painel (página do concelho): sem vidro próprio, para não estreitar o texto. */
+  inPanel?: boolean;
 }) {
   const { t, locale } = useI18n();
   const region = district.region === "acores" ? "acores" : undefined;
@@ -64,7 +67,14 @@ export function ObservationCard({
   ].filter((r) => r.value !== null);
 
   return (
-    <section aria-labelledby="agora-titulo" className="flex flex-col gap-4 rounded-2xl p-6 glass">
+    <section
+      aria-labelledby="agora-titulo"
+      className={
+        inPanel
+          ? "flex flex-col gap-4 border-t border-line pt-4"
+          : "flex flex-col gap-4 rounded-2xl p-6 glass"
+      }
+    >
       <div className="flex flex-col gap-1">
         <h2 id="agora-titulo" className="font-display text-2xl font-bold">
           {t.observed.heading}

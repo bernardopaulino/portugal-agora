@@ -283,6 +283,10 @@
     var(--shadow);
   backdrop-filter: blur(18px) saturate(1.4);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  /* Abaixo de 1024px os painéis passam por cima do país (e não ao lado): o vidro fica mais opaco para a terra não aparecer por trás do texto. */
+  @media (width < 64rem) {
+    background: var(--glass-strong);
+  }
 }
 @utility glass-strong {
   background: var(--glass-strong);

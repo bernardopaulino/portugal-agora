@@ -413,7 +413,8 @@ export function MapPanel({
   return (
     <div className={cn("flex flex-col gap-3", className)}>
       {(onRegion && zones.length > 1) || views.length > 1 || showRiskDay || mode3d ? (
-        <div className="flex flex-wrap gap-x-6 gap-y-3">
+        // Entre grupos, 1rem no telemóvel: "Hoje | Amanhã" e "Mapa | 3D" cabem numa linha a 360px.
+        <div className="flex flex-wrap gap-x-4 gap-y-3 sm:gap-x-6">
           {views.length > 1 ? (
             <div role="radiogroup" aria-label={t.map.show} className="flex flex-wrap gap-2">
               {views.map((v) => (

@@ -179,6 +179,7 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
                   observation={station.observation}
                   result={weather.stations}
                   district={district}
+                  inPanel
                 />
                 {station.km >= 5 ? (
                   <p className="text-sm text-ink-2">
