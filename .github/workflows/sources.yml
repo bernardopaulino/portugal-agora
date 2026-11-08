@@ -1,0 +1,33 @@
+name: Vigiar as fontes
+
+# De 15 em 15 minutos verifica /api/health/sources. Uma avaria abre uma
+# issue (email para o dono do repositório); a recuperação fecha-a. Ver
+# scripts/check-sources.mjs.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+# Uma verificação de cada vez (a segunda tentativa espera 10 min).
+concurrency:
+  group: sources
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - run: node scripts/check-sources.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
