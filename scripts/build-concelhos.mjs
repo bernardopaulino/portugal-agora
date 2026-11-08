@@ -47,25 +47,33 @@ function center(geometry) {
   let best = null;
   for (const polygon of polygons) {
     const ring = polygon[0];
-    let a = 0, cx = 0, cy = 0;
+    let a = 0,
+      cx = 0,
+      cy = 0;
     for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
       const f = ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1];
       a += f;
       cx += (ring[j][0] + ring[i][0]) * f;
       cy += (ring[j][1] + ring[i][1]) * f;
     }
-    if (!best || Math.abs(a) > Math.abs(best.a)) best = { a, c: [cx / (3 * a), cy / (3 * a)], ring };
+    if (!best || Math.abs(a) > Math.abs(best.a))
+      best = { a, c: [cx / (3 * a), cy / (3 * a)], ring };
   }
   if (inside(best.c, best.ring)) return best.c;
   return best.ring.reduce((p, q) =>
-    Math.hypot(q[0] - best.c[0], q[1] - best.c[1]) < Math.hypot(p[0] - best.c[0], p[1] - best.c[1]) ? q : p,
+    Math.hypot(q[0] - best.c[0], q[1] - best.c[1]) < Math.hypot(p[0] - best.c[0], p[1] - best.c[1])
+      ? q
+      : p,
   );
 }
 
 const shapes = new Map(geo.features.map((f) => [f.properties.dico, f.geometry]));
-const regionOf = (district) => (district === "acores" || district === "madeira" ? district : "continente");
+const regionOf = (district) =>
+  district === "acores" || district === "madeira" ? district : "continente";
 const inRegion = ([lon, lat], region) =>
-  region === "acores" ? lon < -24 && lon > -32 && lat > 36.5 && lat < 40 : lon < -15.9 && lon > -17.4 && lat > 32.3 && lat < 33.2;
+  region === "acores"
+    ? lon < -24 && lon > -32 && lat > 36.5 && lat < 40
+    : lon < -15.9 && lon > -17.4 && lat > 32.3 && lat < 33.2;
 
 /** Nomes como estão no OpenStreetMap, quando diferem da CAOP. */
 const osmNames = { "Calheta de São Jorge": "Calheta" };
@@ -74,7 +82,9 @@ async function nominatim(name, region) {
   const q = `${osmNames[name] ?? name}, ${region === "acores" ? "Azores" : "Madeira"}`;
   const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(q)}`;
   const response = await fetch(url, {
-    headers: { "user-agent": "portugal-agora-build-script (github.com/bernardopaulino/portugal-agora)" },
+    headers: {
+      "user-agent": "portugal-agora-build-script (github.com/bernardopaulino/portugal-agora)",
+    },
   });
   const results = await response.json();
   // Prefere a fronteira administrativa do concelho; senão, a localidade sede.
@@ -97,7 +107,8 @@ for (const [code, name, district] of dico) {
     const [lon, lat] = center(shapes.get(code));
     point = [Math.round(lon * 1e4) / 1e4, Math.round(lat * 1e4) / 1e4];
   } else {
-    if (region === "continente") throw new Error(`Concelho do continente sem forma: ${code} ${name}`);
+    if (region === "continente")
+      throw new Error(`Concelho do continente sem forma: ${code} ${name}`);
     point = await nominatim(name, region);
     await new Promise((r) => setTimeout(r, 1100));
   }
@@ -105,7 +116,9 @@ for (const [code, name, district] of dico) {
   if (region !== "continente") console.log(code, name, point.join(", "));
 }
 
-const body = out.map((r) => `  [${JSON.stringify(r[0])}, ${JSON.stringify(r[1])}, ${r[2]}, ${r[3]}],`).join("\n");
+const body = out
+  .map((r) => `  [${JSON.stringify(r[0])}, ${JSON.stringify(r[1])}, ${r[2]}, ${r[3]}],`)
+  .join("\n");
 writeFileSync(
   join(root, "data/concelhos-geo.ts"),
   `/*
