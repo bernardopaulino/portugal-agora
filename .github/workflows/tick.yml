@@ -1,0 +1,30 @@
+name: Tick
+
+# De 10 em 10 minutos: um ponto do histórico dos avisos e as notificações
+# quando o nível de um distrito sobe (app/api/cron/tick). O agendamento do
+# GitHub pode atrasar alguns minutos; o tick tolera-o.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: tick
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    # Só depois de o CRON_SECRET estar na Vercel e no GitHub (variável do repositório).
+    if: vars.TICK_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Chamar o tick
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -fsS --max-time 60 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            https://portugalagora.pt/api/cron/tick

@@ -257,6 +257,31 @@ test("API de fontes só aceita fontes conhecidas", async ({ request }) => {
   }
 });
 
+test("feeds RSS dos avisos, do país e de um distrito", async ({ page, request }) => {
+  for (const path of ["/avisos/rss", "/en/lisboa/avisos/rss"]) {
+    const response = await request.get(path);
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toContain("application/rss+xml");
+    const xml = await response.text();
+    expect(xml.startsWith("<?xml")).toBe(true);
+    expect(xml).toContain("<channel>");
+    expect(xml.trimEnd().endsWith("</rss>")).toBe(true);
+  }
+  expect((await request.get("/nada/avisos/rss")).status()).toBe(404);
+  await page.goto("/lisboa/avisos");
+  await expect(page.locator(`link[rel="alternate"][type="application/rss+xml"]`)).toHaveAttribute(
+    "href",
+    /\/lisboa\/avisos\/rss$/,
+  );
+  await expect(page.getByRole("link", { name: "Subscrever estes avisos por RSS" })).toBeVisible();
+});
+
+test("o tick só responde com o segredo", async ({ request }) => {
+  expect((await request.get("/api/cron/tick")).status()).toBe(401);
+  const wrong = { headers: { authorization: "Bearer errado" } };
+  expect((await request.get("/api/cron/tick", wrong)).status()).toBe(401);
+});
+
 test("HSTS com subdomínios e preload", async ({ request }) => {
   const response = await request.get("/");
   expect(response.headers()["strict-transport-security"]).toBe(
