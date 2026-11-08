@@ -1,5 +1,6 @@
-import { connection } from "next/server";
+import { after, connection } from "next/server";
 
+import { maybeTick } from "@/lib/cron/tick";
 import { getState } from "@/lib/state/get-state";
 
 /**
@@ -14,6 +15,9 @@ import { getState } from "@/lib/state/get-state";
 export async function GET() {
   await connection();
   const state = await getState();
+  // Com o site aberto, o tick (histórico e notificações) corre daqui, depois
+  // de responder, no máximo uma vez a cada 9 min (ver lib/cron/tick.ts).
+  after(maybeTick);
   return Response.json(state, {
     headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
   });

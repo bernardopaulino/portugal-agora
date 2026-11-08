@@ -185,7 +185,7 @@ npm install --no-save pmtiles && node scripts/build-relief-index.mjs
 
 O repositório é público, por isso os workflows agendados não têm custo. Os cron da Vercel no plano Hobby só correm uma vez por dia.
 
-- **Tick** (`.github/workflows/tick.yml`, de 10 em 10 min): chama `/api/cron/tick` com o `CRON_SECRET`. Guarda um ponto do histórico e envia as notificações quando o nível de um distrito sobe. Só corre com a variável `TICK_ENABLED=true`.
+- **Tick** (histórico e notificações, `lib/cron/tick.ts`): corre no próprio site, depois de responder a `/api/state` (que o browser pede de minuto a minuto), no máximo uma vez a cada 9 min (cadeado no Redis). Os agendamentos do GitHub não são fiáveis (atrasam ou nem correm), por isso `.github/workflows/tick.yml` (de 10 em 10 min, com o `CRON_SECRET` e `TICK_ENABLED=true`) fica só como reforço para quando ninguém tem o site aberto.
 - **Vigiar as fontes** (`.github/workflows/sources.yml`, de 15 em 15 min): se `/api/health/sources` falhar em duas verificações seguidas, abre uma issue com a etiqueta `fonte-em-baixo` (email para o dono do repositório); quando tudo volta ao normal, fecha-a.
 - **Aquecer a cache** (`.github/workflows/warm-cache.yml`, só à mão): visita as páginas do sitemap e as imagens de partilha para a CDN deixar de servir versões antigas. Não corre sozinha porque cada passagem custa ~300 renovações ISR.
 
