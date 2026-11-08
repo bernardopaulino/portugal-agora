@@ -983,7 +983,13 @@ export default function LiveMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !focus || !districtGeo) return;
-    const bounds = bboxOf(districtGeo.features.filter((f) => f.properties.slug === focus));
+    // Nas ilhas, o enquadramento da região (a Madeira inclui as Selvagens, a 280 km:
+    // com elas, a ilha ficava minúscula e os concelhos não se viam).
+    const district = getDistrict(focus);
+    const bounds =
+      district && district.region !== "continente"
+        ? regionBounds[district.region]
+        : bboxOf(districtGeo.features.filter((f) => f.properties.slug === focus));
     if (!bounds) return;
     fitTarget.current = (duration) =>
       map.fitBounds(bounds, { padding: 32, duration, ...tilt(map) });

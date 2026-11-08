@@ -35,3 +35,20 @@ describe("concelhos", () => {
     expect(concelhosOf("lisboa").map((c) => c.name)).toContain("Sintra");
   });
 });
+
+describe("contornos dos concelhos (public/geo/concelhos.json)", () => {
+  it("tem os 308, incluindo os 30 dos Açores e da Madeira", async () => {
+    const { readFileSync } = await import("node:fs");
+    const geo = JSON.parse(readFileSync("public/geo/concelhos.json", "utf8")) as {
+      features: { properties: { dico: string; district: string } }[];
+    };
+    expect(geo.features).toHaveLength(308);
+    const islands = geo.features.filter((f) =>
+      ["acores", "madeira"].includes(f.properties.district),
+    );
+    expect(islands).toHaveLength(30);
+    expect(new Set(geo.features.map((f) => f.properties.dico))).toEqual(
+      new Set(concelhos.map((c) => c.dico)),
+    );
+  });
+});
