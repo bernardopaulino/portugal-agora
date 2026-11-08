@@ -276,12 +276,6 @@ test("feeds RSS dos avisos, do país e de um distrito", async ({ page, request }
   await expect(page.getByRole("link", { name: "Subscrever estes avisos por RSS" })).toBeVisible();
 });
 
-test("o tick só responde com o segredo", async ({ request }) => {
-  expect((await request.get("/api/cron/tick")).status()).toBe(401);
-  const wrong = { headers: { authorization: "Bearer errado" } };
-  expect((await request.get("/api/cron/tick", wrong)).status()).toBe(401);
-});
-
 test("HSTS com subdomínios e preload", async ({ request }) => {
   const response = await request.get("/");
   expect(response.headers()["strict-transport-security"]).toBe(

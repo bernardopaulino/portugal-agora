@@ -27,10 +27,7 @@ export default async function PrivacidadePage(props: PageProps<"/[lang]/privacid
 
 function Portuguese() {
   return (
-    <ProsePage
-      title="Privacidade"
-      intro="Não recolhemos dados pessoais. A única coisa guardada no servidor, e só se a pedir, é o endereço técnico das notificações."
-    >
+    <ProsePage title="Privacidade" intro="Não recolhemos dados pessoais.">
       <ul>
         <li>Não há contas, formulários, publicidade nem cookies.</li>
         <li>Não usamos serviços de estatística de terceiros.</li>
@@ -45,14 +42,6 @@ function Portuguese() {
           navegador.
         </li>
         <li>
-          As notificações de avisos são opcionais. Se as ativar, o seu navegador cria um endereço
-          técnico de notificação (do serviço de push do Google, da Mozilla ou da Apple, consoante o
-          navegador) e guardamos esse endereço, os distritos e o nível que escolheu, só para lhe
-          enviar os avisos. Não fica associado a nome, email nem localização. Ao desativar as
-          notificações, apagamos esse registo; o mesmo acontece quando o serviço de push nos diz que
-          o endereço deixou de existir.
-        </li>
-        <li>
           Os mapas são carregados do OpenFreeMap, que, como qualquer servidor, recebe o endereço IP
           do seu dispositivo para lhe enviar as imagens do mapa.
         </li>
@@ -63,10 +52,7 @@ function Portuguese() {
 
 function English() {
   return (
-    <ProsePage
-      title="Privacy"
-      intro="We do not collect personal data. The only thing stored on the server, and only if you ask for it, is the technical address for notifications."
-    >
+    <ProsePage title="Privacy" intro="We do not collect personal data.">
       <ul>
         <li>There are no accounts, forms, ads or cookies.</li>
         <li>We do not use third-party analytics.</li>
@@ -76,14 +62,6 @@ function English() {
           in your browser, to show it next time; you can delete it by clearing the site&apos;s data.
         </li>
         <li>Your theme choice (light, dark or automatic) is also kept only in your browser.</li>
-        <li>
-          Warning notifications are optional. If you turn them on, your browser creates a technical
-          notification address (from Google&apos;s, Mozilla&apos;s or Apple&apos;s push service,
-          depending on the browser) and we store that address, the districts and the level you
-          chose, only to send you the warnings. It is not linked to a name, email or location.
-          Turning notifications off deletes that record; so does the push service telling us the
-          address no longer exists.
-        </li>
         <li>
           Maps are loaded from OpenFreeMap which, like any server, receives your device&apos;s IP
           address in order to send it the map images.
