@@ -8,6 +8,7 @@ import type { CountryState } from "@/lib/state/aggregate";
 import { districtFireRisk } from "@/lib/state/district";
 
 import { AirAndUv } from "./cards/air-uv";
+import { FeedLink } from "./cards/feed-link";
 import { FireList } from "./cards/fire-list";
 import { QuakeList } from "./cards/quake-list";
 import { RiskTable } from "./cards/risk-table";
@@ -50,6 +51,7 @@ export function DistrictWarningsView({ district, initial }: Props) {
         ) : (
           <EmptyState>{t.empty.warningsDown}</EmptyState>
         )}
+        <FeedLink district={district} />
       </Section>
     </TopicLayout>
   );

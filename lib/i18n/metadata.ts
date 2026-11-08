@@ -26,6 +26,8 @@ interface PageMetaInput {
   absoluteTitle?: boolean;
   /** Título para a partilha, quando deve ser diferente do <title> (ex.: o slogan na página inicial). */
   shareTitle?: string;
+  /** Feed RSS da página (<link rel="alternate" type="application/rss+xml">). */
+  feed?: { title: string; url: string };
   /**
    * Imagem de partilha herdada de um segmento acima (ver `inheritedOgImage`). As páginas
    * com o seu próprio opengraph-image.tsx (inicial e distrito) não a passam.
@@ -58,6 +60,7 @@ export function pageMetadata({
   absoluteTitle = false,
   shareTitle,
   image,
+  feed,
 }: PageMetaInput): Metadata {
   const fullTitle = absoluteTitle ? title : `${title} | ${site.name}`;
   const social = shareTitle ?? fullTitle;
@@ -67,7 +70,10 @@ export function pageMetadata({
   return {
     title: absoluteTitle ? { absolute: title } : title,
     description,
-    alternates: alternates(locale, path),
+    alternates: {
+      ...alternates(locale, path),
+      ...(feed && { types: { "application/rss+xml": [{ url: feed.url, title: feed.title }] } }),
+    },
     openGraph: {
       type: "website",
       locale: locale === "pt" ? "pt_PT" : "en_GB",

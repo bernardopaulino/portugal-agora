@@ -13,6 +13,7 @@ import { FireList } from "./cards/fire-list";
 import { FireRiskSummary } from "./cards/fire-risk";
 import { QuakeList } from "./cards/quake-list";
 import { WarningGroups } from "./cards/warning-groups";
+import { FeedLink } from "./cards/feed-link";
 import type { LayerId } from "./map/layers";
 import { MapPanel } from "./map/map-panel";
 import { EmptyState, Section } from "./status/section";
@@ -145,6 +146,7 @@ export function WarningsView({ initial }: { initial: CountryState }) {
         ) : (
           <EmptyState>{t.empty.warningsDown}</EmptyState>
         )}
+        <FeedLink />
       </Section>
     </TopicLayout>
   );

@@ -6,6 +6,7 @@ import { WarningsView } from "@/components/topic-views";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
+import { feedPath } from "@/lib/feeds/paths";
 import { getPageState } from "@/lib/state/get-state";
 
 export async function generateMetadata(props: PageProps<"/[lang]/avisos">): Promise<Metadata> {
@@ -18,6 +19,10 @@ export async function generateMetadata(props: PageProps<"/[lang]/avisos">): Prom
     title: t.meta.warningsTitle,
     description: t.pages.warningsIntro,
     image: inheritedOgImage(lang, t.site.ogAlt),
+    feed: {
+      title: t.feed.title(t.feed.national),
+      url: feedPath(lang),
+    },
   });
 }
 

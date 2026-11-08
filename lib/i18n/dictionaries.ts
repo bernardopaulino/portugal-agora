@@ -134,6 +134,17 @@ const pt = {
     orange: "laranja",
     red: "vermelho",
   } satisfies Record<LevelKey, string>,
+  /** Feed RSS dos avisos (/avisos/rss, /lisboa/avisos/rss). */
+  feed: {
+    national: "em Portugal",
+    title: (where: string) => `Avisos ${where} · Portugal Agora`,
+    description: (where: string) =>
+      `Avisos meteorológicos do IPMA ${where}. Informativo: não substitui as autoridades. Em emergência, ligue 112.`,
+    item: (level: string, type: string) => `Aviso ${level} de ${type}`,
+    range: (from: string, to: string) => `De ${from} a ${to}`,
+    places: "Locais",
+    subscribe: "Subscrever estes avisos por RSS",
+  },
   /** Nome de um distrito ou região, como aparece no texto. */
   districtName: (d: District) => d.name,
   /** "em Lisboa", "no Porto", "nos Açores". */
@@ -590,6 +601,16 @@ const en: Dictionary = {
     unknown: "No data",
   },
   levelAdjective: { none: "green", yellow: "yellow", orange: "orange", red: "red" },
+  feed: {
+    national: "in Portugal",
+    title: (where) => `Warnings ${where} · Portugal Agora`,
+    description: (where) =>
+      `IPMA weather warnings ${where}. For information only: it does not replace the authorities. In an emergency, call 112.`,
+    item: (level, type) => `${level} warning: ${type}`,
+    range: (from, to) => `From ${from} to ${to}`,
+    places: "Places",
+    subscribe: "Subscribe to these warnings by RSS",
+  },
   districtName: enDistrictName,
   inPlace: (d) => d.en?.inName ?? `in ${enDistrictName(d)}`,
   capitalName: (d) => d.en?.capital ?? d.capital,

@@ -7,6 +7,7 @@ import { districts, getDistrict } from "@/data/districts";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
+import { feedPath } from "@/lib/feeds/paths";
 import { getPageState } from "@/lib/state/get-state";
 
 export function generateStaticParams() {
@@ -27,6 +28,10 @@ export async function generateMetadata(
     title: t.meta.districtWarningsTitle(inPlace),
     description: t.districtPages.warningsIntro(inPlace),
     image: inheritedOgImage(lang, t.site.ogAlt, district.slug),
+    feed: {
+      title: t.feed.title(t.inPlace(district)),
+      url: feedPath(lang, district),
+    },
   });
 }
 
