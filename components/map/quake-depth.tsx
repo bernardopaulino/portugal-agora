@@ -14,8 +14,8 @@ import {
 } from "react";
 import * as THREE from "three";
 
-import type { Region } from "@/data/districts";
-import { boundsCenter, depthSceneBounds, inBounds, localProjection } from "@/lib/geo/projection";
+import { getDistrict, type Region } from "@/data/districts";
+import { boundsCenter, depthBoundsFor, inBounds, localProjection } from "@/lib/geo/projection";
 import { DEPTH_EXAGGERATION, depthGrid, quakeRadiusPx } from "@/lib/geo/scales";
 import { useResolvedTheme } from "@/lib/hooks/external";
 import { cameraDuration, prefersReducedMotion } from "@/lib/hooks/webgl";
@@ -41,6 +41,42 @@ type DistrictCollection = GeoJSON.FeatureCollection<
 >;
 
 const DAY_MS = 86_400_000;
+
+/** Corta o segmento (x1,z1)–(x2,z2) ao retângulo |x| ≤ hw, |z| ≤ hd (Liang–Barsky). */
+function clipSegment(
+  x1: number,
+  z1: number,
+  x2: number,
+  z2: number,
+  hw: number,
+  hd: number,
+): [number, number, number, number] | null {
+  const dx = x2 - x1;
+  const dz = z2 - z1;
+  let t0 = 0;
+  let t1 = 1;
+  const edges: [number, number][] = [
+    [-dx, x1 + hw],
+    [dx, hw - x1],
+    [-dz, z1 + hd],
+    [dz, hd - z1],
+  ];
+  for (const [p, q] of edges) {
+    if (p === 0) {
+      if (q < 0) return null;
+      continue;
+    }
+    const r = q / p;
+    if (p < 0) {
+      if (r > t1) return null;
+      if (r > t0) t0 = r;
+    } else {
+      if (r < t0) return null;
+      if (r < t1) t1 = r;
+    }
+  }
+  return [x1 + t0 * dx, z1 + t0 * dz, x1 + t1 * dx, z1 + t1 * dz];
+}
 const FOV = 35;
 const POLAR_MIN = THREE.MathUtils.degToRad(8);
 const POLAR_MAX = THREE.MathUtils.degToRad(80);
@@ -533,7 +569,8 @@ export default function QuakeDepth({
     };
   }, []);
 
-  const bounds = depthSceneBounds[region];
+  // Numa página de distrito, o bloco é o do distrito, não o da região inteira.
+  const bounds = depthBoundsFor(region, focus);
   const projection = useMemo(
     () => localProjection(boundsCenter(bounds), DEPTH_EXAGGERATION),
     [bounds],
@@ -604,7 +641,9 @@ export default function QuakeDepth({
           for (let i = 1; i < ring.length; i++) {
             const a = toScene(ring[i - 1] as [number, number]);
             const b = toScene(ring[i] as [number, number]);
-            out.push(a.x, 0, a.z, b.x, 0, b.z);
+            // Os distritos vizinhos são cortados à borda do bloco.
+            const seg = clipSegment(a.x, a.z, b.x, b.z, halfW, halfD);
+            if (seg) out.push(seg[0], 0, seg[1], seg[2], 0, seg[3]);
           }
     }
     return [all, focused];
@@ -740,8 +779,9 @@ export default function QuakeDepth({
     if (wrap.current) wrap.current.dataset.cameraDuration = String(duration);
   };
 
+  const focusDistrict = focus ? getDistrict(focus) : undefined;
   const label = t.view3d.depthAria(
-    t.map.regions[region],
+    focusDistrict ? t.districtName(focusDistrict) : t.map.regions[region],
     shown.length,
     deepest === null ? null : Math.round(deepest),
   );

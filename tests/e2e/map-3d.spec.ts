@@ -152,7 +152,8 @@ test("sismos em 3D numa página de distrito", async ({ page }) => {
   const errors = consoleErrors(page);
   await withTestQuakes(page);
   await page.goto("/lisboa/sismos");
-  await expect(depthScene(page)).toHaveAttribute("aria-label", /Continente: \d+ sismos?/);
+  // O bloco é o do distrito, não o do continente inteiro.
+  await expect(depthScene(page)).toHaveAttribute("aria-label", /Lisboa: \d+ sismos?/);
   await expect(page.getByRole("link", { name: "Saltar o mapa" })).toBeAttached();
   expect(errors).toEqual([]);
 });

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 
 import { fireDataRegions, fireRiskRegions, getDistrict, type Region } from "@/data/districts";
-import { depthSceneBounds, inBounds } from "@/lib/geo/projection";
+import { depthBoundsFor, inBounds } from "@/lib/geo/projection";
 import { DEPTH_EXAGGERATION, RELIEF_EXAGGERATION } from "@/lib/geo/scales";
 import { useWebGL } from "@/lib/hooks/webgl";
 import { useI18n } from "@/lib/i18n/client";
@@ -204,6 +204,7 @@ function Legend({
   region,
   mode3d,
   quakes,
+  focus,
 }: {
   layer: LayerId;
   region: Region;
@@ -211,6 +212,8 @@ function Legend({
   mode3d: Mode3d | null;
   /** Sismos da página (para as notas da vista em profundidade). */
   quakes: EarthquakeEvent[];
+  /** Distrito da página, se for o caso: o bloco 3D é o dele. */
+  focus?: string;
 }) {
   const { t } = useI18n();
   const scale = (labels: Record<Severe, string>, none: Level) => (
@@ -259,7 +262,7 @@ function Legend({
       );
   let extra: React.ReactNode = null;
   if (mode3d === "depth") {
-    const bounds = depthSceneBounds[region];
+    const bounds = depthBoundsFor(region, focus);
     const inRegion = quakes.filter((q) => q.place.region === region);
     const shown = inRegion.filter((q) => q.coordinates && inBounds(q.coordinates, bounds));
     const outside = inRegion.length - shown.length;
@@ -427,7 +430,7 @@ export function MapPanel({
           <Detail state={state} selection={selection} onClose={onClearSelection} />
         ) : null}
       </div>
-      <Legend layer={layer} region={shownRegion} mode3d={active3d} quakes={quakes} />
+      <Legend layer={layer} region={shownRegion} mode3d={active3d} quakes={quakes} focus={focus} />
       {focus ? (
         <Link
           href={path(layerTopic[layer])}
