@@ -6,10 +6,18 @@
 type Ring = number[][];
 type Polygon = Ring[];
 
+export type AreaGeometry =
+  { type: "Polygon"; coordinates: Polygon } | { type: "MultiPolygon"; coordinates: Polygon[] };
+
 export interface DistrictFeature {
   properties: { slug: string; name: string; region: string };
-  geometry:
-    { type: "Polygon"; coordinates: Polygon } | { type: "MultiPolygon"; coordinates: Polygon[] };
+  geometry: AreaGeometry;
+}
+
+/** Um concelho em public/geo/concelhos.json. */
+export interface ConcelhoFeature {
+  properties: { dico: string; name: string; district: string };
+  geometry: AreaGeometry;
 }
 
 function inRing([x, y]: [number, number], ring: Ring): boolean {
@@ -28,7 +36,10 @@ function inPolygon(point: [number, number], polygon: Polygon): boolean {
   return !holes.some((hole) => inRing(point, hole));
 }
 
-export function pointInFeature(point: [number, number], feature: DistrictFeature): boolean {
+export function pointInFeature(
+  point: [number, number],
+  feature: { geometry: AreaGeometry },
+): boolean {
   const g = feature.geometry;
   return g.type === "Polygon"
     ? inPolygon(point, g.coordinates)

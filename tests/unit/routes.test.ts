@@ -17,3 +17,17 @@ describe("splitDistrictPath", () => {
     expect(splitDistrictPath("/")).toEqual({ topic: "" });
   });
 });
+
+describe("splitDistrictPath com concelhos", () => {
+  it("reconhece a página de um concelho (não é um tema)", () => {
+    expect(splitDistrictPath("/lisboa/sintra")).toEqual({
+      district: "lisboa",
+      concelho: "sintra",
+      topic: "",
+    });
+  });
+
+  it("um concelho de outro distrito não conta", () => {
+    expect(splitDistrictPath("/porto/sintra")).toEqual({ district: "porto", topic: "/sintra" });
+  });
+});

@@ -35,10 +35,10 @@ function Portuguese() {
         <li>Não há contas, formulários, publicidade nem cookies.</li>
         <li>Não usamos serviços de estatística de terceiros.</li>
         <li>
-          O botão “Perto de mim” pede a localização ao seu dispositivo e calcula o distrito no
-          próprio dispositivo. A localização nunca é enviada para o nosso servidor. Guardamos apenas
-          o nome do distrito no seu navegador, para o mostrar da próxima vez; pode apagá-lo limpando
-          os dados do site.
+          O botão “Perto de mim” pede a localização ao seu dispositivo e calcula o concelho e o
+          distrito no próprio dispositivo. A localização nunca é enviada para o nosso servidor.
+          Guardamos apenas o nome do distrito no seu navegador, para o mostrar da próxima vez; pode
+          apagá-lo limpando os dados do site.
         </li>
         <li>
           A escolha de aspeto (claro, escuro ou automático) também fica guardada apenas no seu
@@ -71,9 +71,10 @@ function English() {
         <li>There are no accounts, forms, ads or cookies.</li>
         <li>We do not use third-party analytics.</li>
         <li>
-          The “Near me” button asks your device for its location and works out the district on the
-          device itself. Your location is never sent to our server. We only keep the district name
-          in your browser, to show it next time; you can delete it by clearing the site&apos;s data.
+          The “Near me” button asks your device for its location and works out the municipality and
+          district on the device itself. Your location is never sent to our server. We only keep the
+          district name in your browser, to show it next time; you can delete it by clearing the
+          site&apos;s data.
         </li>
         <li>Your theme choice (light, dark or automatic) is also kept only in your browser.</li>
         <li>

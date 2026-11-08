@@ -161,6 +161,8 @@ export function DistrictStage({
       </section>
 
       <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-4 pt-6 sm:px-6">
+        {/* Os concelhos logo a seguir ao boletim: é aqui que se escolhe um. */}
+        <ConcelhoLinks district={district} />
         {forecast.data ? (
           <ForecastStrip
             days={forecast.data}
@@ -181,7 +183,6 @@ export function DistrictStage({
           </section>
         )}
         <NowAndSea district={district} reference={reference} />
-        <ConcelhoLinks district={district} />
       </div>
     </div>
   );

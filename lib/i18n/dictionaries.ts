@@ -90,6 +90,7 @@ const pt = {
     wholeCountry: "Todo o país",
     mainland: "Continente",
     autonomous: "Regiões autónomas",
+    concelhosOf: (inPlace: string) => `Concelhos ${inPlace}`,
     nearMe: "Perto de mim",
     /** Abaixo de 400 px, para a escolha do distrito caber ao lado. */
     nearMeShort: "Perto",
@@ -694,6 +695,7 @@ const en: Dictionary = {
     wholeCountry: "Whole country",
     mainland: "Mainland",
     autonomous: "Autonomous regions",
+    concelhosOf: (inPlace) => `Municipalities ${inPlace}`,
     nearMe: "Near me",
     nearMeShort: "Near me",
     locating: "Locating…",

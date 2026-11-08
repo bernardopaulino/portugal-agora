@@ -305,6 +305,16 @@ test("página de um concelho: dados ao abrir, sem dados no HTML", async ({ page,
   expect((await request.get("/lisboa/nao-existe")).status()).toBe(404);
 });
 
+test("o seletor mostra os concelhos do distrito e sai bem de um concelho", async ({ page }) => {
+  await page.goto("/lisboa");
+  await picker(page).selectOption("lisboa/sintra");
+  await expect(page).toHaveURL(/\/lisboa\/sintra$/);
+  await expect(picker(page)).toHaveValue("lisboa/sintra");
+  // Mudar de distrito numa página de concelho leva ao resumo do distrito.
+  await picker(page).selectOption("porto");
+  await expect(page).toHaveURL(/\/porto$/);
+});
+
 test("o distrito liga aos seus concelhos", async ({ page }) => {
   await page.goto("/lisboa");
   const list = page.getByRole("region", { name: "Concelhos" });

@@ -5,9 +5,11 @@
  * - Continente: o centroide da forma em public/geo/concelhos.json (CAOP).
  *   Se o centroide cair fora (formas côncavas), usa-se o vértice mais
  *   próximo dele, que está sempre na forma.
- * - Açores e Madeira: public/geo/concelhos.json não os tem; o ponto vem do
- *   OpenStreetMap (Nominatim), um pedido por segundo como pedem as regras,
- *   e confirma-se que cai na região certa.
+ * - Açores e Madeira: a CAOP simplificada do site só tinha o continente; o
+ *   contorno de cada município vem do OpenStreetMap (Nominatim, ODbL), um
+ *   pedido por segundo como pedem as regras, confirma-se que cai na região
+ *   certa e junta-se a public/geo/concelhos.json. Nas corridas seguintes já
+ *   lá está e não se pede outra vez.
  *
  * Uso: node scripts/build-concelhos.mjs   (só é preciso quando mudar a CAOP)
  */
@@ -80,22 +82,30 @@ const osmNames = { "Calheta de São Jorge": "Calheta" };
 
 async function nominatim(name, region) {
   const q = `${osmNames[name] ?? name}, ${region === "acores" ? "Azores" : "Madeira"}`;
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(q)}`;
+  // polygon_threshold: simplificação do contorno em graus (~50 m), como a CAOP simplificada.
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=8&polygon_geojson=1&polygon_threshold=0.0005&q=${encodeURIComponent(q)}`;
   const response = await fetch(url, {
     headers: {
       "user-agent": "portugal-agora-build-script (github.com/bernardopaulino/portugal-agora)",
     },
   });
   const results = await response.json();
-  // Prefere a fronteira administrativa do concelho; senão, a localidade sede.
+  // O contorno do município (não o da freguesia com o mesmo nome).
   const ok = results.filter((r) => inRegion([+r.lon, +r.lat], region));
-  const pick = ok.find((r) => r.type === "administrative") ?? ok[0];
-  if (!pick) throw new Error(`Sem resultado na região para ${q}`);
-  return [Math.round(+pick.lon * 1e4) / 1e4, Math.round(+pick.lat * 1e4) / 1e4];
+  const pick =
+    ok.find((r) => r.addresstype === "municipality" && /Polygon/.test(r.geojson?.type)) ??
+    ok.find((r) => r.type === "administrative" && /Polygon/.test(r.geojson?.type));
+  if (!pick) throw new Error(`Sem contorno do município para ${q}`);
+  const round = (c) =>
+    typeof c[0] === "number"
+      ? [Math.round(c[0] * 1e4) / 1e4, Math.round(c[1] * 1e4) / 1e4]
+      : c.map(round);
+  return { type: pick.geojson.type, coordinates: round(pick.geojson.coordinates) };
 }
 
 const out = [];
 const seen = new Map();
+const islandFeatures = [];
 for (const [code, name, district] of dico) {
   const slug = slugify(name);
   const key = `${district}/${slug}`;
@@ -109,8 +119,12 @@ for (const [code, name, district] of dico) {
   } else {
     if (region === "continente")
       throw new Error(`Concelho do continente sem forma: ${code} ${name}`);
-    point = await nominatim(name, region);
+    const geometry = await nominatim(name, region);
     await new Promise((r) => setTimeout(r, 1100));
+    shapes.set(code, geometry);
+    islandFeatures.push({ type: "Feature", properties: { dico: code, name, district }, geometry });
+    const [lon, lat] = center(geometry);
+    point = [Math.round(lon * 1e4) / 1e4, Math.round(lat * 1e4) / 1e4];
   }
   out.push([code, slug, point[0], point[1]]);
   if (region !== "continente") console.log(code, name, point.join(", "));
@@ -119,6 +133,12 @@ for (const [code, name, district] of dico) {
 const body = out
   .map((r) => `  [${JSON.stringify(r[0])}, ${JSON.stringify(r[1])}, ${r[2]}, ${r[3]}],`)
   .join("\n");
+if (islandFeatures.length > 0) {
+  geo.features.push(...islandFeatures);
+  writeFileSync(join(root, "public/geo/concelhos.json"), JSON.stringify(geo));
+  console.log(`${islandFeatures.length} contornos das ilhas juntos a public/geo/concelhos.json`);
+}
+
 writeFileSync(
   join(root, "data/concelhos-geo.ts"),
   `/*
