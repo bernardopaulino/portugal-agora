@@ -144,7 +144,8 @@ export function WarningsView({ initial }: { initial: CountryState }) {
       <Section id="avisos" title={t.pages.warningsList} result={state.warnings}>
         {t.dataNote ? <p className="text-base text-ink-2">{t.dataNote}</p> : null}
         {state.warnings.data ? (
-          <WarningGroups warnings={state.warnings.data} reference={reference} />
+          // A lista do país chegava a 13 ecrãs no telemóvel: os 4 mais graves (e todos os laranja e vermelho) e um botão para o resto.
+          <WarningGroups warnings={state.warnings.data} reference={reference} initial={4} />
         ) : (
           <EmptyState>{t.empty.warningsDown}</EmptyState>
         )}

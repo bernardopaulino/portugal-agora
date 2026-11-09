@@ -238,7 +238,7 @@ Glass header; the logo (mainland silhouette in `ink`, with a dot in the national
 
 ### Lists
 
-Ruled lists inside glass panels: hairlines between items, no inner boxes. Event rows: severity badge, title in Geist, meta in Atkinson, and a "Ver no mapa" glass pill; the selected row takes a cyan tint with rounded corners. Empty states are a dashed rounded box with large slate text. The fire-risk table by concelho is a table from 640px; on phones each concelho is a row with "Hoje" and "Amanhã" side by side under the name. The bulletin timestamp never starts a line with "·": on phones the date takes one line and the time and freshness the next.
+Ruled lists inside glass panels: hairlines between items, no inner boxes. Long lists show their first items and a "Mostrar os N …" outline button (earthquakes, concelhos, and the national warnings: the four most serious, never hiding an orange or red one). Event rows: severity badge, title in Geist, meta in Atkinson, and a "Ver no mapa" glass pill; the selected row takes a cyan tint with rounded corners. Empty states are a dashed rounded box with large slate text. The fire-risk table by concelho is a table from 640px; on phones each concelho is a row with "Hoje" and "Amanhã" side by side under the name. The bulletin timestamp never starts a line with "·": on phones the date takes one line and the time and freshness the next.
 
 ### District Index
 
