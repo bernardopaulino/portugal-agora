@@ -5,7 +5,10 @@ import webpush from "web-push";
 import { env } from "@/lib/env";
 
 import type { PushPayload } from "./changes";
-import { removeSubscription, type StoredSubscription } from "./subscriptions";
+import { isPushService, removeSubscription, type StoredSubscription } from "./subscriptions";
+
+/** Um serviço de push que não responde não pode prender o tick. */
+const SEND_TIMEOUT_MS = 10_000;
 
 let configured = false;
 
@@ -37,10 +40,17 @@ export async function sendAll(
   let failed = 0;
   await Promise.all(
     jobs.map(async ({ subscription, payload }) => {
+      // Subscrições guardadas antes da lista de serviços de push: não se envia, apaga-se.
+      if (!isPushService(subscription.subscription.endpoint)) {
+        await removeSubscription(subscription.subscription.endpoint);
+        removed += 1;
+        return;
+      }
       try {
         await webpush.sendNotification(subscription.subscription, JSON.stringify(payload), {
           TTL: 6 * 3600,
           urgency: "high",
+          timeout: SEND_TIMEOUT_MS,
         });
         sent += 1;
       } catch (error) {

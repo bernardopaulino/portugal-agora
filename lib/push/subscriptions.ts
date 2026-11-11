@@ -21,12 +21,33 @@ export const MAX_SUBSCRIPTIONS = 10_000;
 
 const slugs = districts.map((d) => d.slug) as [string, ...string[]];
 
+/*
+ * Os serviços de push dos browsers: Chrome e derivados (FCM), Firefox,
+ * Safari e Edge (WNS). Sem esta lista, qualquer endereço https servia de
+ * "endpoint": dava para encher as subscrições com endereços inventados e
+ * pôr o servidor a enviar milhares de POSTs para um site alheio.
+ */
+const PUSH_HOSTS = new Set(["fcm.googleapis.com", "updates.push.services.mozilla.com"]);
+const PUSH_HOST_SUFFIXES = [".push.apple.com", ".notify.windows.com"];
+
+export function isPushService(endpoint: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(endpoint);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== "https:" || url.port !== "" || url.username || url.password) return false;
+  const host = url.hostname.toLowerCase();
+  return PUSH_HOSTS.has(host) || PUSH_HOST_SUFFIXES.some((suffix) => host.endsWith(suffix));
+}
+
 export const subscriptionSchema = z.object({
   subscription: z.object({
     endpoint: z
       .url()
       .max(1000)
-      .refine((u) => u.startsWith("https://"), "O endpoint tem de ser https"),
+      .refine(isPushService, "O endpoint tem de ser de um serviço de push conhecido"),
     keys: z.object({ p256dh: z.string().min(1).max(200), auth: z.string().min(1).max(100) }),
   }),
   districts: z.array(z.enum(slugs)).min(1).max(slugs.length),
