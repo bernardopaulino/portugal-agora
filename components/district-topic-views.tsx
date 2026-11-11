@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import { fireDataRegions, regionalCivilProtection, type District } from "@/data/districts";
 import { useI18n } from "@/lib/i18n/client";
-import type { CountryState } from "@/lib/state/aggregate";
 import { districtFireRisk } from "@/lib/state/district";
 
 import { AirAndUv } from "./cards/air-uv";
@@ -24,18 +23,18 @@ import { TopicLayout, useTopic } from "./topic-views";
  * O resumo do distrito (/lisboa) fica só com o boletim e a previsão.
  */
 
-type Props = { district: District; initial: CountryState };
+type Props = { district: District };
 
-export function DistrictWarningsView({ district, initial }: Props) {
+export function DistrictWarningsView({ district }: Props) {
   const { t } = useI18n();
-  const { state, controls, mapRef, reference } = useTopic(initial, ["warnings"], district.region);
+  const { live, state, controls, mapRef, reference } = useTopic(["warnings"], district.region);
   const inPlace = t.inPlace(district);
   const warnings = (state.warnings.data ?? []).filter((w) => w.place.district === district.slug);
   return (
     <TopicLayout
       title={t.districtPages.warningsTitle(inPlace)}
       intro={t.districtPages.warningsIntro(inPlace)}
-      state={state}
+      state={live}
       controls={controls}
       mapRef={mapRef}
       district={district}
@@ -61,9 +60,9 @@ export function DistrictWarningsView({ district, initial }: Props) {
   );
 }
 
-export function DistrictFiresView({ district, initial }: Props) {
+export function DistrictFiresView({ district }: Props) {
   const { t } = useI18n();
-  const { state, controls, mapRef, reference } = useTopic(initial, ["fires"], district.region);
+  const { live, state, controls, mapRef, reference } = useTopic(["fires"], district.region);
   const inPlace = t.inPlace(district);
   const fires = (state.fires.data ?? []).filter((f) => f.place.district === district.slug);
   const covered = fireDataRegions.includes(district.region);
@@ -72,7 +71,7 @@ export function DistrictFiresView({ district, initial }: Props) {
     <TopicLayout
       title={t.districtPages.firesTitle(inPlace)}
       intro={t.districtPages.firesIntro(district)}
-      state={state}
+      state={live}
       controls={controls}
       mapRef={mapRef}
       district={district}
@@ -112,16 +111,16 @@ export function DistrictFiresView({ district, initial }: Props) {
   );
 }
 
-export function DistrictQuakesView({ district, initial }: Props) {
+export function DistrictQuakesView({ district }: Props) {
   const { t } = useI18n();
-  const { state, controls, mapRef, reference } = useTopic(initial, ["quakes"], district.region);
+  const { live, state, controls, mapRef, reference } = useTopic(["quakes"], district.region);
   const inPlace = t.inPlace(district);
   const quakes = (state.earthquakes.data ?? []).filter((q) => q.place.district === district.slug);
   return (
     <TopicLayout
       title={t.districtPages.quakesTitle(inPlace)}
       intro={t.districtPages.quakesIntro(inPlace)}
-      state={state}
+      state={live}
       controls={controls}
       mapRef={mapRef}
       district={district}
@@ -146,12 +145,11 @@ export function DistrictQuakesView({ district, initial }: Props) {
 }
 
 /** Risco de incêndio por concelho (só no continente), qualidade do ar e UV. */
-export function DistrictRiskView({ district, initial }: Props) {
+export function DistrictRiskView({ district }: Props) {
   const { t } = useI18n();
-  const risk = districtFireRisk(initial, district.slug);
-  const hasRisk = risk.length > 0;
-  const { state, controls, mapRef } = useTopic(
-    initial,
+  // O risco de incêndio por concelho só existe no continente.
+  const hasRisk = district.region === "continente";
+  const { live, state, controls, mapRef } = useTopic(
     hasRisk ? ["risk", "air"] : ["air"],
     district.region,
   );
@@ -171,15 +169,17 @@ export function DistrictRiskView({ district, initial }: Props) {
           ? t.districtPages.riskIntro(t.capitalName(district))
           : t.districtPages.airIntro(t.capitalName(district))
       }
-      state={state}
+      state={live}
       controls={controls}
       mapRef={mapRef}
       district={district}
     >
       <div className="grid grid-cols-[minmax(0,1fr)] gap-14 @3xl:grid-cols-2">
-        {liveRisk.length > 0 ? (
+        {hasRisk ? (
           <Section id="risco" title={t.sections.riskByConcelho} result={state.fireRisk}>
-            {notableRisk.length === 0 && !allRisk ? (
+            {!state.fireRisk.data ? (
+              <EmptyState>{t.empty.riskDown}</EmptyState>
+            ) : notableRisk.length === 0 && !allRisk ? (
               <EmptyState>{t.empty.riskLow}</EmptyState>
             ) : (
               <RiskTable rows={allRisk ? liveRisk : notableRisk} />

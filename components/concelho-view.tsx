@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { concelhos, type Concelho } from "@/data/concelhos";
 import { fireDataRegions, type District } from "@/data/districts";
 import { distanceKm } from "@/lib/geo/geometry";
-import { useLiveStateOnly } from "@/lib/hooks/live-state";
+import { useLiveState } from "@/lib/hooks/live-state";
 import { useWeather } from "@/lib/hooks/weather";
 import { useI18n } from "@/lib/i18n/client";
 import type { ForecastDay } from "@/lib/sources/ipma-forecast";
@@ -52,7 +52,7 @@ const forecastFetcher = async (url: string): Promise<SourceResult<ForecastDay[]>
 
 export function ConcelhoView({ concelho, district }: { concelho: Concelho; district: District }) {
   const { t, path } = useI18n();
-  const state = useLiveStateOnly();
+  const state = useLiveState();
   const weather = useWeather();
   const { data: forecast } = useSWR(`/api/forecast/${district.globalIdLocal}`, forecastFetcher, {
     revalidateOnFocus: false,

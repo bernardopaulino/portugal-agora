@@ -636,9 +636,9 @@ const pt = {
   },
   dataNote: "",
   term: (text: string) => text,
-  districtMeta: (name: string, headline: string, inPlace: string) => ({
+  districtMeta: (name: string, inPlace: string) => ({
     title: `${name}: avisos, incêndios e sismos agora`,
-    description: `${headline} Previsão, risco de incêndio, qualidade do ar e UV ${inPlace}.`,
+    description: `Avisos do IPMA, incêndios e sismos ${inPlace}, ao minuto. Previsão, risco de incêndio, qualidade do ar e UV.`,
   }),
   /**
    * Títulos para o Google (<title> e partilha), com as palavras que as pessoas
@@ -1229,9 +1229,9 @@ const en: Dictionary = {
   dataNote:
     "Official texts from IPMA and Fogos.pt (warning descriptions, place names) are shown in Portuguese, as published.",
   term: translateTerm,
-  districtMeta: (name, headline, inPlace) => ({
+  districtMeta: (name, inPlace) => ({
     title: `${name}: warnings, wildfires and earthquakes now`,
-    description: `${headline} Forecast, wildfire risk, air quality and UV ${inPlace}.`,
+    description: `IPMA weather warnings, wildfires and earthquakes ${inPlace}, live. Forecast, wildfire risk, air quality and UV.`,
   }),
   meta: {
     homeTitle: "Portugal Agora: weather warnings, wildfires and earthquakes live",

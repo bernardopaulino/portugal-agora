@@ -7,8 +7,6 @@ import { districts, getDistrict } from "@/data/districts";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
-import { getPageState } from "@/lib/state/get-state";
-import { slimState } from "@/lib/state/slim";
 
 export function generateStaticParams() {
   return districts.map((d) => ({ distrito: d.slug }));
@@ -41,7 +39,6 @@ export default async function DistrictRiscoPage(props: PageProps<"/[lang]/[distr
   if (!district || !isLocale(lang)) notFound();
   const t = getDictionary(lang);
   const inPlace = t.inPlace(district);
-  const state = await getPageState();
   const topic =
     district.region === "continente"
       ? t.districtPages.riskTitle(inPlace)
@@ -55,11 +52,7 @@ export default async function DistrictRiscoPage(props: PageProps<"/[lang]/[distr
         ])}
       />
       {/* Uma vista nova por distrito (ver o comentário em avisos/page.tsx). */}
-      <DistrictRiskView
-        key={district.slug}
-        district={district}
-        initial={slimState(state, "risco", district.slug)}
-      />
+      <DistrictRiskView key={district.slug} district={district} />
     </>
   );
 }

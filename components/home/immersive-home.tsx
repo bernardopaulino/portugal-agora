@@ -14,6 +14,7 @@ import { useWebGLEnhancement } from "@/lib/hooks/webgl";
 import { useI18n } from "@/lib/i18n/client";
 import { severityRank } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
+import { PENDING_STATE } from "@/lib/state/pending";
 import {
   countryHeadline,
   districtCaption,
@@ -71,10 +72,13 @@ export function sceneMarkers(state: CountryState, district?: string) {
  * legenda que acompanha o distrito apontado); depois, um painel por tema,
  * e a câmara viaja até ele com o scroll. No fim, todos os distritos.
  */
-export function ImmersiveHome({ initial }: { initial: CountryState }) {
+export function ImmersiveHome() {
   const { t, path } = useI18n();
   const router = useRouter();
-  const state = useLiveState(initial);
+  // O HTML não leva dados (página estática): até o /api/state responder, o
+  // mapa e a cena ficam a cinzento e o boletim diz "A atualizar os dados…".
+  const live = useLiveState();
+  const state = live ?? PENDING_STATE;
   const [pointed, setPointed] = useState<string | null>(null);
   const enhance = useWebGLEnhancement();
   const [ready, setReady] = useState(false);
@@ -170,10 +174,12 @@ export function ImmersiveHome({ initial }: { initial: CountryState }) {
               id="boletim-titulo"
               className="title-in font-display text-[clamp(2.1rem,1.1rem+2.6vw,3.6rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance"
             >
-              {countryHeadline(state.levelKnown, state.districts, t)}
+              {live ? countryHeadline(live.levelKnown, live.districts, t) : t.meta.homeKicker}
             </h1>
-            <BulletinStamp iso={state.generatedAt} />
-            <TopicList topics={topics} hrefFor={(id) => path(topicPage[id])} compact />
+            <BulletinStamp iso={live?.generatedAt} />
+            {live ? (
+              <TopicList topics={topics} hrefFor={(id) => path(topicPage[id])} compact />
+            ) : null}
             <p className="text-sm text-ink-2">
               {t.stage.levelRule} <Link href={path("/fontes#niveis")}>{t.stage.howWeRead}</Link>
             </p>
@@ -220,7 +226,9 @@ export function ImmersiveHome({ initial }: { initial: CountryState }) {
                 <span className="font-display text-2xl font-semibold tracking-[-0.02em]">
                   {t.caption.country}
                 </span>
-                <span className="text-base text-ink-2">{nationalCaption(state, reference, t)}</span>
+                <span className="text-base text-ink-2">
+                  {live ? nationalCaption(live, reference, t) : t.concelho.loading}
+                </span>
               </LowerThird>
             )}
             {/* Abaixo de 1024px a legenda fica por cima da terra: vai num vidro. */}
@@ -234,7 +242,7 @@ export function ImmersiveHome({ initial }: { initial: CountryState }) {
         </section>
 
         {/* Um painel por tema; a câmara viaja até cada um. */}
-        {topics.map((topic, i) => (
+        {(live ? topics : []).map((topic, i) => (
           <TopicStop
             key={topic.id}
             topic={topic}

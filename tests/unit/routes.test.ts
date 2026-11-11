@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { splitDistrictPath } from "@/lib/routes";
+import { isKnownPage, splitDistrictPath } from "@/lib/routes";
 
 describe("splitDistrictPath", () => {
   it("separa o distrito e o tema", () => {
@@ -29,5 +29,41 @@ describe("splitDistrictPath com concelhos", () => {
 
   it("um concelho de outro distrito não conta", () => {
     expect(splitDistrictPath("/porto/sintra")).toEqual({ district: "porto", topic: "/sintra" });
+  });
+});
+
+describe("isKnownPage", () => {
+  it("aceita as páginas que existem", () => {
+    for (const path of [
+      "/",
+      "/avisos",
+      "/sobre",
+      "/sismos/rss",
+      "/opengraph-image",
+      "/lisboa",
+      "/lisboa/risco",
+      "/lisboa/incendios/rss",
+      "/lisboa/opengraph-image",
+      "/lisboa/sintra",
+      "/acores",
+    ]) {
+      expect(isKnownPage(path), path).toBe(true);
+    }
+  });
+
+  it("recusa os endereços inventados (vão para a página 404 em cache)", () => {
+    for (const path of [
+      "/xyz",
+      "/wp-login.php",
+      "/.env",
+      "/404",
+      "/lisboa/xyz",
+      "/lisboa/sintra/avisos",
+      "/porto/sintra",
+      "/lisboa/fontes",
+      "/avisos/xyz",
+    ]) {
+      expect(isKnownPage(path), path).toBe(false);
+    }
   });
 });

@@ -1,24 +1,27 @@
+import { connection } from "next/server";
+
 import { getDictionary } from "@/lib/i18n/dictionaries";
-import { isLocale, locales } from "@/lib/i18n/locales";
+import { isLocale } from "@/lib/i18n/locales";
 import { safeOgImage, statusCard } from "@/lib/og/card";
 import { countryHeadline } from "@/lib/state/bulletin";
-import { getPageState } from "@/lib/state/get-state";
+import { getState } from "@/lib/state/get-state";
 import { levelsByDistrict } from "@/lib/og/text";
 
 export const alt = "Portugal Agora";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export function generateStaticParams() {
-  return locales.map((lang) => ({ lang }));
-}
-
+/*
+ * Gerada a pedido (connection()) e guardada 15 min na CDN (ver safeOgImage),
+ * nunca pré-gerada como ISR: assim não gasta "ISR writes" da Vercel.
+ */
 export default async function Image({ params }: { params: Promise<{ lang: string }> }) {
+  await connection();
   const { lang } = await params;
   const locale = isLocale(lang) ? lang : "pt";
   const t = getDictionary(locale);
   return safeOgImage(async () => {
-    const state = await getPageState();
+    const state = await getState();
     return statusCard({
       level: state.levelKnown ? state.level : "unknown",
       place: t.site.wholeCountry,

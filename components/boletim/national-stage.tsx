@@ -1,7 +1,5 @@
 "use client";
 
-import { useNow } from "@/lib/hooks/external";
-import { useStateRefreshing } from "@/lib/hooks/live-state";
 import { useI18n } from "@/lib/i18n/client";
 import type { CountryState } from "@/lib/state/aggregate";
 import type { TopicId } from "@/lib/state/bulletin";
@@ -11,8 +9,6 @@ import { RelativeTime } from "../status/relative-time";
 import type { MapLevel, MapMarker } from "./bulletin-map";
 
 const WEEK = 7 * 86_400_000;
-/** HTML mais velho do que isto já não é o de getPageState (15 min): veio do deploy. */
-const OLD_HTML_MS = 20 * 60_000;
 
 /** Página de cada linha do boletim nacional. */
 export const topicPage: Record<TopicId, string> = {
@@ -23,16 +19,13 @@ export const topicPage: Record<TopicId, string> = {
   ar: "/risco",
 };
 
-/** Carimbo do boletim: "Domingo, 4 de outubro · 16:07 · atualizado há 1 min". */
-export function BulletinStamp({ iso }: { iso: string }) {
+/**
+ * Carimbo do boletim: "Domingo, 4 de outubro · 16:07 · atualizado há 1 min".
+ * Sem hora (o estado ainda não chegou do /api/state), "A atualizar os dados…".
+ */
+export function BulletinStamp({ iso }: { iso?: string }) {
   const { locale, t } = useI18n();
-  const now = useNow();
-  const refreshing = useStateRefreshing();
-  // A CDN às vezes entrega o HTML gerado no deploy, com dados de há dias, e o
-  // estado atual chega logo a seguir por /api/state. Enquanto chega, não se
-  // mostra a hora antiga como se fosse a atual. Se o pedido falhar, volta a
-  // hora antiga com o "atualizado há…", que diz a idade verdadeira.
-  if (refreshing && now !== null && now - Date.parse(iso) > OLD_HTML_MS) {
+  if (!iso) {
     return (
       <p
         role="status"

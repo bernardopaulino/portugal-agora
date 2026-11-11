@@ -299,11 +299,21 @@ export function fallbackCard(locale: Locale = "pt") {
   );
 }
 
+/**
+ * As imagens de partilha são geradas a pedido (connection()) e ficam na CDN,
+ * nunca como ISR: pré-geradas, renovavam-se de 15 em 15 min e cada renovação
+ * contava como "ISR writes" (limite do plano Hobby). 15 min na CDN chegam
+ * para as pré-visualizações; a genérica (quando algo falha) só fica 1 min.
+ */
+const OG_CACHE = "public, s-maxage=900, stale-while-revalidate=3600";
+const FALLBACK_CACHE = "public, s-maxage=60, stale-while-revalidate=300";
+
 /** Desenha já o PNG: o ImageResponse só desenha quando a resposta é lida. */
-async function render(image: ImageResponse): Promise<Response> {
+async function render(image: ImageResponse, cache: string): Promise<Response> {
   const body = await image.arrayBuffer();
-  // Os mesmos cabeçalhos (tipo e cache) que o ImageResponse definiu.
-  return new Response(body, { status: image.status, headers: image.headers });
+  const headers = new Headers(image.headers);
+  headers.set("Cache-Control", cache);
+  return new Response(body, { status: image.status, headers });
 }
 
 /**
@@ -318,10 +328,10 @@ export async function safeOgImage(
   locale: Locale = "pt",
 ): Promise<Response> {
   try {
-    return await render(await build());
+    return await render(await build(), OG_CACHE);
   } catch (error) {
     unstable_rethrow(error);
     console.error("[og] falhou a imagem de partilha; uso a genérica", error);
-    return render(fallbackCard(locale));
+    return render(fallbackCard(locale), FALLBACK_CACHE);
   }
 }

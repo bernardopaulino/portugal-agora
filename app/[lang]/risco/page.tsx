@@ -6,8 +6,6 @@ import { RiskView } from "@/components/topic-views";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
-import { getPageState } from "@/lib/state/get-state";
-import { slimState } from "@/lib/state/slim";
 
 export async function generateMetadata(props: PageProps<"/[lang]/risco">): Promise<Metadata> {
   const { lang } = await props.params;
@@ -26,11 +24,10 @@ export default async function RiscoPage(props: PageProps<"/[lang]/risco">) {
   const { lang } = await props.params;
   if (!isLocale(lang)) notFound();
   const t = getDictionary(lang);
-  const state = await getPageState();
   return (
     <>
       <JsonLd data={breadcrumbJsonLd(lang, t, [{ name: t.pages.riskTitle, path: "/risco" }])} />
-      <RiskView initial={slimState(state, "risco")} />
+      <RiskView />
     </>
   );
 }

@@ -8,8 +8,6 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
 import { feedPath } from "@/lib/feeds/paths";
-import { getPageState } from "@/lib/state/get-state";
-import { slimState } from "@/lib/state/slim";
 
 export function generateStaticParams() {
   return districts.map((d) => ({ distrito: d.slug }));
@@ -43,7 +41,6 @@ export default async function DistrictIncendiosPage(
   const district = getDistrict(distrito);
   if (!district || !isLocale(lang)) notFound();
   const t = getDictionary(lang);
-  const state = await getPageState();
   return (
     <>
       <JsonLd
@@ -57,7 +54,6 @@ export default async function DistrictIncendiosPage(
         // reaproveitava o mapa do distrito anterior (filtros, entrada 3D, câmara).
         key={district.slug}
         district={district}
-        initial={slimState(state, "incendios", district.slug)}
       />
     </>
   );

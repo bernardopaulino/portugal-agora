@@ -7,6 +7,7 @@ import { useI18n } from "@/lib/i18n/client";
 import { useLiveState, useMapControls } from "@/lib/hooks/live-state";
 import { HISTORY_ORDER } from "@/lib/history/points";
 import type { CountryState } from "@/lib/state/aggregate";
+import { PENDING_STATE } from "@/lib/state/pending";
 
 import { PageHead } from "./boletim/page-head";
 import { AirQualitySummary } from "./cards/air-uv";
@@ -43,7 +44,8 @@ export function TopicLayout({
 }: {
   title: string;
   intro: string;
-  state: CountryState;
+  /** null até o /api/state responder: só o cabeçalho e "A carregar os dados…". */
+  state: CountryState | null;
   controls: Controls;
   mapRef: RefObject<HTMLElement | null>;
   district?: District;
@@ -55,74 +57,92 @@ export function TopicLayout({
       <PageHead
         title={title}
         intro={intro}
-        generatedAt={state.generatedAt}
+        generatedAt={state?.generatedAt}
         back={
           district
             ? { href: path(`/${district.slug}`), label: t.districtName(district) }
             : undefined
         }
       />
+      {state ? null : (
+        <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+          <p role="status" className="text-base text-ink-2">
+            {t.concelho.loading}
+          </p>
+        </div>
+      )}
       {/*
        * O mapa vem logo a seguir ao cabeçalho: nestes temas, "onde" é a
        * primeira pergunta. Em ecrãs largos, a lista fica ao lado e o mapa
        * acompanha a página (sticky), em vez de ocupar a largura toda com
        * Espanha e o mar à volta de Portugal.
        */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-10">
-        <section
-          id="mapa"
-          ref={mapRef}
-          aria-labelledby="mapa-titulo"
-          className="flex scroll-mt-4 flex-col gap-3 pt-8 lg:sticky lg:top-36 lg:pb-4 xl:top-24"
-        >
-          <div className="flex flex-col gap-1">
-            <h2
-              id="mapa-titulo"
-              className="font-display text-2xl leading-tight font-semibold tracking-[-0.02em]"
-            >
-              {district ? t.sections.mapOf(district) : t.sections.map}
-            </h2>
-            <p className="max-w-[70ch] text-base text-ink-2">
-              {district ? t.sections.mapIntroDistrict(t.inPlace(district)) : t.sections.mapIntro}
-            </p>
-          </div>
-          {/* Para quem navega com o teclado ou leitor de ecrã: a lista sem passar pelo mapa. */}
-          <a
-            href="#lista"
-            className="sr-only self-start rounded-sm bg-ink px-4 py-3 font-bold text-bg focus:not-sr-only"
+      {state ? (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-10">
+          <section
+            id="mapa"
+            ref={mapRef}
+            aria-labelledby="mapa-titulo"
+            className="flex scroll-mt-4 flex-col gap-3 pt-8 lg:sticky lg:top-36 lg:pb-4 xl:top-24"
           >
-            {t.sections.skipMap}
-          </a>
-          <MapPanel
-            state={state}
-            views={controls.views}
-            layer={controls.layer}
-            onLayer={controls.setLayer}
-            selection={controls.selection}
-            onSelect={controls.setSelection}
-            onClearSelection={() => controls.setSelection(null)}
-            region={district ? district.region : controls.region}
-            onRegion={district ? undefined : controls.setRegion}
-            focus={district?.slug}
-          />
-        </section>
-        <div
-          id="lista"
-          tabIndex={-1}
-          className="@container flex min-w-0 scroll-mt-4 flex-col gap-8 pt-10 outline-none lg:pt-8"
-        >
-          {children}
+            <div className="flex flex-col gap-1">
+              <h2
+                id="mapa-titulo"
+                className="font-display text-2xl leading-tight font-semibold tracking-[-0.02em]"
+              >
+                {district ? t.sections.mapOf(district) : t.sections.map}
+              </h2>
+              <p className="max-w-[70ch] text-base text-ink-2">
+                {district ? t.sections.mapIntroDistrict(t.inPlace(district)) : t.sections.mapIntro}
+              </p>
+            </div>
+            {/* Para quem navega com o teclado ou leitor de ecrã: a lista sem passar pelo mapa. */}
+            <a
+              href="#lista"
+              className="sr-only self-start rounded-sm bg-ink px-4 py-3 font-bold text-bg focus:not-sr-only"
+            >
+              {t.sections.skipMap}
+            </a>
+            <MapPanel
+              state={state}
+              views={controls.views}
+              layer={controls.layer}
+              onLayer={controls.setLayer}
+              selection={controls.selection}
+              onSelect={controls.setSelection}
+              onClearSelection={() => controls.setSelection(null)}
+              region={district ? district.region : controls.region}
+              onRegion={district ? undefined : controls.setRegion}
+              focus={district?.slug}
+            />
+          </section>
+          <div
+            id="lista"
+            tabIndex={-1}
+            className="@container flex min-w-0 scroll-mt-4 flex-col gap-8 pt-10 outline-none lg:pt-8"
+          >
+            {children}
+          </div>
         </div>
-      </div>
+      ) : null}
     </>
   );
 }
 
-/** `views`: as camadas que o mapa da página pode mostrar; abre na primeira. */
-export function useTopic(initial: CountryState, views: LayerId[], region?: Region) {
-  const state = useLiveState(initial);
+/**
+ * `views`: as camadas que o mapa da página pode mostrar; abre na primeira.
+ * As páginas não levam dados no HTML (para serem estáticas e não gastarem
+ * "ISR writes" da Vercel): `live` é null até o /api/state responder, e é
+ * ele que vai para o TopicLayout, que até lá só mostra o cabeçalho. `state`
+ * nunca é null (o estado vazio enquanto carrega), para as vistas poderem
+ * preparar a lista sem verificar; essa lista só se mostra com `live`.
+ */
+export function useTopic(views: LayerId[], region?: Region) {
+  const live = useLiveState();
+  const state = live ?? PENDING_STATE;
   const { map, mapRef } = useMapControls(views[0]!, region);
   return {
+    live,
     state,
     controls: { ...map, views },
     mapRef,
@@ -130,14 +150,14 @@ export function useTopic(initial: CountryState, views: LayerId[], region?: Regio
   };
 }
 
-export function WarningsView({ initial }: { initial: CountryState }) {
+export function WarningsView() {
   const { t } = useI18n();
-  const { state, controls, mapRef, reference } = useTopic(initial, ["warnings", "observed", "sea"]);
+  const { live, state, controls, mapRef, reference } = useTopic(["warnings", "observed", "sea"]);
   return (
     <TopicLayout
       title={t.pages.warningsTitle}
       intro={t.pages.warningsIntro}
-      state={state}
+      state={live}
       controls={controls}
       mapRef={mapRef}
     >
@@ -156,14 +176,14 @@ export function WarningsView({ initial }: { initial: CountryState }) {
   );
 }
 
-export function FiresView({ initial }: { initial: CountryState }) {
+export function FiresView() {
   const { t } = useI18n();
-  const { state, controls, mapRef, reference } = useTopic(initial, ["fires"]);
+  const { live, state, controls, mapRef, reference } = useTopic(["fires"]);
   return (
     <TopicLayout
       title={t.pages.firesTitle}
       intro={t.pages.firesIntro}
-      state={state}
+      state={live}
       controls={controls}
       mapRef={mapRef}
     >
@@ -191,14 +211,14 @@ export function FiresView({ initial }: { initial: CountryState }) {
   );
 }
 
-export function QuakesView({ initial }: { initial: CountryState }) {
+export function QuakesView() {
   const { t } = useI18n();
-  const { state, controls, mapRef, reference } = useTopic(initial, ["quakes"]);
+  const { live, state, controls, mapRef, reference } = useTopic(["quakes"]);
   return (
     <TopicLayout
       title={t.pages.quakesTitle}
       intro={t.pages.quakesIntro}
-      state={state}
+      state={live}
       controls={controls}
       mapRef={mapRef}
     >
@@ -220,14 +240,14 @@ export function QuakesView({ initial }: { initial: CountryState }) {
   );
 }
 
-export function RiskView({ initial }: { initial: CountryState }) {
+export function RiskView() {
   const { t } = useI18n();
-  const { state, controls, mapRef } = useTopic(initial, ["risk", "air"]);
+  const { live, state, controls, mapRef } = useTopic(["risk", "air"]);
   return (
     <TopicLayout
       title={t.pages.riskTitle}
       intro={t.pages.riskIntro}
-      state={state}
+      state={live}
       controls={controls}
       mapRef={mapRef}
     >

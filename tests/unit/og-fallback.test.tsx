@@ -1,8 +1,9 @@
 import { ImageResponse } from "next/og";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const getPageState = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/state/get-state", () => ({ getPageState }));
+const getState = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/state/get-state", () => ({ getState }));
+vi.mock("next/server", () => ({ connection: async () => {} }));
 
 const PNG = [0x89, 0x50, 0x4e, 0x47];
 
@@ -19,7 +20,7 @@ describe("imagens de partilha: nunca dão erro", () => {
 
   it("se os dados falharem, a rota devolve a imagem genérica em PNG", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
-    getPageState.mockRejectedValue(new Error("IPMA sem resposta"));
+    getState.mockRejectedValue(new Error("IPMA sem resposta"));
     const { default: districtImage } = await import("@/app/[lang]/[distrito]/opengraph-image");
     const { default: homeImage } = await import("@/app/[lang]/opengraph-image");
 

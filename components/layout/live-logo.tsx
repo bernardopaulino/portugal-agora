@@ -1,6 +1,6 @@
 "use client";
 
-import { useLiveStateOnly } from "@/lib/hooks/live-state";
+import { useLiveState } from "@/lib/hooks/live-state";
 
 import { LogoMark } from "./logo";
 
@@ -12,7 +12,7 @@ import { LogoMark } from "./logo";
  * estáticas e não contam para o limite de "ISR writes" da Vercel.
  */
 export function LiveLogoMark({ className }: { className?: string }) {
-  const state = useLiveStateOnly();
+  const state = useLiveState();
   const level = !state ? "unknown" : state.levelKnown ? state.level : "unknown";
   return <LogoMark level={level} className={className} />;
 }

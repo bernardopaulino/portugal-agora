@@ -22,46 +22,20 @@ const fetcher = async (url: string): Promise<CountryState> => {
 };
 
 /**
- * O estado do país, renovado a cada minuto a partir do que veio do servidor.
- * O HTML das páginas pode ter até ~15 min (ver getPageState), por isso
- * pede-se logo o estado atual ao abrir a página (/api/state, em cache na CDN).
+ * O estado do país no browser, renovado a cada minuto: null até chegar.
+ *
+ * Nenhuma página leva dados no HTML. Assim são todas estáticas (geradas no
+ * deploy e nunca renovadas) e não gastam "ISR writes" da Vercel (limite do
+ * plano Hobby). Os dados vêm sempre do /api/state, gerado a pedido e
+ * guardado 30 s na CDN, que não é ISR.
  */
-export function useLiveState(initial: CountryState): CountryState {
-  const { data } = useSWR("/api/state", fetcher, {
-    fallbackData: initial,
-    refreshInterval: 60_000,
-    revalidateOnFocus: true,
-    revalidateOnMount: true,
-    keepPreviousData: true,
-  });
-  return data ?? initial;
-}
-
-/**
- * O estado do país sem estado inicial no HTML (páginas dos concelhos, que
- * não levam dados para não contarem como "ISR writes"): null até chegar.
- */
-export function useLiveStateOnly(): CountryState | null {
+export function useLiveState(): CountryState | null {
   const { data } = useSWR("/api/state", fetcher, {
     refreshInterval: 60_000,
     revalidateOnFocus: true,
     keepPreviousData: true,
   });
   return data ?? null;
-}
-
-/**
- * Se o pedido a /api/state está a caminho. Lê o mesmo estado do SWR que o
- * useLiveState, sem fazer pedidos seus.
- */
-export function useStateRefreshing(): boolean {
-  const { isValidating } = useSWR<CountryState>("/api/state", null, {
-    revalidateOnMount: false,
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-  });
-  return isValidating;
 }
 
 /**

@@ -8,8 +8,6 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
 import { feedPath } from "@/lib/feeds/paths";
-import { getPageState } from "@/lib/state/get-state";
-import { slimState } from "@/lib/state/slim";
 
 export function generateStaticParams() {
   return districts.map((d) => ({ distrito: d.slug }));
@@ -41,7 +39,6 @@ export default async function DistrictSismosPage(props: PageProps<"/[lang]/[dist
   const district = getDistrict(distrito);
   if (!district || !isLocale(lang)) notFound();
   const t = getDictionary(lang);
-  const state = await getPageState();
   return (
     <>
       <JsonLd
@@ -51,11 +48,7 @@ export default async function DistrictSismosPage(props: PageProps<"/[lang]/[dist
         ])}
       />
       {/* Uma vista nova por distrito (ver o comentário em avisos/page.tsx). */}
-      <DistrictQuakesView
-        key={district.slug}
-        district={district}
-        initial={slimState(state, "sismos", district.slug)}
-      />
+      <DistrictQuakesView key={district.slug} district={district} />
     </>
   );
 }

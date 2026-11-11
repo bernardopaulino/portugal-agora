@@ -202,10 +202,13 @@ test("voltar a um distrito já visitado repete a entrada da câmara", async ({ p
 });
 
 test("dados novos não repetem a entrada da câmara dos sismos", async ({ page }) => {
-  // O estado atual chega depois de a página abrir, com um sismo mais fundo:
-  // o bloco cresce e a câmara ajusta-se com uma viagem curta, sem voltar ao topo.
+  // O primeiro estado faz a entrada da câmara; a renovação seguinte traz um
+  // sismo mais fundo: o bloco cresce e a câmara ajusta-se com uma viagem
+  // curta, sem voltar ao topo.
+  let calls = 0;
   await page.route("**/api/state", async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    calls += 1;
+    if (calls === 1) return route.continue();
     const state = await (await route.fetch()).json();
     // Um sismo mais fundo do que qualquer um real, dentro do bloco do continente.
     state.earthquakes.data = [
@@ -227,6 +230,9 @@ test("dados novos não repetem a entrada da câmara dos sismos", async ({ page }
   });
   await page.goto("/sismos");
   await expect(depthScene(page)).toHaveAttribute("data-camera-duration", "1800");
+  // O SWR volta a pedir o estado quando a janela ganha o foco (no máximo de 5 em 5 s).
+  await page.waitForTimeout(5500);
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(depthScene(page)).toHaveAttribute("data-camera-duration", "600", {
     timeout: 10_000,
   });

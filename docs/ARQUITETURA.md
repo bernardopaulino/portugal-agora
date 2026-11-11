@@ -24,7 +24,7 @@ Browser ──(SWR, a cada 60 s)──▶ /api/state ──▶ getState()   "use
 Se uma fonte falhar → registry.ts devolve o snapshot marcado "stale", ou "unavailable".
 ```
 
-- **As páginas são pré-renderizadas** (inicial, 4 temas, 3 páginas de texto e as 5 páginas de cada um dos 20 distritos, em cada idioma) e revalidadas a cada minuto: carregam como estáticas e o browser atualiza os dados sozinho.
+- **As páginas são estáticas e não levam dados** (inicial, 4 temas, 3 páginas de texto, as 5 páginas de cada distrito e as dos concelhos, em cada idioma): são geradas no deploy e nunca renovadas. O browser vai buscar o estado ao `/api/state` (`useLiveState`, null até chegar; os mapas ficam a cinzento com `PENDING_STATE`) e renova-o a cada minuto. As imagens de partilha são geradas a pedido e ficam 15 min na CDN. Ver "ISR writes" em [OPERACAO.md](OPERACAO.md).
 - **As APIs externas nunca são chamadas pelo browser.** O servidor agrega tudo, o que respeita os limites de cada fonte (uma chamada por período de cache, não uma por visitante).
 - **As horas do IPMA são UTC sem sufixo** (confirmado no código do próprio site do IPMA) e são mostradas na hora local de cada região.
 

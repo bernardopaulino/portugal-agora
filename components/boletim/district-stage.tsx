@@ -13,6 +13,7 @@ import type { ForecastDay } from "@/lib/sources/ipma-forecast";
 import type { SourceResult } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
 import { districtHeadline, districtTopics, type TopicId } from "@/lib/state/bulletin";
+import { PENDING_STATE } from "@/lib/state/pending";
 import { cn } from "@/lib/utils";
 
 import { districtRisk, sceneMarkers } from "../home/immersive-home";
@@ -41,16 +42,20 @@ const districtTopicPage: Record<TopicId, string> = {
  */
 export function DistrictStage({
   district,
-  state,
+  state: live,
   forecast,
 }: {
   district: District;
-  state: CountryState;
-  forecast: SourceResult<ForecastDay[]>;
+  /** null até o /api/state responder: o mapa fica a cinzento e o boletim "a atualizar". */
+  state: CountryState | null;
+  /** undefined a carregar, null se o pedido falhou. */
+  forecast: SourceResult<ForecastDay[]> | null | undefined;
 }) {
   const { t, path } = useI18n();
   const router = useRouter();
-  const reference = new Date(state.generatedAt);
+  const state = live ?? PENDING_STATE;
+  // A previsão e o tempo agora contam os dias a partir da hora dos dados.
+  const reference = live ? new Date(live.generatedAt) : null;
   const enhance = useWebGLEnhancement();
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -130,14 +135,18 @@ export function DistrictStage({
             id="boletim-titulo"
             className="title-in font-display text-[clamp(2.1rem,1.1rem+2.6vw,3.6rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance"
           >
-            {districtHeadline(district, state.warnings.data ?? [], state.levelKnown, t)}
+            {live
+              ? districtHeadline(district, live.warnings.data ?? [], live.levelKnown, t)
+              : t.districtName(district)}
           </h1>
-          <BulletinStamp iso={state.generatedAt} />
-          <TopicList
-            topics={districtTopics(state, district.slug, t)}
-            hrefFor={(id) => path(`/${district.slug}${districtTopicPage[id]}`)}
-            compact
-          />
+          <BulletinStamp iso={live?.generatedAt} />
+          {live ? (
+            <TopicList
+              topics={districtTopics(live, district.slug, t)}
+              hrefFor={(id) => path(`/${district.slug}${districtTopicPage[id]}`)}
+              compact
+            />
+          ) : null}
           <p className="text-sm text-ink-2">
             <Link href={path("/fontes#niveis")}>{t.stage.howWeRead}</Link>
           </p>
@@ -164,7 +173,7 @@ export function DistrictStage({
       <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-4 pt-6 sm:px-6">
         {/* Os concelhos logo a seguir ao boletim: é aqui que se escolhe um. */}
         <ConcelhoLinks district={district} />
-        {forecast.data ? (
+        {!reference || forecast === undefined ? null : forecast?.data ? (
           <ForecastStrip
             days={forecast.data}
             reference={reference}
@@ -183,7 +192,7 @@ export function DistrictStage({
             </p>
           </section>
         )}
-        <NowAndSea district={district} reference={reference} />
+        {reference ? <NowAndSea district={district} reference={reference} /> : null}
       </div>
     </div>
   );
