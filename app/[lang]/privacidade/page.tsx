@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ProsePage } from "@/components/layout/prose-page";
+import { site } from "@/lib/config/site";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { isLocale } from "@/lib/i18n/locales";
 import { inheritedOgImage, pageMetadata } from "@/lib/i18n/metadata";
@@ -53,10 +54,24 @@ function Portuguese() {
           o endereço deixou de existir.
         </li>
         <li>
-          Os mapas são carregados do OpenFreeMap, que, como qualquer servidor, recebe o endereço IP
-          do seu dispositivo para lhe enviar as imagens do mapa.
+          Os mapas são carregados do OpenFreeMap e, na vista 3D dos incêndios, o relevo vem da
+          Mapterhorn. Como qualquer servidor, ambos recebem o endereço IP do seu dispositivo para
+          lhe enviar as imagens do mapa.
         </li>
       </ul>
+      <h2>Responsável e contacto</h2>
+      <p>
+        O site é mantido por {site.author}, a título pessoal. Para dúvidas sobre privacidade ou para
+        exercer os seus direitos (acesso, retificação, apagamento), abra uma questão no{" "}
+        <a href={`${site.repo}/issues`} rel="noopener">
+          GitHub
+        </a>
+        . Também pode apresentar reclamação à Comissão Nacional de Proteção de Dados (
+        <a href="https://www.cnpd.pt" rel="noopener">
+          CNPD
+        </a>
+        ).
+      </p>
     </ProsePage>
   );
 }
@@ -86,10 +101,24 @@ function English() {
           address no longer exists.
         </li>
         <li>
-          Maps are loaded from OpenFreeMap which, like any server, receives your device&apos;s IP
-          address in order to send it the map images.
+          Maps are loaded from OpenFreeMap and, in the 3D wildfire view, the terrain comes from
+          Mapterhorn. Like any server, both receive your device&apos;s IP address in order to send
+          it the map images.
         </li>
       </ul>
+      <h2>Controller and contact</h2>
+      <p>
+        The site is run by {site.author} in a personal capacity. For privacy questions or to
+        exercise your rights (access, correction, erasure), open an issue on{" "}
+        <a href={`${site.repo}/issues`} rel="noopener">
+          GitHub
+        </a>
+        . You can also lodge a complaint with the Portuguese data protection authority (
+        <a href="https://www.cnpd.pt/en/" rel="noopener">
+          CNPD
+        </a>
+        ).
+      </p>
     </ProsePage>
   );
 }

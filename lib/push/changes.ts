@@ -64,7 +64,7 @@ export function notificationsFor(
       return [
         {
           title: t.push.title(t.districtName(district), t.levelAdjective[c.to]),
-          body: t.headline.districtLevel(c.to, warningTypes(warnings, t), t.inPlace(district)),
+          body: `${t.headline.districtLevel(c.to, warningTypes(warnings, t), t.inPlace(district))} ${t.push.source}`,
           url: localePath(subscriber.locale, `/${c.slug}/avisos`),
           tag: `aviso-${c.slug}`,
         },

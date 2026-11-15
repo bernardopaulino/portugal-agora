@@ -170,6 +170,8 @@ const pt = {
   /** Notificações de avisos (web push) na página de cada distrito. */
   push: {
     title: (name: string, level: string) => `${name}: aviso ${level}`,
+    /** Os termos do IPMA pedem que a fonte seja sempre referida, também nas notificações. */
+    source: "Fonte: IPMA.",
     testTitle: "Portugal Agora: notificação de teste",
     testBody: (inPlace: string) =>
       `As notificações estão a funcionar. Quando o IPMA subir um aviso ${inPlace}, recebe uma assim.`,
@@ -780,6 +782,7 @@ const en: Dictionary = {
   },
   push: {
     title: (name, level) => `${name}: ${level} warning`,
+    source: "Source: IPMA.",
     testTitle: "Portugal Agora: test notification",
     testBody: (inPlace) =>
       `Notifications are working. When IPMA raises a warning ${inPlace}, you will get one like this.`,

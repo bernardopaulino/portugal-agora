@@ -129,7 +129,7 @@ describe("notificações", () => {
     expect(lisboaOrange).toEqual([
       {
         title: "Lisboa: aviso laranja",
-        body: "Aviso laranja de vento em Lisboa.",
+        body: "Aviso laranja de vento em Lisboa. Fonte: IPMA.",
         url: "/lisboa/avisos",
         tag: "aviso-lisboa",
       },

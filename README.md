@@ -124,3 +124,8 @@ Portugal Agora ("Portugal Now") is a non-profit site that answers _"is everythin
 ## Licença
 
 Código: [MIT](LICENSE). Os dados pertencem às respetivas fontes e seguem os seus termos de utilização.
+
+A licença MIT não cobre os dados geográficos em `public/geo/`:
+
+- Os contornos dos distritos e dos concelhos do continente vêm da CAOP 2025 da [DGT](https://www.dgterritorio.gov.pt) (CC BY 4.0).
+- Os contornos dos concelhos dos Açores e da Madeira, em `public/geo/concelhos.json`, são uma base de dados derivada do OpenStreetMap, © contribuidores do OpenStreetMap, disponibilizada sob a [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/1-0/) ([direitos de autor do OpenStreetMap](https://www.openstreetmap.org/copyright)).
