@@ -90,6 +90,15 @@ export function earthquakeSeverity(magnitude: number, felt: boolean): Severity {
   return "none";
 }
 
+/**
+ * Tira os sismos com mais de 7 dias. Os dados ficam guardados até o IPMA
+ * mudar o ficheiro, por isso este filtro corre outra vez a cada leitura.
+ */
+export function dropOldEarthquakes(events: EarthquakeEvent[], now: Date): EarthquakeEvent[] {
+  const since = now.getTime() - WINDOW_DAYS * 86_400_000;
+  return events.filter((e) => new Date(e.occurredAt).getTime() >= since);
+}
+
 export function normalizeSeismic(raws: IpmaSeismicRaw[], now: Date): EarthquakeEvent[] {
   const since = now.getTime() - WINDOW_DAYS * 86_400_000;
   const seen = new Set<string>();

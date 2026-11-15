@@ -15,6 +15,8 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/forecast/[i
   const { id } = await ctx.params;
   if (!known.has(id)) return Response.json({ error: "Local desconhecido" }, { status: 404 });
   return Response.json(await getForecast(Number(id)), {
-    headers: { "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600" },
+    headers: {
+      "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600, stale-if-error=86400",
+    },
   });
 }

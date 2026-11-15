@@ -1,10 +1,9 @@
 import "server-only";
 
-import { cacheLife, cacheTag } from "next/cache";
+import type { z } from "zod";
 
-import { saveSnapshot } from "@/lib/cache/snapshot";
 import { env } from "@/lib/env";
-import { fetchJson } from "@/lib/http/fetch-json";
+import { fetchJsonIfChanged, SourceError, type Validators } from "@/lib/http/fetch-json";
 
 import { FOGOS_ACTIVE_URL, fogosSchema, normalizeFires } from "./fogos";
 import {
@@ -29,217 +28,243 @@ import {
   normalizeSea,
   type SeaSpot,
 } from "./ipma-sea";
-import { IPMA_SEISMIC_URLS, ipmaSeismicSchema, normalizeSeismic } from "./ipma-seismic";
+import {
+  dropOldEarthquakes,
+  IPMA_SEISMIC_URLS,
+  ipmaSeismicSchema,
+  normalizeSeismic,
+} from "./ipma-seismic";
 import { IPMA_UV_URL, ipmaUvSchema, normalizeUv } from "./ipma-uv";
-import { IPMA_WARNINGS_URL, ipmaWarningsSchema, normalizeWarnings } from "./ipma-warnings";
+import {
+  dropEndedWarnings,
+  IPMA_WARNINGS_URL,
+  ipmaWarningsSchema,
+  normalizeWarnings,
+} from "./ipma-warnings";
 import { normalizeAirQuality, openMeteoAqSchema, openMeteoAqUrl } from "./openmeteo-aq";
 import type {
   AirQualityReading,
   EarthquakeEvent,
   FireEvent,
   FireRisk,
-  Loaded,
+  SourceId,
   UvReading,
   WarningEvent,
 } from "./types";
 
-/**
- * Carregadores com cache. Cada um corre apenas quando a sua cache
- * expira; nesse momento vai à fonte, valida, normaliza e guarda o
- * resultado como snapshot (o "último resultado bom").
+/*
+ * As fontes e o ritmo a que cada uma é verificada.
  *
- * Uma falha nunca sai de dentro de uma função "use cache": o Next 16
- * trata um erro lançado ali durante o build como erro de pré-geração e
- * aborta o build inteiro (bastava o IPMA não responder no CI). Por isso
- * a parte em cache devolve um resultado { ok: false } guardado só
- * 1 minuto, e é a função exportada (fora da cache) que lança o erro,
- * para o registo (registry.ts) mostrar o snapshot como até aqui.
+ * Cada fonte diz de quanto em quanto tempo vale a pena perguntar-lhe se
+ * mudou (`every`), medido em novembro de 2026:
+ * - Fogos.pt: a ANEPC atualiza de ~2 em 2 min e a CDN deles guarda 3 min;
+ * - avisos e sismos: mudam quando o IPMA emite; 2 min põem um aviso novo
+ *   no ecrã (e nas notificações) em ~3 min no pior caso;
+ * - observações: de hora a hora (~:31); mar e previsões: ~2 vezes por dia;
+ * - risco de incêndio: à meia-noite e de manhã; UV: poucas vezes por dia;
+ * - qualidade do ar (Open-Meteo): valores horários.
+ * O IPMA responde 304 (sem corpo, ~70 ms) quando o ficheiro não mudou, por
+ * isso verificar mais vezes do que muda custa quase nada a ambos.
  *
- * Durações escolhidas em função da frequência de atualização de cada
- * fonte e do respeito pelos seus limites de utilização.
+ * `staleAfterMinutes`: a partir daí, os dados guardados já não servem sem
+ * perguntar primeiro à fonte (o pedido espera por ela). Coincide com o
+ * limite que a monitorização usa (lib/state/health.ts).
  */
 
-type Outcome<T> = { ok: true; value: Loaded<T> } | { ok: false; message: string };
+export type Fetched<T> =
+  { notModified: true } | { notModified: false; data: T; validators: Record<string, Validators> };
 
-/** Vida curta para falhas: tenta-se de novo ao fim de 1 minuto. */
-const FAILURE_LIFE = { stale: 30, revalidate: 60, expire: 300 } as const;
-
-function stamp<T>(data: T): Loaded<T> {
-  return { data, fetchedAt: new Date().toISOString() };
+export interface SourceDef<T> {
+  id: SourceId;
+  /** Chave no armazém (lib/cache/source-store.ts). */
+  key: string;
+  /** Segundos entre verificações da fonte. */
+  every: number;
+  staleAfterMinutes: number;
+  /** Pergunta à fonte, com os validadores da última resposta quando os há. */
+  fetch(validators: Record<string, Validators> | undefined): Promise<Fetched<T>>;
+  /** Filtros que dependem da hora, aplicados de novo a cada leitura. */
+  prune?(data: T, now: Date): T;
 }
 
-async function attempt<T>(load: () => Promise<Loaded<T>>): Promise<Outcome<T>> {
-  try {
-    return { ok: true, value: await load() };
-  } catch (error) {
-    return { ok: false, message: error instanceof Error ? error.message : String(error) };
-  }
+interface Request<T> {
+  url: string;
+  schema: z.ZodType<T>;
+  timeoutMs?: number;
+  headers?: Record<string, string>;
 }
 
-function unwrap<T>(outcome: Outcome<T>): Loaded<T> {
-  if (!outcome.ok) throw new Error(outcome.message);
-  return outcome.value;
-}
+type Raws<R extends readonly Request<unknown>[]> = {
+  -readonly [K in keyof R]: R[K] extends Request<infer T> ? T : never;
+};
 
-async function cachedWarnings(): Promise<Outcome<WarningEvent[]>> {
-  "use cache";
-  cacheTag("ipma-warnings");
-  const outcome = await attempt(async () => {
-    const raw = await fetchJson(IPMA_WARNINGS_URL, { schema: ipmaWarningsSchema });
-    const result = stamp(normalizeWarnings(raw, new Date()));
-    await saveSnapshot("ipma-warnings", result);
-    return result;
+/**
+ * Pede vários ficheiros de uma fonte com os validadores anteriores. Se
+ * nenhum mudou, `notModified`; se algum mudou, volta a pedir sem
+ * validadores os que vieram 304 (é preciso o conteúdo de todos para
+ * normalizar). Acontece poucas vezes por dia.
+ */
+async function fetchGroup<const R extends readonly Request<unknown>[]>(
+  requests: R,
+  previous: Record<string, Validators> | undefined,
+): Promise<
+  | { notModified: true }
+  | { notModified: false; raws: Raws<R>; validators: Record<string, Validators> }
+> {
+  const first = await Promise.all(
+    requests.map((r) => fetchJsonIfChanged(r.url, { ...r, validators: previous?.[r.url] })),
+  );
+  if (first.every((f) => f.notModified)) return { notModified: true };
+  const full = await Promise.all(
+    first.map((f, i) => (f.notModified ? fetchJsonIfChanged(requests[i]!.url, requests[i]!) : f)),
+  );
+  const validators: Record<string, Validators> = {};
+  const raws = full.map((f, i) => {
+    const url = requests[i]!.url;
+    if (f.notModified) throw new SourceError(`304 inesperado: ${url}`, "http", 304);
+    validators[url] = f.validators;
+    return f.data;
   });
-  cacheLife(outcome.ok ? { stale: 60, revalidate: 300, expire: 3600 } : FAILURE_LIFE);
-  return outcome;
+  return { notModified: false, raws: raws as Raws<R>, validators };
 }
-export const loadWarnings = async () => unwrap(await cachedWarnings());
 
-async function cachedEarthquakes(): Promise<Outcome<EarthquakeEvent[]>> {
-  "use cache";
-  cacheTag("ipma-seismic");
-  const outcome = await attempt(async () => {
-    const raws = await Promise.all(
-      IPMA_SEISMIC_URLS.map((url) => fetchJson(url, { schema: ipmaSeismicSchema })),
-    );
-    const result = stamp(normalizeSeismic(raws, new Date()));
-    await saveSnapshot("ipma-seismic", result);
-    return result;
-  });
-  cacheLife(outcome.ok ? { stale: 60, revalidate: 300, expire: 3600 } : FAILURE_LIFE);
-  return outcome;
+/** Uma fonte feita de um grupo de ficheiros e de uma normalização. */
+function source<T, const R extends readonly Request<unknown>[]>(def: {
+  id: SourceId;
+  key?: string;
+  every: number;
+  staleAfterMinutes: number;
+  requests: () => R;
+  normalize: (raws: Raws<R>) => T;
+  prune?: (data: T, now: Date) => T;
+}): SourceDef<T> {
+  return {
+    id: def.id,
+    key: def.key ?? def.id,
+    every: def.every,
+    staleAfterMinutes: def.staleAfterMinutes,
+    prune: def.prune,
+    async fetch(validators) {
+      const result = await fetchGroup(def.requests(), validators);
+      if (result.notModified) return result;
+      return {
+        notModified: false,
+        data: def.normalize(result.raws),
+        validators: result.validators,
+      };
+    },
+  };
 }
-export const loadEarthquakes = async () => unwrap(await cachedEarthquakes());
 
-async function cachedFireRisk(): Promise<Outcome<FireRisk>> {
-  "use cache";
-  cacheTag("ipma-rcm");
-  const outcome = await attempt(async () => {
-    const [today, tomorrow] = await Promise.all([
-      fetchJson(IPMA_RCM_URLS.today, { schema: ipmaRcmSchema }),
-      fetchJson(IPMA_RCM_URLS.tomorrow, { schema: ipmaRcmSchema }),
-    ]);
-    const result = stamp(normalizeFireRisk(today, tomorrow));
-    await saveSnapshot("ipma-rcm", result);
-    return result;
-  });
-  cacheLife(outcome.ok ? { stale: 300, revalidate: 3600, expire: 86400 } : FAILURE_LIFE);
-  return outcome;
-}
-export const loadFireRisk = async () => unwrap(await cachedFireRisk());
+export const warningsSource: SourceDef<WarningEvent[]> = source({
+  id: "ipma-warnings",
+  every: 120,
+  staleAfterMinutes: 20,
+  requests: () => [{ url: IPMA_WARNINGS_URL, schema: ipmaWarningsSchema }] as const,
+  normalize: ([raw]) => normalizeWarnings(raw, new Date()),
+  prune: dropEndedWarnings,
+});
 
-async function cachedUv(): Promise<Outcome<UvReading[]>> {
-  "use cache";
-  cacheTag("ipma-uv");
-  const outcome = await attempt(async () => {
-    const raw = await fetchJson(IPMA_UV_URL, { schema: ipmaUvSchema });
-    const result = stamp(normalizeUv(raw));
-    await saveSnapshot("ipma-uv", result);
-    return result;
-  });
-  cacheLife(outcome.ok ? { stale: 300, revalidate: 3600, expire: 86400 } : FAILURE_LIFE);
-  return outcome;
-}
-export const loadUv = async () => unwrap(await cachedUv());
+export const earthquakesSource: SourceDef<EarthquakeEvent[]> = source({
+  id: "ipma-seismic",
+  every: 120,
+  staleAfterMinutes: 20,
+  requests: () => IPMA_SEISMIC_URLS.map((url) => ({ url, schema: ipmaSeismicSchema })),
+  normalize: (raws) => normalizeSeismic(raws, new Date()),
+  prune: dropOldEarthquakes,
+});
 
-async function cachedFires(): Promise<Outcome<FireEvent[]>> {
-  "use cache";
-  cacheTag("fogos");
-  const outcome = await attempt(async () => {
+export const firesSource: SourceDef<FireEvent[]> = source({
+  id: "fogos",
+  every: 120,
+  staleAfterMinutes: 15,
+  requests: () => {
     const key = env().FOGOS_API_KEY;
     if (!key) throw new Error("FOGOS_API_KEY em falta");
-    const raw = await fetchJson(FOGOS_ACTIVE_URL, {
-      schema: fogosSchema,
-      headers: { "X-API-Key": key },
-    });
-    const result = stamp(normalizeFires(raw));
-    await saveSnapshot("fogos", result);
-    return result;
-  });
-  cacheLife(outcome.ok ? { stale: 60, revalidate: 120, expire: 3600 } : FAILURE_LIFE);
-  return outcome;
-}
-export const loadFires = async () => unwrap(await cachedFires());
+    return [{ url: FOGOS_ACTIVE_URL, schema: fogosSchema, headers: { "X-API-Key": key } }] as const;
+  },
+  normalize: ([raw]) => normalizeFires(raw),
+});
 
-async function cachedAirQuality(): Promise<Outcome<AirQualityReading[]>> {
-  "use cache";
-  cacheTag("openmeteo-aq");
-  const outcome = await attempt(async () => {
-    const raw = await fetchJson(openMeteoAqUrl(), { schema: openMeteoAqSchema, timeoutMs: 5000 });
-    const result = stamp(normalizeAirQuality(raw));
-    await saveSnapshot("openmeteo-aq", result);
-    return result;
-  });
-  cacheLife(outcome.ok ? { stale: 300, revalidate: 600, expire: 7200 } : FAILURE_LIFE);
-  return outcome;
-}
-export const loadAirQuality = async () => unwrap(await cachedAirQuality());
+export const fireRiskSource: SourceDef<FireRisk> = source({
+  id: "ipma-rcm",
+  // Muda à meia-noite e de manhã; de 15 em 15 min, o "hoje" troca pouco depois das 00:05.
+  every: 900,
+  staleAfterMinutes: 180,
+  requests: () =>
+    [
+      { url: IPMA_RCM_URLS.today, schema: ipmaRcmSchema },
+      { url: IPMA_RCM_URLS.tomorrow, schema: ipmaRcmSchema },
+    ] as const,
+  normalize: ([today, tomorrow]) => normalizeFireRisk(today, tomorrow),
+});
 
-async function cachedForecast(globalIdLocal: number): Promise<Outcome<ForecastDay[]>> {
-  "use cache";
-  cacheTag(`ipma-forecast-${globalIdLocal}`);
-  const outcome = await attempt(async () => {
-    const raw = await fetchJson(ipmaForecastUrl(globalIdLocal), { schema: ipmaForecastSchema });
-    const result = stamp(normalizeForecast(raw));
-    await saveSnapshot(`ipma-forecast-${globalIdLocal}`, result);
-    return result;
-  });
-  cacheLife(outcome.ok ? { stale: 300, revalidate: 3600, expire: 86400 } : FAILURE_LIFE);
-  return outcome;
-}
-export const loadForecast = async (globalIdLocal: number) =>
-  unwrap(await cachedForecast(globalIdLocal));
+export const uvSource: SourceDef<UvReading[]> = source({
+  id: "ipma-uv",
+  every: 1800,
+  staleAfterMinutes: 180,
+  requests: () => [{ url: IPMA_UV_URL, schema: ipmaUvSchema }] as const,
+  normalize: ([raw]) => normalizeUv(raw),
+});
 
-/** Observações das estações: o IPMA publica de hora a hora (por volta de :35). */
-async function cachedObservations(): Promise<Outcome<Record<string, StationObservation>>> {
-  "use cache";
-  cacheTag("ipma-observations");
-  const outcome = await attempt(async () => {
-    const raw = await fetchJson(IPMA_OBSERVATIONS_URL, {
-      schema: ipmaObservationsSchema,
-      timeoutMs: 6000,
-    });
-    const result = stamp(normalizeObservations(raw));
-    await saveSnapshot("ipma-observations", result);
-    return result;
-  });
-  cacheLife(outcome.ok ? { stale: 300, revalidate: 1200, expire: 7200 } : FAILURE_LIFE);
-  return outcome;
-}
-export const loadObservations = async () => unwrap(await cachedObservations());
+export const airQualitySource: SourceDef<AirQualityReading[]> = source({
+  id: "openmeteo-aq",
+  // Sem ETag nem Last-Modified: cada verificação descarrega tudo, por isso só de 30 em 30 min.
+  every: 1800,
+  staleAfterMinutes: 45,
+  requests: () => [{ url: openMeteoAqUrl(), schema: openMeteoAqSchema, timeoutMs: 5000 }] as const,
+  normalize: ([raw]) => normalizeAirQuality(raw),
+});
 
-/** Todas as estações (o concelho escolhe a mais próxima). Mesmo ficheiro, mesma cadência. */
-async function cachedStations(): Promise<Outcome<StationObservation[]>> {
-  "use cache";
-  cacheTag("ipma-stations");
-  const outcome = await attempt(async () => {
-    const raw = await fetchJson(IPMA_OBSERVATIONS_URL, {
-      schema: ipmaObservationsSchema,
-      timeoutMs: 6000,
-    });
-    const result = stamp(normalizeStations(raw));
-    await saveSnapshot("ipma-stations", result);
-    return result;
-  });
-  cacheLife(outcome.ok ? { stale: 300, revalidate: 1200, expire: 7200 } : FAILURE_LIFE);
-  return outcome;
+export interface ObservationsData {
+  /** Estação de referência de cada distrito. */
+  byDistrict: Record<string, StationObservation>;
+  /** Todas as estações (o concelho escolhe a mais próxima). */
+  stations: StationObservation[];
 }
-export const loadStations = async () => unwrap(await cachedStations());
+
+/** Observações das estações: um só ficheiro (450 KB) para os distritos e para as estações. */
+export const observationsSource: SourceDef<ObservationsData> = source({
+  id: "ipma-observations",
+  every: 600,
+  staleAfterMinutes: 120,
+  requests: () =>
+    [{ url: IPMA_OBSERVATIONS_URL, schema: ipmaObservationsSchema, timeoutMs: 6000 }] as const,
+  normalize: ([raw]) => ({
+    byDistrict: normalizeObservations(raw),
+    stations: normalizeStations(raw),
+  }),
+});
 
 /** Estado do mar: hoje e os 2 dias seguintes, em 12 pontos da costa. */
-async function cachedSea(): Promise<Outcome<Record<string, SeaSpot[]>>> {
-  "use cache";
-  cacheTag("ipma-sea");
-  const outcome = await attempt(async () => {
-    const [locations, days] = await Promise.all([
-      fetchJson(IPMA_SEA_LOCATIONS_URL, { schema: ipmaSeaLocationsSchema }),
-      Promise.all(IPMA_SEA_URLS.map((url) => fetchJson(url, { schema: ipmaSeaDaySchema }))),
-    ]);
-    const result = stamp(normalizeSea(days, locations));
-    await saveSnapshot("ipma-sea", result);
-    return result;
-  });
-  cacheLife(outcome.ok ? { stale: 300, revalidate: 3600, expire: 86400 } : FAILURE_LIFE);
-  return outcome;
+export const seaSource: SourceDef<Record<string, SeaSpot[]>> = source({
+  id: "ipma-sea",
+  every: 3600,
+  staleAfterMinutes: 240,
+  requests: () =>
+    [
+      { url: IPMA_SEA_LOCATIONS_URL, schema: ipmaSeaLocationsSchema },
+      ...IPMA_SEA_URLS.map((url) => ({ url, schema: ipmaSeaDaySchema })),
+    ] as const,
+  normalize: ([locations, ...days]) => normalizeSea(days, locations),
+});
+
+const forecastSources = new Map<number, SourceDef<ForecastDay[]>>();
+
+/** Previsão a 5 dias de um local; só se verifica quando alguém a pede. */
+export function forecastSource(globalIdLocal: number): SourceDef<ForecastDay[]> {
+  let def = forecastSources.get(globalIdLocal);
+  if (!def) {
+    def = source({
+      id: "ipma-forecast",
+      key: `ipma-forecast-${globalIdLocal}`,
+      every: 3600,
+      staleAfterMinutes: 360,
+      requests: () =>
+        [{ url: ipmaForecastUrl(globalIdLocal), schema: ipmaForecastSchema }] as const,
+      normalize: ([raw]) => normalizeForecast(raw),
+    });
+    forecastSources.set(globalIdLocal, def);
+  }
+  return def;
 }
-export const loadSea = async () => unwrap(await cachedSea());

@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+
 import {
   getAirQuality,
   getEarthquakes,
@@ -18,6 +20,8 @@ const getters = {
 
 /** Dados normalizados de uma fonte, com o seu estado (ok, desatualizado, indisponível). */
 export async function GET(_request: Request, ctx: RouteContext<"/api/sources/[id]">) {
+  // Sempre a pedido (nunca ISR), como as outras rotas de dados.
+  await connection();
   const { id } = await ctx.params;
   // Object.hasOwn: só as fontes da lista. Sem isto, "constructor",
   // "toString" ou "__proto__" vinham do protótipo do objeto e davam 200 ou 500.
@@ -28,7 +32,7 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/sources/[id
     );
   }
   const getter = getters[id as keyof typeof getters];
-  return Response.json(await getter(), {
+  return Response.json(await getter("after"), {
     headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
   });
 }

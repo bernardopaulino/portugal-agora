@@ -27,15 +27,42 @@ export interface FetchJsonOptions<T> {
   fetchImpl?: typeof fetch;
 }
 
+/** Validadores HTTP da última resposta, para perguntar "mudou?" na seguinte. */
+export interface Validators {
+  etag?: string;
+  lastModified?: string;
+}
+
+export type Conditional<T> =
+  { notModified: true } | { notModified: false; data: T; validators: Validators };
+
 /**
  * GET JSON com timeout, User-Agent identificável e validação Zod.
  * Todos os adaptadores de fontes passam por aqui: um único sítio para
  * tratar falhas de rede, respostas HTTP de erro e mudanças de formato.
- * A cache é responsabilidade de cada adaptador (`"use cache"` + `cacheLife`).
+ * A cache é do Redis (lib/cache/source-store.ts), não do Next.
  */
 export async function fetchJson<T>(url: string, options: FetchJsonOptions<T>): Promise<T> {
-  const { schema, timeoutMs = 3000, headers = {}, fetchImpl = fetch } = options;
+  const result = await fetchJsonIfChanged(url, options);
+  // Sem validadores no pedido, o servidor nunca responde 304.
+  if (result.notModified) throw new SourceError(`304 inesperado: ${url}`, "http", 304);
+  return result.data;
+}
+
+/**
+ * Como fetchJson, mas com If-None-Match / If-Modified-Since quando há
+ * validadores da resposta anterior: o IPMA responde 304, sem corpo, em
+ * ~70 ms quando o ficheiro não mudou, e assim não se descarrega nem valida nada.
+ */
+export async function fetchJsonIfChanged<T>(
+  url: string,
+  options: FetchJsonOptions<T> & { validators?: Validators },
+): Promise<Conditional<T>> {
+  const { schema, timeoutMs = 3000, headers = {}, fetchImpl = fetch, validators } = options;
   const e = env();
+  const conditional: Record<string, string> = {};
+  if (validators?.etag) conditional["If-None-Match"] = validators.etag;
+  if (validators?.lastModified) conditional["If-Modified-Since"] = validators.lastModified;
 
   let response: Response;
   try {
@@ -46,8 +73,11 @@ export async function fetchJson<T>(url: string, options: FetchJsonOptions<T>): P
           siteUrl: e.NEXT_PUBLIC_SITE_URL,
           contactEmail: e.CONTACT_EMAIL,
         }),
+        ...conditional,
         ...headers,
       },
+      // Sempre à fonte: a cache é o Redis, e um 304 só serve se o pedido lá chegar.
+      cache: "no-store",
       signal: AbortSignal.timeout(timeoutMs),
     });
   } catch (error) {
@@ -58,6 +88,10 @@ export async function fetchJson<T>(url: string, options: FetchJsonOptions<T>): P
       throw new SourceError(`Sem resposta em ${timeoutMs} ms: ${url}`, "timeout");
     }
     throw new SourceError(`Falha de rede: ${url}`, "network");
+  }
+
+  if (response.status === 304 && (validators?.etag || validators?.lastModified)) {
+    return { notModified: true };
   }
 
   if (!response.ok) {
@@ -78,5 +112,12 @@ export async function fetchJson<T>(url: string, options: FetchJsonOptions<T>): P
       "schema",
     );
   }
-  return parsed.data;
+  return {
+    notModified: false,
+    data: parsed.data,
+    validators: {
+      etag: response.headers.get("etag") ?? undefined,
+      lastModified: response.headers.get("last-modified") ?? undefined,
+    },
+  };
 }

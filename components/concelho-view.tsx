@@ -56,6 +56,7 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
   const weather = useWeather();
   const { data: forecast } = useSWR(`/api/forecast/${district.globalIdLocal}`, forecastFetcher, {
     revalidateOnFocus: false,
+    refreshInterval: 60 * 60_000,
   });
   const name = t.concelhoName(concelho.dico, concelho.name);
   const inPlace = t.inPlace(district);

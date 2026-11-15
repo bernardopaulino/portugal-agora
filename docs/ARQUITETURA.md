@@ -9,23 +9,30 @@ Next.js 16 (App Router, Cache Components, Turbopack), React 19, TypeScript, Tail
 ## Fluxo dos dados
 
 ```
-Browser ──(SWR, a cada 60 s)──▶ /api/state ──▶ getState()   "use cache", 60 s
-                                                   │
-                        ┌──────────────┬───────────┼────────────┬─────────────┐
-                        ▼              ▼           ▼            ▼             ▼
-                 loadWarnings  loadEarthquakes  loadFires  loadFireRisk  loadAirQuality …
-                 "use cache" com duração própria por fonte (2 min a 1 h)
-                        │
-                        ├─ fetchJson: timeout de 3 s, User-Agent identificável, erros tipados
-                        ├─ validação Zod da resposta
-                        ├─ normalização para um modelo comum (Event, Severity)
-                        └─ snapshot no Redis ("último resultado bom")
+Browser ──(SWR, 60 s)──▶ CDN (30 s) ──▶ /api/state ──▶ getState()
+                                                          │ 1 MGET ao Redis
+                                                          ▼
+                                    src:<fonte> (dados) + meta:<fonte> (horas, ETag)
+                                                          │
+                       responde logo ◀────────────────────┤
+                                                          │ depois de responder (after()),
+                                                          ▼ só as fontes em atraso
+                                   refreshSource: cadeado lock:<fonte> (SET NX)
+                                     ├─ fetchJsonIfChanged: If-None-Match / If-Modified-Since,
+                                     │  timeout de 3 a 6 s, User-Agent identificável
+                                     ├─ 304 ou igual → só meta:<fonte> (a hora da verificação)
+                                     └─ novo → validação Zod, normalização, src:<fonte>
 
-Se uma fonte falhar → registry.ts devolve o snapshot marcado "stale", ou "unavailable".
+Agendador externo (2 min) ──▶ /api/cron/tick: verifica as fontes em atraso, notificações, histórico
 ```
 
+- **O Redis é a única cache de dados do servidor** (`lib/cache/source-store.ts`, `lib/sources/registry.ts`). Cada fonte é verificada ao seu ritmo (`every` em `lib/sources/loaders.ts`: 2 min para avisos, sismos e incêndios, até 1 h para o mar e as previsões), seja quantas forem as pessoas no site. Um pedido só espera pela fonte quando não há dados, ou quando são mais antigos do que `staleAfterMinutes`.
+- **Não se usa `"use cache"` para os dados**: na Vercel essa cache vive na memória de cada instância e quase nunca é reaproveitada entre pedidos (medido em novembro de 2026: cada pedido voltava a ir às 8 fontes).
+- **Se uma fonte falhar**, ficam os últimos dados, marcados "stale"; sem dados, "unavailable". Volta-se a tentar ao fim de 1 min.
+- **Filtros que dependem da hora** (avisos terminados, sismos com mais de 7 dias) correm a cada leitura (`prune`), porque os dados ficam guardados até a fonte mudar.
+
 - **As páginas são estáticas e não levam dados** (inicial, 4 temas, 3 páginas de texto, as 5 páginas de cada distrito e as dos concelhos, em cada idioma): são geradas no deploy e nunca renovadas. O browser vai buscar o estado ao `/api/state` (`useLiveState`, null até chegar; os mapas ficam a cinzento com `PENDING_STATE`) e renova-o a cada minuto. O pedido começa logo no `<head>` (`lib/state/early-fetch.ts`), em paralelo com o JavaScript. Entre páginas, o browser usa a cópia pedida de antemão (prefetch) durante 30 min (`staleTimes.static`), e um traço no topo (`NavigationProgress`) mostra que a página está a mudar. As imagens de partilha são geradas a pedido e ficam 15 min na CDN. Ver "ISR writes" em [OPERACAO.md](OPERACAO.md).
-- **As APIs externas nunca são chamadas pelo browser.** O servidor agrega tudo, o que respeita os limites de cada fonte (uma chamada por período de cache, não uma por visitante).
+- **As APIs externas nunca são chamadas pelo browser.** O servidor agrega tudo, o que respeita os limites de cada fonte (uma verificação por período, não uma por visitante; a maioria é um 304 sem corpo).
 - **As horas do IPMA são UTC sem sufixo** (confirmado no código do próprio site do IPMA) e são mostradas na hora local de cada região.
 
 ## Idiomas
@@ -65,7 +72,7 @@ lib/
   i18n/                 idiomas, dicionários, tradução de termos, metadados
   routes.ts             distrito e tema a partir do endereço
   og/                   imagens de partilha (opengraph-image)
-  cache/                snapshots no Redis e verificação do Redis para o /api/health
+  cache/                armazém das fontes no Redis e verificação do Redis para o /api/health
   geo/ time/ http/      geometria, datas em pt-PT e en-GB, fetch robusto
 assets/fonts/           letras das imagens de partilha (Barlow Semi Condensed, Atkinson Hyperlegible Next; OFL)
 public/geo/             limites simplificados da CAOP 2025 (GeoJSON)

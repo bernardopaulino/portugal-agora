@@ -38,6 +38,14 @@ const levelWord: Record<Severity, string> = {
 };
 
 /**
+ * Tira os avisos que já terminaram. Os dados ficam guardados até o IPMA
+ * mudar o ficheiro, por isso este filtro corre outra vez a cada leitura.
+ */
+export function dropEndedWarnings(warnings: WarningEvent[], now: Date): WarningEvent[] {
+  return warnings.filter((w) => new Date(w.endsAt) > now);
+}
+
+/**
  * Converte a lista do IPMA em avisos: ignora os verdes (não são avisos)
  * e os que já terminaram. As horas do IPMA estão em UTC sem sufixo —
  * o próprio site do IPMA acrescenta "Z" antes de as interpretar.

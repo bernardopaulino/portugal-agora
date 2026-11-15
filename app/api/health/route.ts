@@ -5,7 +5,8 @@ import { features } from "@/lib/env";
 /**
  * Verificação rápida da configuração em produção:
  * GET /api/health → que funcionalidades estão ativas e se o Redis responde.
- * Não expõe segredos, só booleanos. O PING ao Redis é reutilizado 30 s.
+ * Não expõe segredos, só booleanos. Fica 30 s na CDN (e o PING ao Redis é
+ * reutilizado 30 s na instância): chamá-lo em ciclo não gasta a quota do Upstash.
  */
 export async function GET() {
   const enabled = features();
@@ -18,6 +19,6 @@ export async function GET() {
       fires: enabled.fires ? "enabled" : "missing-api-key",
       time: new Date().toISOString(),
     },
-    { headers: { "Cache-Control": "no-store" } },
+    { headers: { "Cache-Control": "public, s-maxage=30" } },
   );
 }

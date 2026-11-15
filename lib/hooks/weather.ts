@@ -25,8 +25,11 @@ const fetcher = async (url: string): Promise<Weather> => {
  */
 export function useWeather(enabled = true): Weather | null {
   const { data } = useSWR(enabled ? "/api/weather" : null, fetcher, {
-    refreshInterval: 20 * 60_000,
-    revalidateOnFocus: false,
+    // O IPMA publica observações de hora a hora (~:31): de 10 em 10 min, e ao
+    // voltar ao separador (no máximo de 5 em 5 min), para não ficar uma hora atrás.
+    refreshInterval: 10 * 60_000,
+    revalidateOnFocus: true,
+    focusThrottleInterval: 5 * 60_000,
   });
   return data ?? null;
 }

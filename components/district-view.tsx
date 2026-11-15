@@ -27,7 +27,8 @@ export function DistrictView({ district }: { district: District }) {
   const { data: forecast, error } = useSWR(
     `/api/forecast/${district.globalIdLocal}`,
     forecastFetcher,
-    { revalidateOnFocus: false },
+    // Com o separador aberto horas a fio, a previsão também se renova (o IPMA atualiza ~2 vezes por dia).
+    { revalidateOnFocus: false, refreshInterval: 60 * 60_000 },
   );
   return (
     <DistrictStage
