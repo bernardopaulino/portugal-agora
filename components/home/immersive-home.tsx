@@ -28,6 +28,7 @@ import { capitalize, formatDayTime, formatNumber } from "@/lib/time/format";
 import { cn } from "@/lib/utils";
 
 import { BulletinMap } from "../boletim/bulletin-map";
+import { startNavigationFeedback } from "../layout/navigation-progress";
 import { DistrictIndex } from "../boletim/district-index";
 import { BulletinStamp, mapLevels, mapMarkers, topicPage } from "../boletim/national-stage";
 import { LevelMark, LowerThird, MapLegend, TopicList } from "../boletim/parts";
@@ -111,7 +112,10 @@ export function ImmersiveHome() {
             quakes={quakes}
             pointed={pointed}
             onPoint={setPointed}
-            onOpen={(slug) => router.push(path(`/${slug}`))}
+            onOpen={(slug) => {
+              startNavigationFeedback(path(`/${slug}`));
+              router.push(path(`/${slug}`));
+            }}
             onReady={() => setReady(true)}
             onFailed={() => setFailed(true)}
             regionLabels={{ acores: t.stage.acores, madeira: t.stage.madeira }}

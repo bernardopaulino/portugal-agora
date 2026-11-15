@@ -15,6 +15,8 @@ import { writeStorage } from "@/lib/hooks/external";
 import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 
+import { startNavigationFeedback } from "./navigation-progress";
+
 export const MY_DISTRICT_KEY = "pa:distrito";
 
 type Status = "idle" | "locating" | "error";
@@ -63,7 +65,9 @@ export function NearMeButton({ className }: { className?: string }) {
           const concelho = feature ? concelhoForDico(feature.properties.dico) : undefined;
           writeStorage(MY_DISTRICT_KEY, slug);
           setStatus("idle");
-          router.push(path(concelho ? `/${slug}/${concelho.slug}` : `/${slug}`));
+          const href = path(concelho ? `/${slug}/${concelho.slug}` : `/${slug}`);
+          startNavigationFeedback(href);
+          router.push(href);
         } catch {
           setStatus("error");
           setMessage(t.header.geoFailed);

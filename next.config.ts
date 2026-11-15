@@ -46,6 +46,13 @@ const nextConfig: NextConfig = {
   // prefetch de sempre (o Next 16.4.5 pede que se escolha). Ligá-lo é uma migração
   // à parte (node_modules/next/dist/docs/01-app/02-guides/adopting-partial-prefetching.md).
   partialPrefetching: false,
+  experimental: {
+    // Quanto tempo o browser usa a cópia de uma página pedida de antemão (prefetch).
+    // Por omissão são 5 min: com o site aberto mais tempo, o clique seguinte tinha
+    // de ir ao servidor. As páginas não levam dados (chegam pelo /api/state) e só
+    // mudam num deploy, por isso podem durar 30 min. Não mexe na cache do servidor.
+    staleTimes: { static: 1800 },
+  },
   poweredByHeader: false,
   reactStrictMode: true,
   async headers() {

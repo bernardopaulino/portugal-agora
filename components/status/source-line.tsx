@@ -40,10 +40,16 @@ export function SourceLine({
             className="-my-3 inline-flex items-center py-3"
             aria-label={t.source.ipmaLogo}
           >
+            {/*
+             * loading="lazy": numa mudança de página, o React espera (até 800 ms)
+             * que as imagens novas carreguem antes de mostrar a página nova. Este
+             * logótipo atrasava assim a primeira ida a cada tema.
+             */}
             {/* eslint-disable-next-line @next/next/no-img-element -- SVG oficial, sem otimização */}
             <img
               src={source.logo}
               alt=""
+              loading="lazy"
               width={72}
               height={16}
               className="h-4 w-auto dark:brightness-0 dark:invert"

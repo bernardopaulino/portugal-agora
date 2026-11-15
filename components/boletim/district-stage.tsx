@@ -17,6 +17,7 @@ import { PENDING_STATE } from "@/lib/state/pending";
 import { cn } from "@/lib/utils";
 
 import { districtRisk, sceneMarkers } from "../home/immersive-home";
+import { startNavigationFeedback } from "../layout/navigation-progress";
 import { BulletinMap } from "./bulletin-map";
 import { ForecastStrip } from "./forecast-strip";
 import { ConcelhoLinks } from "./concelho-links";
@@ -84,7 +85,10 @@ export function DistrictStage({
             focus={district.slug}
             pointed={pointed}
             onPoint={setPointed}
-            onOpen={(slug) => router.push(path(`/${slug}`))}
+            onOpen={(slug) => {
+              startNavigationFeedback(path(`/${slug}`));
+              router.push(path(`/${slug}`));
+            }}
             onReady={() => setReady(true)}
             onFailed={() => setFailed(true)}
             regionLabels={{ acores: t.stage.acores, madeira: t.stage.madeira }}

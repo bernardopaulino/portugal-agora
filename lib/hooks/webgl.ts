@@ -23,6 +23,9 @@ function detect(): boolean {
   return supported;
 }
 
+/** O mesmo teste fora do React (para pedir de antemão o código das vistas 3D). */
+export const supportsWebGL2 = detect;
+
 const subscribe = () => () => {};
 
 export function useWebGL(): boolean {

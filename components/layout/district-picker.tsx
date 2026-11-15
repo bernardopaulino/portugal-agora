@@ -9,6 +9,8 @@ import { districts, getDistrict } from "@/data/districts";
 import { useCurrentPath, useI18n } from "@/lib/i18n/client";
 import { splitDistrictPath } from "@/lib/routes";
 
+import { startNavigationFeedback } from "./navigation-progress";
+
 const noop = () => () => {};
 
 /**
@@ -34,8 +36,11 @@ export function DistrictPicker() {
   );
 
   const go = (next: string) => {
-    if (next.includes("/")) router.push(path(`/${next}`));
-    else router.push(path(next ? `/${next}${topic}` : topic || "/"));
+    const href = next.includes("/")
+      ? path(`/${next}`)
+      : path(next ? `/${next}${topic}` : topic || "/");
+    startNavigationFeedback(href);
+    router.push(href);
   };
   // Escolhido antes de a página ficar pronta (telemóvel lento, página pesada):
   // o browser já mudou o campo, mas o React ainda não ouvia. Ao ficar pronto,

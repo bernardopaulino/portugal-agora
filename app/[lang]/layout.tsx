@@ -2,16 +2,19 @@ import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 
 import { EmergencyBar } from "@/components/layout/emergency-bar";
+import { NavigationProgress } from "@/components/layout/navigation-progress";
 import { OfflineBanner } from "@/components/layout/offline-banner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ServiceWorkerRegister } from "@/components/layout/sw-register";
 import { themeScript } from "@/components/layout/theme";
+import { PreloadMapOnIntent } from "@/components/map/preload";
 import { site } from "@/lib/config/site";
 import { fontClasses } from "@/lib/fonts";
 import { I18nProvider } from "@/lib/i18n/client";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { intlLocale, isLocale, locales } from "@/lib/i18n/locales";
+import { earlyStateScript } from "@/lib/state/early-fetch";
 
 import "../globals.css";
 
@@ -73,6 +76,8 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
             suppressHydrationWarning: há extensões do browser que alteram
             este <script> (ex.: acrescentam um src) antes de o React carregar. */}
         <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* O estado do país pedido já, em paralelo com o JavaScript (lib/state/early-fetch.ts). */}
+        <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: earlyStateScript }} />
       </head>
       <body className="flex min-h-dvh flex-col">
         <I18nProvider locale={lang}>
@@ -82,6 +87,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
           >
             {t.nav.skip}
           </a>
+          <NavigationProgress />
           <EmergencyBar />
           <OfflineBanner />
           <SiteHeader />
@@ -90,6 +96,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
           </main>
           <SiteFooter />
           <ServiceWorkerRegister />
+          <PreloadMapOnIntent />
         </I18nProvider>
       </body>
     </html>

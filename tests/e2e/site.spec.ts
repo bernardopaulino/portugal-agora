@@ -59,6 +59,30 @@ test("o distrito tem uma página por tema e o seletor mantém o tema", async ({ 
   await expect(pageTitle(page)).toHaveText("Avisos no Porto");
 });
 
+test("enquanto a página nova não chega, um traço no topo mostra que está a mudar", async ({
+  page,
+}) => {
+  // Uma resposta atrasada imita uma ligação lenta (também a do prefetch, se a
+  // lista do histórico mostrar a ligação para o Porto).
+  await page.route(
+    (url) => url.pathname === "/porto/avisos" && url.searchParams.has("_rsc"),
+    async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await route.continue();
+    },
+  );
+  await page.goto("/avisos");
+  await expect(pageTitle(page)).toHaveText("Avisos meteorológicos");
+  const bar = page.locator(".nav-progress");
+  await picker(page).selectOption("porto");
+  await expect(page.locator("html")).toHaveAttribute("data-navigating", "");
+  await expect
+    .poll(() => bar.evaluate((el) => Number(getComputedStyle(el).opacity)))
+    .toBeGreaterThan(0.5);
+  await expect(pageTitle(page)).toHaveText("Avisos no Porto");
+  await expect(page.locator("html")).not.toHaveAttribute("data-navigating");
+});
+
 test("regiões autónomas têm página própria", async ({ page }) => {
   await page.goto("/acores");
   await expect(pageTitle(page)).toContainText("Açores");

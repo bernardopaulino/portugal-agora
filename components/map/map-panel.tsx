@@ -29,6 +29,7 @@ import { riskColors } from "../cards/fire-risk";
 import type { OnSelect, Selection } from "../cards/types";
 import { type Level, levels, SeverityBadge } from "../status/severity";
 import { layerTopic, type LayerId, type RiskDay } from "./layers";
+import { preloaded } from "./preload";
 
 const LiveMap = dynamic(() => import("./live-map"), {
   ssr: false,
@@ -400,6 +401,10 @@ export function MapPanel({
   // Os mapas que têm vista 3D abrem nela (com a entrada da câmara); "Mapa" volta ao 2D.
   // O estado é deste componente, por isso reinicia ao mudar de página.
   const [view, setView] = useState<"map" | "3d">("3d");
+  // Se o código já veio de antemão (components/map/preload.ts), desenha-se logo, sem
+  // o "A carregar o mapa…". Escolhido uma vez: mudar depois remontaria o mapa.
+  const [Map2d] = useState(() => preloaded("map") ?? LiveMap);
+  const [Depth] = useState(() => preloaded("depth") ?? QuakeDepth);
   const webgl = useWebGL();
   const [lost, setLost] = useState(false);
   const mode3d = mode3dFor(layer, showRiskDay);
@@ -469,7 +474,7 @@ export function MapPanel({
       ) : null}
       <div className="relative h-[45vh] min-h-[300px] overflow-hidden rounded-2xl glass sm:h-[62vh] sm:min-h-[360px] lg:h-[min(66vh,720px)]">
         {active3d === "depth" ? (
-          <QuakeDepth
+          <Depth
             quakes={quakes}
             region={shownRegion}
             focus={focus}
@@ -480,7 +485,7 @@ export function MapPanel({
             onFailed={onWebglLost}
           />
         ) : (
-          <LiveMap
+          <Map2d
             state={state}
             layer={layer}
             riskDay={riskDay}

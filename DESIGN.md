@@ -285,6 +285,7 @@ Cinematic once, then still. Every transform is a perspective rotation or a move 
 - **Lists:** items below the screen tilt up from depth once as they scroll into view.
 - **Topic maps:** see Detailed Map, Camera.
 - **Page handover:** the old page recedes in depth (300ms); the new one rises from below, straightening (750ms, 120ms delay). The active nav pill slides to the new tab (280ms).
+- **Page on its way:** from the click until the new page arrives, a 3px cyan line at the very top of the screen (`.nav-progress`). It only shows after 100ms, so quick changes do not flash, then eases towards 90% over 8s; it never completes on its own and never loops. With reduced motion it appears at its end, still.
 - **Live data:** a list item that arrived in the last refresh is tinted once (2.4s).
 - **Reduced motion:** every animation jumps to its end; the scene appears in its final state with the camera at the overview and no parallax; topic maps jump; nothing waits hidden for a scroll.
 

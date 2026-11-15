@@ -8,13 +8,16 @@ import { getDistrict } from "@/data/districts";
 import type { Selection } from "@/components/cards/types";
 import type { LayerId } from "@/components/map/layers";
 import type { CountryState } from "@/lib/state/aggregate";
+import { takeEarlyState } from "@/lib/state/early-fetch";
 
 /** Quantas respostas de /api/state chegaram desde que o site abriu (ver useHighlightNew). */
 let refreshes = 0;
 export const refreshCount = () => refreshes;
 
 const fetcher = async (url: string): Promise<CountryState> => {
-  const response = await fetch(url);
+  // O primeiro pedido já foi feito pelo <head> (lib/state/early-fetch.ts).
+  const early = takeEarlyState();
+  const response = (await early?.catch(() => undefined)) ?? (await fetch(url));
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const state: CountryState = await response.json();
   refreshes += 1;
