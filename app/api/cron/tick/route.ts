@@ -10,7 +10,7 @@ import { env } from "@/lib/env";
  * Chamado com o CRON_SECRET (cabeçalho Authorization: Bearer) por um
  * agendador externo de 4 em 4 min e pelo GitHub Actions de 10 em 10 min
  * (.github/workflows/tick.yml). Verifica as fontes em atraso e envia as
- * notificações; o histórico só leva um ponto de 9 em 9 min (lib/cron/tick.ts).
+ * notificações; o histórico leva um ponto quando passaram 9 min desde o anterior (lib/cron/tick.ts).
  */
 
 function authorized(request: Request): boolean {

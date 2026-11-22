@@ -190,8 +190,15 @@ describe("nationalCaption", () => {
       azores("ACE"),
       azores("AOR"),
     ];
+    // Com o continente e os Açores na mesma janela, diz-se de que hora se fala.
     expect(caption(warnings)).toBe(
-      "Trovoada: hoje, das 13:00 às 22:00 em 5 distritos e nos Açores.",
+      "Trovoada: hoje, das 13:00 às 22:00 (hora do continente) em 5 distritos e nos Açores.",
+    );
+  });
+
+  it("só nos Açores, as horas são as dos Açores", () => {
+    expect(caption([azores("AOC")])).toBe(
+      "Trovoada: hoje, das 12:00 às 21:00 (hora dos Açores) nos Açores.",
     );
   });
 

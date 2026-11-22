@@ -3,8 +3,9 @@ import type { Severity } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
 
 /*
- * Histórico dos últimos 7 dias: de 10 em 10 minutos (o tick do GitHub
- * Actions), o nível de cada distrito e o número de incêndios ativos.
+ * Histórico dos últimos 7 dias: a cada ~12 minutos (o tick guarda um ponto
+ * quando passaram 9 min desde o anterior e o QStash chama-o de 4 em 4 min),
+ * o nível de cada distrito e o número de incêndios ativos.
  * Cada ponto é pequeno (~60 bytes): os níveis vão numa string, um
  * carácter por distrito, na ordem de `districts`.
  */
@@ -21,8 +22,13 @@ export interface HistoryPoint {
 export type HistoryLevel = Severity | "unknown";
 
 export const HISTORY_ORDER = districts.map((d) => d.slug);
-/** 7 dias de pontos de 10 em 10 minutos. */
-export const HISTORY_MAX_POINTS = 7 * 24 * 6;
+/** O que o histórico guarda. */
+export const HISTORY_DAYS = 7;
+/**
+ * Teto da lista no Redis, com folga: dois pontos nunca ficam a menos de 5 min
+ * (lib/history/store.ts). O corte que conta é o dos 7 dias, pela hora.
+ */
+export const HISTORY_MAX_POINTS = (HISTORY_DAYS * 24 * 60) / 5;
 
 const code: Record<Severity, string> = { none: "n", yellow: "y", orange: "o", red: "r" };
 const decode: Record<string, HistoryLevel> = {

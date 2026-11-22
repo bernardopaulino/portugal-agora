@@ -17,7 +17,7 @@ import { mapColors } from "../status/severity";
 
 /*
  * Histórico dos avisos: uma faixa por distrito, com o nível ao longo das
- * últimas 24 h ou 7 dias (de 10 em 10 min, ver lib/history). "Sem aviso"
+ * últimas 24 h ou 7 dias (a cada ~12 min, ver lib/history). "Sem aviso"
  * fica na cor das linhas, para só os avisos se destacarem; ao lado de
  * cada faixa, o tempo em cada nível por extenso (a cor nunca é a única
  * pista). Passar o rato ou o dedo mostra o nível e a hora.
@@ -38,7 +38,7 @@ const fetcher = async (url: string): Promise<HistoryResponse> => {
   return response.json();
 };
 
-/** Pontos do histórico, renovados de 10 em 10 min. */
+/** Pontos do histórico, renovados a cada ~12 min. */
 export function useHistory() {
   const { data } = useSWR("/api/history", fetcher, { refreshInterval: 10 * 60_000 });
   return data?.points ?? null;

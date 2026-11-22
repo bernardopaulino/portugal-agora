@@ -181,7 +181,8 @@ export function DistrictStage({
           <ForecastStrip
             days={forecast.data}
             reference={reference}
-            capital={t.capitalName(district)}
+            title={t.stage.forecastFor(t.capitalName(district))}
+            region={district.region}
           />
         ) : (
           <section

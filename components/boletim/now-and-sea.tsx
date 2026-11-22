@@ -2,7 +2,7 @@
 
 import { Droplets, Thermometer, Umbrella, Wind } from "lucide-react";
 
-import type { District } from "@/data/districts";
+import type { District, Region } from "@/data/districts";
 import { useWeather } from "@/lib/hooks/weather";
 import { useI18n } from "@/lib/i18n/client";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -103,14 +103,17 @@ export function SeaCard({
   spots,
   result,
   reference,
+  region,
 }: {
   spots: SeaSpot[];
   result: SourceResult<unknown>;
   reference: Date;
+  /** "Hoje" é o dia local: nos Açores, uma hora mais tarde. */
+  region: Region;
 }) {
   const { t, locale } = useI18n();
-  const today = localDate(reference.toISOString());
-  const tomorrow = localDate(new Date(reference.getTime() + 86_400_000).toISOString());
+  const today = localDate(reference.toISOString(), region);
+  const tomorrow = localDate(new Date(reference.getTime() + 86_400_000).toISOString(), region);
   const dayName = (date: string) =>
     date === today
       ? t.stage.today
@@ -199,7 +202,9 @@ export function NowAndSea({ district, reference }: { district: District; referen
       {observation ? (
         <ObservationCard observation={observation} result={observations} district={district} />
       ) : null}
-      {spots?.length ? <SeaCard spots={spots} result={sea} reference={reference} /> : null}
+      {spots?.length ? (
+        <SeaCard spots={spots} result={sea} reference={reference} region={district.region} />
+      ) : null}
     </div>
   );
 }

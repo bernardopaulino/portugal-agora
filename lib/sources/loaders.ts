@@ -9,7 +9,10 @@ import { FOGOS_ACTIVE_URL, fogosSchema, normalizeFires } from "./fogos";
 import {
   ipmaForecastSchema,
   ipmaForecastUrl,
+  ipmaLocalForecastSchema,
+  ipmaLocalForecastUrl,
   normalizeForecast,
+  normalizeLocalForecast,
   type ForecastDay,
 } from "./ipma-forecast";
 import {
@@ -265,6 +268,30 @@ export function forecastSource(globalIdLocal: number): SourceDef<ForecastDay[]> 
       normalize: ([raw]) => normalizeForecast(raw),
     });
     forecastSources.set(globalIdLocal, def);
+  }
+  return def;
+}
+
+const localForecastSources = new Map<number, SourceDef<ForecastDay[]>>();
+
+/**
+ * Previsão a 5 dias do local de previsão de um concelho (data/forecast-locations.ts).
+ * Chave própria: o globalIdLocal de uma capital é o mesmo do seu concelho, mas
+ * o ficheiro (e o ETag) é outro.
+ */
+export function localForecastSource(globalIdLocal: number): SourceDef<ForecastDay[]> {
+  let def = localForecastSources.get(globalIdLocal);
+  if (!def) {
+    def = source({
+      id: "ipma-forecast",
+      key: `ipma-forecast-local-${globalIdLocal}`,
+      every: 3600,
+      staleAfterMinutes: 360,
+      requests: () =>
+        [{ url: ipmaLocalForecastUrl(globalIdLocal), schema: ipmaLocalForecastSchema }] as const,
+      normalize: ([raw]) => normalizeLocalForecast(raw),
+    });
+    localForecastSources.set(globalIdLocal, def);
   }
   return def;
 }

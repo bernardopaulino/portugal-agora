@@ -11,6 +11,7 @@ import {
   fireRiskSource,
   firesSource,
   forecastSource,
+  localForecastSource,
   observationsSource,
   seaSource,
   uvSource,
@@ -224,6 +225,7 @@ export const getUv = (refresh?: RefreshMode) => one(uvSource, refresh);
 export const getAirQuality = (refresh?: RefreshMode) => one(airQualitySource, refresh);
 export const getSea = (refresh?: RefreshMode) => one(seaSource, refresh);
 export const getForecast = (globalIdLocal: number) => one(forecastSource(globalIdLocal));
+export const getLocalForecast = (globalIdLocal: number) => one(localForecastSource(globalIdLocal));
 
 export async function getFires(refresh?: RefreshMode): Promise<SourceResult<FireEvent[]>> {
   if (!features().fires) return firesDisabled;

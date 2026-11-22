@@ -44,7 +44,9 @@ const SEA_RADIUS_KM = 40;
 /** Concelhos vizinhos na tabela do risco. */
 const RISK_NEIGHBOURS = 4;
 
-const forecastFetcher = async (url: string): Promise<SourceResult<ForecastDay[]>> => {
+type Forecast = SourceResult<ForecastDay[]> & { place?: string };
+
+const forecastFetcher = async (url: string): Promise<Forecast> => {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json();
@@ -54,10 +56,20 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
   const { t, path } = useI18n();
   const state = useLiveState();
   const weather = useWeather();
-  const { data: forecast } = useSWR(`/api/forecast/${district.globalIdLocal}`, forecastFetcher, {
-    revalidateOnFocus: false,
-    refreshInterval: 60 * 60_000,
-  });
+  const forecastOptions = { revalidateOnFocus: false, refreshInterval: 60 * 60_000 };
+  // A previsão do próprio concelho; a da capital de distrito só se essa falhar.
+  const { data: own, error: ownError } = useSWR(
+    `/api/forecast/concelho/${concelho.dico}`,
+    forecastFetcher,
+    forecastOptions,
+  );
+  const ownFailed = ownError !== undefined || (own !== undefined && !own.data);
+  const { data: capitalForecast } = useSWR(
+    ownFailed ? `/api/forecast/${district.globalIdLocal}` : null,
+    forecastFetcher,
+    forecastOptions,
+  );
+  const forecast = own?.data ? own : ownFailed ? capitalForecast : undefined;
   const name = t.concelhoName(concelho.dico, concelho.name);
   const inPlace = t.inPlace(district);
 
@@ -192,7 +204,7 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
           </Section>
 
           <Section id="ar" title={t.concelho.airTitle} result={state.airQuality} size="md">
-            <AirAndUv air={air} uv={uv} />
+            <AirAndUv air={air} uv={uv} generatedAt={state.generatedAt} region={district.region} />
             <p className="text-sm text-ink-2">{t.lists.airNoteDistrict(t.capitalName(district))}</p>
           </Section>
         </div>
@@ -245,7 +257,12 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
         ) : null}
 
         {seaSpot && weather ? (
-          <SeaCard spots={[seaSpot]} result={weather.sea} reference={reference} />
+          <SeaCard
+            spots={[seaSpot]}
+            result={weather.sea}
+            reference={reference}
+            region={district.region}
+          />
         ) : null}
 
         {forecast?.data ? (
@@ -253,9 +270,20 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
             <ForecastStrip
               days={forecast.data}
               reference={reference}
-              capital={t.capitalName(district)}
+              region={district.region}
+              title={
+                forecast === own
+                  ? t.concelho.forecastTitle(name)
+                  : t.stage.forecastFor(t.capitalName(district))
+              }
             />
-            <p className="text-sm text-ink-2">{t.concelho.forecastNote(t.capitalName(district))}</p>
+            {forecast !== own ? (
+              <p className="text-sm text-ink-2">
+                {t.concelho.forecastNote(t.capitalName(district))}
+              </p>
+            ) : own.place && own.place.toLowerCase() !== concelho.name.toLowerCase() ? (
+              <p className="text-sm text-ink-2">{t.concelho.forecastPlace(own.place)}</p>
+            ) : null}
           </div>
         ) : null}
       </div>

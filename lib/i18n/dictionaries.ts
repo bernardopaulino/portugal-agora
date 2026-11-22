@@ -239,7 +239,11 @@ const pt = {
       `Sem sismos de magnitude 2 ou superior, nem sentidos, a menos de ${km} km nos últimos 7 dias.`,
     weatherTitle: "Tempo agora",
     stationDistance: (km: number) => `A estação fica a ${km} km do centro do concelho.`,
-    forecastNote: (capital: string) => `A previsão do IPMA é por capital de distrito: ${capital}.`,
+    forecastTitle: (name: string) => `Previsão para o concelho de ${name}`,
+    forecastPlace: (place: string) =>
+      `Previsão do IPMA para ${place}, o local de previsão mais próximo do concelho.`,
+    forecastNote: (capital: string) =>
+      `A previsão do concelho não está disponível; esta é a da capital de distrito, ${capital}.`,
     listTitle: "Concelhos",
     listIntro: (inPlace: string) =>
       `Cada concelho ${inPlace}, com o risco de incêndio, os incêndios, os sismos perto e o tempo agora.`,
@@ -279,7 +283,7 @@ const pt = {
     } as Record<"avisos" | "incendios" | "sismos", string>,
     firesTitle: (where: string) => `Incêndios ${where} · Portugal Agora`,
     firesDescription: (where: string) =>
-      `Incêndios em curso ${where}, com dados do Fogos.pt (ANEPC). Informativo: não substitui as autoridades. Em emergência, ligue 112.`,
+      `Incêndios em curso ou em resolução ${where}, com dados do Fogos.pt (ANEPC). Informativo: não substitui as autoridades. Em emergência, ligue 112.`,
     fireStart: (when: string) => `Início: ${when}.`,
     quakesTitle: (where: string) => `Sismos ${where} · Portugal Agora`,
     quakesDescription: (where: string) =>
@@ -428,7 +432,7 @@ const pt = {
           : `O Fogos.pt não tem dados de incêndios ${d.inName}.`,
     quakesTitle: (inPlace: string) => `Sismos ${inPlace}`,
     quakesIntro: (inPlace: string) =>
-      `Sismos de magnitude 2 ou superior registados pelo IPMA ${inPlace} nos últimos 7 dias.`,
+      `Sismos de magnitude 2 ou superior, e os que foram sentidos, registados pelo IPMA ${inPlace} nos últimos 7 dias.`,
     riskTitle: (inPlace: string) => `Risco de incêndio, ar e UV ${inPlace}`,
     airTitle: (inPlace: string) => `Ar e raios UV ${inPlace}`,
     riskIntro: (capital: string) =>
@@ -844,7 +848,11 @@ const en: Dictionary = {
       `No earthquakes of magnitude 2 or more, or felt, within ${km} km in the last 7 days.`,
     weatherTitle: "Weather now",
     stationDistance: (km) => `The station is ${km} km from the centre of the municipality.`,
-    forecastNote: (capital) => `IPMA forecasts are by district capital: ${capital}.`,
+    forecastTitle: (name) => `Forecast for ${name}`,
+    forecastPlace: (place) =>
+      `IPMA forecast for ${place}, the closest forecast location to the municipality.`,
+    forecastNote: (capital) =>
+      `The municipality forecast isn't available; this is the district capital's, ${capital}.`,
     listTitle: "Municipalities",
     listIntro: (inPlace) =>
       `Each municipality ${inPlace}, with wildfire risk, wildfires, nearby earthquakes and the weather now.`,
@@ -883,7 +891,7 @@ const en: Dictionary = {
     },
     firesTitle: (where) => `Wildfires ${where} · Portugal Agora`,
     firesDescription: (where) =>
-      `Active wildfires ${where}, with data from Fogos.pt (ANEPC). For information only: it does not replace the authorities. In an emergency, call 112.`,
+      `Wildfires in progress or being resolved ${where}, with data from Fogos.pt (ANEPC). For information only: it does not replace the authorities. In an emergency, call 112.`,
     fireStart: (when) => `Started: ${when}.`,
     quakesTitle: (where) => `Earthquakes ${where} · Portugal Agora`,
     quakesDescription: (where) =>
@@ -957,7 +965,8 @@ const en: Dictionary = {
     nationalCalm: "No weather warnings and no active wildfires.",
     firstWindow: (when, places) => `${when} ${places}`,
     nextWindow: (when, places) => `${when}, ${places}`,
-    others: (n) => ` ${plural(n, "other warning", "other warnings")} in force.`,
+    others: (n) =>
+      ` There ${n === 1 ? "is" : "are"} ${plural(n, "other kind of warning", "other kinds of warning")}.`,
   },
   stage: {
     mapLabel: "Map of Portugal with the warning level of each district",
@@ -1028,7 +1037,7 @@ const en: Dictionary = {
     },
     quakesTitle: (inPlace) => `Earthquakes ${inPlace}`,
     quakesIntro: (inPlace) =>
-      `Earthquakes of magnitude 2 or more recorded by IPMA ${inPlace} in the last 7 days.`,
+      `Earthquakes of magnitude 2 or more, and those that were felt, recorded by IPMA ${inPlace} in the last 7 days.`,
     riskTitle: (inPlace) => `Wildfire risk, air and UV ${inPlace}`,
     airTitle: (inPlace) => `Air and UV ${inPlace}`,
     riskIntro: (capital) =>

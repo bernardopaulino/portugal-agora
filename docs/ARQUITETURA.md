@@ -23,7 +23,7 @@ Browser ──(SWR, 60 s)──▶ CDN (30 s) ──▶ /api/state ──▶ get
                                      ├─ 304 ou igual → só meta:<fonte> (a hora da verificação)
                                      └─ novo → validação Zod, normalização, src:<fonte>
 
-Agendador externo (2 min) ──▶ /api/cron/tick: verifica as fontes em atraso, notificações, histórico
+Agendador externo (QStash, 4 min) ──▶ /api/cron/tick: verifica as fontes em atraso, notificações, histórico
 ```
 
 - **O Redis é a única cache de dados do servidor** (`lib/cache/source-store.ts`, `lib/sources/registry.ts`). Cada fonte é verificada ao seu ritmo (`every` em `lib/sources/loaders.ts`: 2 min para avisos, sismos e incêndios, até 1 h para o mar e as previsões), seja quantas forem as pessoas no site. Um pedido só espera pela fonte quando não há dados, ou quando são mais antigos do que `staleAfterMinutes`.

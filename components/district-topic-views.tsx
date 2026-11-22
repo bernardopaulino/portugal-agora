@@ -198,7 +198,7 @@ export function DistrictRiskView({ district }: Props) {
         ) : null}
 
         <Section id="ar" title={t.sections.airUv} result={state.airQuality}>
-          <AirAndUv air={air} uv={uv} />
+          <AirAndUv air={air} uv={uv} generatedAt={state.generatedAt} region={district.region} />
           <p className="text-sm text-ink-2">{t.lists.airNoteDistrict(t.capitalName(district))}</p>
         </Section>
       </div>

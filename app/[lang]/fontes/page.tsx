@@ -74,16 +74,17 @@ function Portuguese() {
       </p>
       <ul>
         <li>
-          Avisos: consultados a cada 5 minutos. As horas do IPMA são UTC e mostramo-las na hora
+          Avisos: consultados a cada 2 a 4 minutos. As horas do IPMA são UTC e mostramo-las na hora
           local (nos Açores, na hora dos Açores).
         </li>
         <li>
-          Sismos: consultados a cada 5 minutos. Listamos os dos últimos 7 dias com magnitude 2 ou
-          superior, e todos os que foram sentidos.
+          Sismos: consultados a cada 2 a 4 minutos. Listamos os dos últimos 7 dias com magnitude 2
+          ou superior, e todos os que foram sentidos.
         </li>
         <li>
-          Risco de incêndio rural por concelho (hoje e amanhã), índice UV e previsão a 5 dias:
-          consultados de hora a hora.
+          Risco de incêndio rural por concelho (hoje e amanhã), consultado a cada 15 minutos; índice
+          UV, a cada 30 minutos; previsão a 5 dias (da capital de cada distrito e de cada concelho),
+          de hora a hora.
         </li>
         <li>
           Tempo agora: a observação mais recente da estação meteorológica do IPMA mais próxima da
@@ -111,7 +112,7 @@ function Portuguese() {
         </a>
         , que reúne as ocorrências da ANEPC no continente e as da Madeira. Não tem dados dos Açores:
         aí, consulte o Serviço Regional de Proteção Civil e Bombeiros dos Açores. Consultado a cada
-        2 minutos.
+        2 a 4 minutos.
       </p>
       <h3>Como classificamos os incêndios</h3>
       <p>
@@ -130,7 +131,7 @@ function Portuguese() {
         <a href="https://atmosphere.copernicus.eu" rel="noopener">
           Copernicus CAMS
         </a>{" "}
-        (licença CC BY 4.0). Consultado a cada 10 minutos.
+        (licença CC BY 4.0). Consultado a cada 30 minutos.
       </p>
       <p>
         É uma <strong>estimativa de modelo</strong> para a capital de cada distrito, não uma medição
@@ -267,16 +268,17 @@ function English() {
       </p>
       <ul>
         <li>
-          Warnings: checked every 5 minutes. IPMA times are in UTC and we show them in local time
-          (Azores time in the Azores).
+          Warnings: checked every 2 to 4 minutes. IPMA times are in UTC and we show them in local
+          time (Azores time in the Azores).
         </li>
         <li>
-          Earthquakes: checked every 5 minutes. We list those from the last 7 days with magnitude 2
-          or more, and every one that was felt.
+          Earthquakes: checked every 2 to 4 minutes. We list those from the last 7 days with
+          magnitude 2 or more, and every one that was felt.
         </li>
         <li>
-          Rural wildfire risk by municipality (today and tomorrow), UV index and 5-day forecast:
-          checked every hour.
+          Rural wildfire risk by municipality (today and tomorrow), checked every 15 minutes; UV
+          index, every 30 minutes; 5-day forecast (for each district capital and each municipality),
+          every hour.
         </li>
         <li>
           Weather now: the latest reading from the IPMA weather station closest to each district
@@ -304,7 +306,7 @@ function English() {
         </a>
         , which gathers incidents from ANEPC (Civil Protection) on the mainland and those in
         Madeira. It has no data for the Azores: there, see the Azores Regional Civil Protection
-        Service. Checked every 2 minutes.
+        Service. Checked every 2 to 4 minutes.
       </p>
       <h3>How we classify wildfires</h3>
       <p>
@@ -322,7 +324,7 @@ function English() {
         <a href="https://atmosphere.copernicus.eu" rel="noopener">
           Copernicus CAMS
         </a>{" "}
-        service (CC BY 4.0 licence). Checked every 10 minutes.
+        service (CC BY 4.0 licence). Checked every 30 minutes.
       </p>
       <p>
         It is a <strong>model estimate</strong> for each district capital, not a station

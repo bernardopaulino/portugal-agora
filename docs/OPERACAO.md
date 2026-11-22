@@ -25,7 +25,7 @@ Para confirmar depois de mexer nas páginas: `npm run build` e, no `.next/preren
 
 O repositório é público, por isso os workflows agendados não têm custo. Os cron da Vercel no plano Hobby só correm uma vez por dia.
 
-- **Tick** (`lib/cron/tick.ts`, em `/api/cron/tick`): verifica as fontes em atraso, envia as notificações quando o nível de um distrito sobe e, de 9 em 9 min, junta um ponto ao histórico. Corre de três maneiras:
+- **Tick** (`lib/cron/tick.ts`, em `/api/cron/tick`): verifica as fontes em atraso, envia as notificações quando o nível de um distrito sobe e junta um ponto ao histórico quando passaram 9 min desde o anterior (com o QStash de 4 em 4 min, um ponto a cada ~12 min; guardam-se 7 dias). Corre de três maneiras:
   - **Agendador externo, de 4 em 4 min** (o principal): mantém os dados frescos e as notificações a tempo mesmo com o site fechado. Os cron da Vercel no Hobby só correm uma vez por dia, por isso usa-se um serviço de fora, com o cabeçalho `Authorization: Bearer <CRON_SECRET>`:
     - **Upstash QStash** (o que está em uso): produto `portugal-agora-tick` na integração Upstash da Vercel (plano Free, região UE, sem conta nova). O plano grátis anunciado na Vercel é de 500 mensagens/dia, por isso o cron é `*/4 * * * *` (360/dia). Destino `https://portugalagora.pt/api/cron/tick`, cabeçalhos `Upstash-Method: GET`, `Upstash-Retries: 0` (a chamada seguinte vem 4 min depois) e `Upstash-Forward-Authorization: Bearer <CRON_SECRET>` (o QStash envia-o como `Authorization`). As chamadas veem-se em Logs; 401 = segredo diferente do da Vercel;
     - ou **cron-job.org**: um trabalho com o mesmo endereço e o cabeçalho `Authorization`.

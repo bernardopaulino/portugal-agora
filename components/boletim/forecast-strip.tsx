@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import type { Region } from "@/data/districts";
 import type { ForecastDay } from "@/lib/sources/ipma-forecast";
 import { useI18n } from "@/lib/i18n/client";
 import { formatWeekday, localDate } from "@/lib/time/format";
@@ -36,15 +37,19 @@ function weatherIcon(id: number): LucideIcon {
 export function ForecastStrip({
   days,
   reference,
-  capital,
+  title,
+  region,
 }: {
   days: ForecastDay[];
   reference: Date;
-  capital: string;
+  /** "Hoje" é o dia local: nos Açores, uma hora mais tarde. */
+  region: Region;
+  /** "Previsão para Lisboa", "Previsão para o concelho de Sintra". */
+  title: string;
 }) {
   const { t, locale } = useI18n();
-  const today = localDate(reference.toISOString());
-  const tomorrow = localDate(new Date(reference.getTime() + 86_400_000).toISOString());
+  const today = localDate(reference.toISOString(), region);
+  const tomorrow = localDate(new Date(reference.getTime() + 86_400_000).toISOString(), region);
   const name = (date: string) =>
     date === today
       ? t.stage.today
@@ -55,7 +60,7 @@ export function ForecastStrip({
   return (
     <section aria-labelledby="previsao-titulo" className="flex flex-col gap-3">
       <h2 id="previsao-titulo" className="font-display text-2xl font-bold">
-        {t.stage.forecastFor(capital)}
+        {title}
       </h2>
       <ol className="flip-in grid grid-cols-5 overflow-hidden rounded-2xl glass">
         {days.slice(0, 5).map((d, i) => {

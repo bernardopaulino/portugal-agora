@@ -1,9 +1,9 @@
 "use client";
 
-import { getDistrict } from "@/data/districts";
+import { getDistrict, type Region } from "@/data/districts";
 import { useI18n } from "@/lib/i18n/client";
 import type { AirQualityReading, UvReading } from "@/lib/sources/types";
-import { formatNumber } from "@/lib/time/format";
+import { formatNumber, localDate } from "@/lib/time/format";
 
 import { EmptyState } from "../status/section";
 import { SeverityBadge } from "../status/severity";
@@ -35,9 +35,22 @@ export function AirQualitySummary({ readings }: { readings: AirQualityReading[] 
 }
 
 /** Na página do distrito: qualidade do ar e UV da capital. */
-export function AirAndUv({ air, uv }: { air?: AirQualityReading; uv?: UvReading[] }) {
+export function AirAndUv({
+  air,
+  uv,
+  generatedAt,
+  region,
+}: {
+  air?: AirQualityReading;
+  uv?: UvReading[];
+  /** Hora dos dados: o UV "de hoje" é o do dia local, não o primeiro da lista. */
+  generatedAt: string;
+  region: Region;
+}) {
   const { t, locale } = useI18n();
-  const today = uv?.[0];
+  // Depois da meia-noite, até o IPMA publicar o ficheiro novo, o primeiro dia ainda é ontem.
+  const day = localDate(generatedAt, region);
+  const today = uv?.find((u) => u.date === day);
   return (
     <dl className="grid gap-y-5">
       <div className="flex flex-col gap-2 border-t border-line pt-3">

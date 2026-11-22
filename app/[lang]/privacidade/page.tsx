@@ -49,9 +49,10 @@ function Portuguese() {
           As notificações de avisos são opcionais. Se as ativar, o seu navegador cria um endereço
           técnico de notificação (do serviço de push do Google, da Mozilla ou da Apple, consoante o
           navegador) e guardamos esse endereço, os distritos e o nível que escolheu, só para lhe
-          enviar os avisos. Não fica associado a nome, email nem localização. Ao desativar as
-          notificações, apagamos esse registo; o mesmo acontece quando o serviço de push nos diz que
-          o endereço deixou de existir.
+          enviar os avisos. Não fica associado a nome, email nem localização. A mesma escolha fica
+          também no seu navegador, para a página saber se as notificações estão ativas. Ao desativar
+          as notificações, apagamos esse registo; o mesmo acontece quando o serviço de push nos diz
+          que o endereço deixou de existir.
         </li>
         <li>
           Os mapas são carregados do OpenFreeMap e, na vista 3D dos incêndios, o relevo vem da
@@ -96,7 +97,8 @@ function English() {
           Warning notifications are optional. If you turn them on, your browser creates a technical
           notification address (from Google&apos;s, Mozilla&apos;s or Apple&apos;s push service,
           depending on the browser) and we store that address, the districts and the level you
-          chose, only to send you the warnings. It is not linked to a name, email or location.
+          chose, only to send you the warnings. It is not linked to a name, email or location. The
+          same choice is also kept in your browser, so the page knows whether notifications are on.
           Turning notifications off deletes that record; so does the push service telling us the
           address no longer exists.
         </li>

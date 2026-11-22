@@ -341,6 +341,45 @@ test("página de um concelho: dados ao abrir, sem dados no HTML", async ({ page,
   expect((await request.get("/lisboa/nao-existe")).status()).toBe(404);
 });
 
+test("a previsão de um concelho é a do concelho, não a da capital", async ({ page, request }) => {
+  const forecast = { status: "ok", fetchedAt: new Date().toISOString() };
+  const day = (date: string, max: number) => ({
+    date,
+    min: 10,
+    max,
+    rainChance: 0,
+    weather: "Céu limpo",
+    weatherId: 1,
+    wind: "Vento fraco de norte",
+  });
+  const days = (max: number) =>
+    [0, 1, 2, 3, 4].map((i) =>
+      day(new Date(Date.now() + i * 86_400_000).toISOString().slice(0, 10), max + i),
+    );
+  await page.route("**/api/forecast/concelho/1111", (route) =>
+    route.fulfill({ json: { ...forecast, id: "ipma-forecast", data: days(31), place: "Sintra" } }),
+  );
+  await page.goto("/lisboa/sintra");
+  await expect(
+    page.getByRole("heading", { name: "Previsão para o concelho de Sintra" }),
+  ).toBeVisible();
+  await expect(page.locator("#previsao-titulo + ol")).toContainText("31°");
+  await expect(page.getByText(/capital de distrito/)).toHaveCount(0);
+
+  // Sem a previsão do concelho, a da capital, e diz-se.
+  await page.route("**/api/forecast/concelho/1106", (route) =>
+    route.fulfill({ json: { ...forecast, id: "ipma-forecast", status: "error", data: null } }),
+  );
+  await page.goto("/lisboa/lisboa");
+  await expect(page.getByRole("heading", { name: "Previsão para Lisboa" })).toBeVisible();
+  await expect(page.getByText(/esta é a da capital de distrito, Lisboa/)).toBeVisible();
+
+  // O endpoint: um local por concelho; nas ilhas, o local de previsão mais próximo.
+  const ribeiraBrava = await (await request.get("/api/forecast/concelho/3107")).json();
+  expect(ribeiraBrava.place).toBe("Lugar de Baixo");
+  expect((await request.get("/api/forecast/concelho/9999")).status()).toBe(404);
+});
+
 test("o seletor mostra os concelhos do distrito e sai bem de um concelho", async ({ page }) => {
   await page.goto("/lisboa");
   await picker(page).selectOption("lisboa/sintra");

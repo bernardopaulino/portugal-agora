@@ -427,7 +427,12 @@ export function nationalCaption(state: CountryState, now: Date, t: Dictionary): 
   }
   const seen = new Map<string, Set<string>>();
   for (const w of top.windows) {
-    const label = formatRange(w.startsAt, w.endsAt, now, "continente", t.locale);
+    // Como nas listas dos avisos: só Açores, na hora deles; misturado, diz-se qual é a hora.
+    const allAzores = w.items.every((item) => item.place.region === "acores");
+    const mixed = !allAzores && w.items.some((item) => item.place.region === "acores");
+    const label =
+      formatRange(w.startsAt, w.endsAt, now, allAzores ? "acores" : "continente", t.locale) +
+      (allAzores ? t.lists.azoresTime : mixed ? t.lists.mainlandTime : "");
     const slugs = seen.get(label) ?? new Set<string>();
     for (const item of w.items) if (item.place.district) slugs.add(item.place.district);
     seen.set(label, slugs);
