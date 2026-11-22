@@ -47,6 +47,23 @@ const words: Record<string, string> = {
   "partículas pm10": "PM10 particles",
   "partículas pm2,5": "PM2.5 particles",
   "partículas finas": "fine particles",
+  // Classes do índice de seca (PDSI, IPMA)
+  "seca extrema": "Extreme drought",
+  "seca severa": "Severe drought",
+  "seca moderada": "Moderate drought",
+  "seca fraca": "Mild drought",
+  normal: "Normal",
+  "chuva fraca": "Slightly wet",
+  "chuva moderada": "Moderately wet",
+  "chuva severa": "Very wet",
+  "chuva extrema": "Extremely wet",
+  // Pólen (CAMS)
+  gramíneas: "grasses",
+  oliveira: "olive",
+  bétula: "birch",
+  amieiro: "alder",
+  artemísia: "mugwort",
+  ambrósia: "ragweed",
   partículas: "particles",
   // Índice UV e risco de incêndio
   baixo: "Low",

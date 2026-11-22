@@ -16,6 +16,7 @@ import { FireRiskSummary } from "./cards/fire-risk";
 import { QuakeList } from "./cards/quake-list";
 import { WarningGroups } from "./cards/warning-groups";
 import { FeedLink } from "./cards/feed-link";
+import { HotspotsSection } from "./cards/hotspots";
 import { FiresHistorySection, WarningsHistorySection } from "./history/history-sections";
 import { NationalYearSection } from "./history/year-history";
 import type { LayerId } from "./map/layers";
@@ -208,6 +209,7 @@ export function FiresView() {
         )}
         <FeedLink topic="incendios" />
       </Section>
+      <HotspotsSection fires={state.fires.data ?? []} reference={reference} />
       <FiresHistorySection />
     </TopicLayout>
   );

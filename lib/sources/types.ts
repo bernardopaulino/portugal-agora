@@ -24,7 +24,10 @@ export type SourceId =
   | "ipma-observations"
   | "ipma-sea"
   | "fogos"
-  | "openmeteo-aq";
+  | "openmeteo-aq"
+  | "ipma-precip"
+  | "ipma-pdsi"
+  | "nasa-firms";
 
 export interface Place {
   /** Slug do distrito/região, quando conhecido. */
@@ -85,6 +88,11 @@ export interface AirQualityReading {
   severity: Severity;
   pollutant: string;
   observedAt: string;
+  /**
+   * Pólen previsto para hoje (máximo do dia, grãos/m³), do mais ao menos
+   * abundante, só os tipos com algum. null onde o CAMS não chega (Açores).
+   */
+  pollen?: { type: string; grains: number }[] | null;
 }
 
 export interface UvReading {

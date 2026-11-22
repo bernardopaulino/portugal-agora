@@ -25,6 +25,7 @@ export const attributions = {
   ipma: { label: "IPMA", url: "https://www.ipma.pt" },
   fogos: { label: "Fonte: Fogos.pt", url: "https://fogos.pt" },
   openMeteo: { label: "Open-Meteo / Copernicus CAMS", url: "https://open-meteo.com" },
+  firms: { label: "NASA FIRMS", url: "https://firms.modaps.eosdis.nasa.gov" },
   openFreeMap: {
     label: "© OpenFreeMap © OpenMapTiles © OpenStreetMap",
     url: "https://openfreemap.org",

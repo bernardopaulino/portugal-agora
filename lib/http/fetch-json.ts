@@ -25,6 +25,8 @@ export interface FetchJsonOptions<T> {
   headers?: Record<string, string>;
   /** Injeção para testes. */
   fetchImpl?: typeof fetch;
+  /** "text": o corpo vai como texto ao esquema (ficheiros CSV). Por defeito, JSON. */
+  format?: "json" | "text";
 }
 
 /** Validadores HTTP da última resposta, para perguntar "mudou?" na seguinte. */
@@ -58,7 +60,14 @@ export async function fetchJsonIfChanged<T>(
   url: string,
   options: FetchJsonOptions<T> & { validators?: Validators },
 ): Promise<Conditional<T>> {
-  const { schema, timeoutMs = 3000, headers = {}, fetchImpl = fetch, validators } = options;
+  const {
+    schema,
+    timeoutMs = 3000,
+    headers = {},
+    fetchImpl = fetch,
+    validators,
+    format = "json",
+  } = options;
   const e = env();
   const conditional: Record<string, string> = {};
   if (validators?.etag) conditional["If-None-Match"] = validators.etag;
@@ -68,7 +77,7 @@ export async function fetchJsonIfChanged<T>(
   try {
     response = await fetchImpl(url, {
       headers: {
-        Accept: "application/json",
+        Accept: format === "text" ? "text/csv, text/plain, */*" : "application/json",
         "User-Agent": buildUserAgent({
           siteUrl: e.NEXT_PUBLIC_SITE_URL,
           contactEmail: e.CONTACT_EMAIL,
@@ -100,7 +109,7 @@ export async function fetchJsonIfChanged<T>(
 
   let data: unknown;
   try {
-    data = await response.json();
+    data = format === "text" ? await response.text() : await response.json();
   } catch {
     throw new SourceError(`Resposta não é JSON válido: ${url}`, "parse");
   }

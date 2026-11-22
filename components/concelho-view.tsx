@@ -17,6 +17,7 @@ import { HourlyStrip } from "./boletim/hourly-strip";
 import { ObservationCard, SeaCard } from "./boletim/now-and-sea";
 import { PageHead } from "./boletim/page-head";
 import { AirAndUv } from "./cards/air-uv";
+import { RainAndDrought } from "./cards/rain-drought";
 import { FireList } from "./cards/fire-list";
 import { QuakeList } from "./cards/quake-list";
 import { RiskTable } from "./cards/risk-table";
@@ -214,6 +215,8 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
             <AirAndUv air={air} uv={uv} generatedAt={state.generatedAt} region={district.region} />
             <p className="text-sm text-ink-2">{t.lists.airNoteDistrict(t.capitalName(district))}</p>
           </Section>
+
+          {district.region === "continente" ? <RainAndDrought dico={concelho.dico} /> : null}
         </div>
 
         <Section id="avisos" title={t.concelho.warningsTitle} result={state.warnings}>

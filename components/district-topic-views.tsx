@@ -9,6 +9,7 @@ import { districtFireRisk } from "@/lib/state/district";
 import { AirAndUv } from "./cards/air-uv";
 import { FeedLink } from "./cards/feed-link";
 import { FireList } from "./cards/fire-list";
+import { HotspotsSection } from "./cards/hotspots";
 import { WarningsHistorySection } from "./history/history-sections";
 import { DistrictYearSection } from "./history/year-history";
 import { PushSection } from "./push/push-toggle";
@@ -109,6 +110,7 @@ export function DistrictFiresView({ district }: Props) {
         )}
         {covered ? <FeedLink topic="incendios" district={district} /> : null}
       </Section>
+      <HotspotsSection district={district} fires={fires} reference={reference} />
     </TopicLayout>
   );
 }

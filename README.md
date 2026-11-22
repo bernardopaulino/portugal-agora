@@ -65,20 +65,22 @@ WCAG 2.2 AA, verificado com axe em cada build. Letra Atkinson Hyperlegible Next 
 
 ## Fontes de dados
 
-| Dados                                   | Fonte                                                                                               | Atualização |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------- |
-| Avisos meteorológicos                   | [IPMA](https://api.ipma.pt)                                                                         | 2–4 min     |
-| Sismos (continente, Madeira, Açores)    | IPMA                                                                                                | 2–4 min     |
-| Risco de incêndio rural por concelho    | IPMA (só continente)                                                                                | 15 min      |
-| Índice UV                               | IPMA                                                                                                | 30 min      |
-| Previsão a 5 dias (capitais, concelhos) | IPMA                                                                                                | 1 h         |
-| Tempo observado (estações)              | IPMA (estação mais próxima da capital de cada distrito)                                             | 10 min      |
-| Estado do mar (12 pontos da costa)      | IPMA (hoje e os 2 dias seguintes)                                                                   | 1 h         |
-| Incêndios ativos                        | [Fogos.pt](https://fogos.pt) (dados ANEPC), requer chave                                            | 2–4 min     |
-| Qualidade do ar (estimativa de modelo)  | [Open-Meteo](https://open-meteo.com) / Copernicus CAMS, CC BY 4.0                                   | 30 min      |
-| Mapa base                               | [OpenFreeMap](https://openfreemap.org), © OpenStreetMap                                             | —           |
-| Relevo (vista 3D dos incêndios)         | [Mapterhorn](https://mapterhorn.com) (DGT, IGP, Copernicus GLO-30)                                  | —           |
-| Limites de distritos e concelhos        | CAOP 2025, [DGT](https://www.dgterritorio.gov.pt), CC BY; concelhos das ilhas: OpenStreetMap (ODbL) | estático    |
+| Dados                                      | Fonte                                                                                                   | Atualização |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------- | ----------- |
+| Avisos meteorológicos                      | [IPMA](https://api.ipma.pt)                                                                             | 2–4 min     |
+| Sismos (continente, Madeira, Açores)       | IPMA                                                                                                    | 2–4 min     |
+| Risco de incêndio rural por concelho       | IPMA (só continente)                                                                                    | 15 min      |
+| Índice UV                                  | IPMA                                                                                                    | 30 min      |
+| Previsão a 5 dias (capitais, concelhos)    | IPMA                                                                                                    | 1 h         |
+| Tempo observado (estações)                 | IPMA (estação mais próxima da capital de cada distrito)                                                 | 10 min      |
+| Estado do mar (12 pontos da costa)         | IPMA (hoje e os 2 dias seguintes)                                                                       | 1 h         |
+| Incêndios ativos                           | [Fogos.pt](https://fogos.pt) (dados ANEPC), requer chave                                                | 2–4 min     |
+| Qualidade do ar e pólen (estimativa)       | [Open-Meteo](https://open-meteo.com) / Copernicus CAMS, CC BY 4.0                                       | 30 min      |
+| Chuva (20 dias) e seca (PDSI) por concelho | IPMA (só continente)                                                                                    | 6 h / 1 dia |
+| Pontos de calor por satélite               | [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov) (VIIRS), dados abertos; chave opcional para as ilhas | 30 min      |
+| Mapa base                                  | [OpenFreeMap](https://openfreemap.org), © OpenStreetMap                                                 | —           |
+| Relevo (vista 3D dos incêndios)            | [Mapterhorn](https://mapterhorn.com) (DGT, IGP, Copernicus GLO-30)                                      | —           |
+| Limites de distritos e concelhos           | CAOP 2025, [DGT](https://www.dgterritorio.gov.pt), CC BY; concelhos das ilhas: OpenStreetMap (ODbL)     | estático    |
 
 A página [/fontes](https://portugalagora.pt/fontes) explica cada fonte e como classificamos incêndios, sismos e qualidade do ar.
 

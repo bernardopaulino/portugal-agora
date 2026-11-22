@@ -556,3 +556,80 @@ test.describe("Perto de mim em Oeiras", () => {
     await expect(page).toHaveURL(/\/lisboa\/oeiras$/);
   });
 });
+
+test.describe("dados novos: chuva, seca, pólen e satélite", () => {
+  // O service worker serve o /api/state: sem ele, o Playwright interceta tudo.
+  test.use({ serviceWorkers: "block" });
+
+  test("concelho: chuva dos últimos 20 dias, seca e pólen", async ({ page }) => {
+    const ok = { status: "ok", fetchedAt: new Date().toISOString() };
+    const days = Array.from({ length: 20 }, (_, i) => (i === 9 ? 86.7 : i % 3));
+    await page.route("**/api/clima/1111", (route) =>
+      route.fulfill({
+        json: {
+          rain: { ...ok, id: "ipma-precip", data: { start: "2026-11-02", days } },
+          drought: {
+            ...ok,
+            id: "ipma-pdsi",
+            data: { month: "2026-10", value: -3.7, label: "Seca severa", level: -3 },
+          },
+        },
+      }),
+    );
+    await page.route("**/api/state", async (route) => {
+      const state = await (await route.fetch()).json();
+      const air = (state.airQuality.data ?? []).map((a: { district: string }) =>
+        a.district === "lisboa" ? { ...a, pollen: [{ type: "gramíneas", grains: 22 }] } : a,
+      );
+      await route.fulfill({ json: { ...state, airQuality: { ...state.airQuality, data: air } } });
+    });
+    await page.goto("/lisboa/sintra");
+    const section = page.locator("#chuva-seca");
+    await expect(page.getByRole("heading", { name: "Chuva e seca" })).toBeVisible();
+    await expect(section).toContainText("Nos últimos 20 dias choveu");
+    await expect(section).toContainText("com 87 mm");
+    await expect(section).toContainText(
+      "Índice de seca em outubro de 2026: seca severa (PDSI -3,7)",
+    );
+    await expect(page.locator("#ar")).toContainText("Gramíneas: 22 grãos/m³");
+  });
+
+  test("incêndios: deteções de satélite por concelho, com a ressalva", async ({ page }) => {
+    const spot = (id: string, district: string, label: string, dico: string) => ({
+      id,
+      coordinates: [-8.08, 40.52],
+      detectedAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
+      satellite: "NOAA-20",
+      frp: 18,
+      confidence: "nominal",
+      place: { district, region: "continente", label },
+      dico,
+    });
+    await page.route("**/api/hotspots", (route) =>
+      route.fulfill({
+        json: {
+          id: "nasa-firms",
+          status: "ok",
+          fetchedAt: new Date().toISOString(),
+          coverage: "continente",
+          data: [
+            spot("a", "viseu", "Tondela", "1821"),
+            spot("b", "viseu", "Tondela", "1821"),
+            spot("c", "setubal", "Sines", "1513"),
+          ],
+        },
+      }),
+    );
+    await page.goto("/incendios");
+    const section = page.locator("#satelite");
+    await expect(
+      page.getByRole("heading", { name: "Deteções de satélite (últimas 24 h)" }),
+    ).toBeVisible();
+    await expect(section).toContainText("Não são incêndios confirmados");
+    await expect(section.locator("li", { hasText: "Tondela" })).toContainText("2 deteções");
+    await page.goto("/viseu/incendios");
+    await expect(page.locator("#satelite li")).toHaveCount(1);
+    await page.goto("/acores/incendios");
+    await expect(page.locator("#satelite")).toContainText("ainda não incluem os Açores");
+  });
+});

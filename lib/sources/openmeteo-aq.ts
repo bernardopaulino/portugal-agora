@@ -7,12 +7,26 @@ import { districts } from "@/data/districts";
 import type { AirQualityReading, Severity } from "./types";
 
 const POLLUTANTS = ["pm2_5", "pm10", "nitrogen_dioxide", "ozone"] as const;
+/** Pólen do CAMS (grãos/m³). Os Açores ficam fora do domínio europeu: vêm a null. */
+const POLLEN = ["grass", "olive", "birch", "alder", "mugwort", "ragweed"] as const;
+
+const pollenNames: Record<(typeof POLLEN)[number], string> = {
+  grass: "gramíneas",
+  olive: "oliveira",
+  birch: "bétula",
+  alder: "amieiro",
+  mugwort: "artemísia",
+  ragweed: "ambrósia",
+};
 
 export function openMeteoAqUrl(): string {
   const params = new URLSearchParams({
     latitude: districts.map((d) => d.lat).join(","),
     longitude: districts.map((d) => d.lon).join(","),
     current: ["european_aqi", ...POLLUTANTS.map((p) => `european_aqi_${p}`)].join(","),
+    // O pólen tem o pico a meio do dia: interessa o máximo previsto para hoje.
+    hourly: POLLEN.map((p) => `${p}_pollen`).join(","),
+    forecast_days: "1",
     timezone: "UTC",
   });
   return `https://air-quality-api.open-meteo.com/v1/air-quality?${params}`;
@@ -27,6 +41,7 @@ const reading = z.object({
     european_aqi_nitrogen_dioxide: z.number().nullish(),
     european_aqi_ozone: z.number().nullish(),
   }),
+  hourly: z.record(z.string(), z.array(z.union([z.number(), z.string()]).nullable())).optional(),
 });
 
 /** Com várias coordenadas a API devolve uma lista; com uma só, um objeto. */
@@ -60,6 +75,7 @@ export function normalizeAirQuality(raw: OpenMeteoAqRaw): AirQualityReading[] {
       (a, b) => b[1] - a[1],
     )[0]?.[0];
     const level = eaqiLevel(value);
+    const pollen = pollenToday(r.hourly);
     return [
       {
         district: district.slug,
@@ -68,7 +84,25 @@ export function normalizeAirQuality(raw: OpenMeteoAqRaw): AirQualityReading[] {
         severity: level.severity,
         pollutant: dominant ? pollutantNames[dominant] : "",
         observedAt: new Date(`${r.current.time}Z`).toISOString(),
+        pollen,
       },
     ];
   });
+}
+
+/** O máximo de cada pólen nas horas de hoje; null quando o CAMS não cobre o sítio (Açores). */
+function pollenToday(
+  hourly: Record<string, (number | string | null)[]> | undefined,
+): { type: string; grains: number }[] | null | undefined {
+  // Sem horas na resposta (dados de antes do pólen): não se diz nada.
+  if (!hourly) return undefined;
+  const series = POLLEN.map((p) => ({
+    type: pollenNames[p],
+    values: (hourly[`${p}_pollen`] ?? []).filter((v): v is number => typeof v === "number"),
+  }));
+  if (series.every((s) => s.values.length === 0)) return null;
+  return series
+    .map((s) => ({ type: s.type, grains: Math.round(Math.max(0, ...s.values)) }))
+    .filter((s) => s.grains >= 1)
+    .sort((a, b) => b.grains - a.grains);
 }

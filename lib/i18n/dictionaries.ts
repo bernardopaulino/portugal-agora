@@ -240,6 +240,30 @@ const pt = {
     hours: (n: number) => `${n} h`,
     minutes: (n: number) => `${n} min`,
   },
+  /** Pontos de calor por satélite (NASA FIRMS). */
+  hotspots: {
+    title: "Deteções de satélite (últimas 24 h)",
+    intro:
+      "Pontos de calor vistos pelos satélites da NASA. Não são incêndios confirmados: também aparecem queimadas, fábricas e outras fontes de calor.",
+    count: (n: number) => `${n} ${n === 1 ? "deteção" : "deteções"}`,
+    latest: (when: string) => `a última ${when}`,
+    nearFire: "perto de uma ocorrência do Fogos.pt",
+    unknownPlace: "Local por confirmar",
+    none: "Sem deteções de calor por satélite nas últimas 24 horas.",
+    down: "As deteções de satélite estão indisponíveis de momento.",
+    islandsUncovered: "As deteções de satélite ainda não incluem os Açores e a Madeira.",
+    note: "Fonte: NASA FIRMS (satélites NOAA-20 e NOAA-21, VIIRS). Cada passagem chega com cerca de 3 horas de atraso.",
+  },
+  /** Chuva e seca por concelho (IPMA, só continente). */
+  climate: {
+    title: "Chuva e seca",
+    rainTotal: (total: string, days: number, wettest: string | null, when: string | null) =>
+      `Nos últimos ${days} dias choveu ${total} mm.` +
+      (wettest && when ? ` O dia mais chuvoso foi ${when}, com ${wettest} mm.` : ""),
+    drought: (month: string, label: string, value: string) =>
+      `Índice de seca em ${month}: ${label.toLowerCase()} (PDSI ${value}).`,
+    note: "Chuva: estimativa do IPMA a partir das observações, em média no concelho. Seca: índice de Palmer (PDSI) mensal do IPMA, no centro do concelho; abaixo de −1 há seca.",
+  },
   /** Páginas dos concelhos (/lisboa/sintra). */
   concelho: {
     /** `region`: "continente", "acores" ou "madeira" (o código, não o nome traduzido). */
@@ -523,12 +547,17 @@ const pt = {
       `Índice europeu ${eaqi}${pollutant ? `, sobretudo ${pollutant}` : ""}.`,
     noReading: "Sem leitura de momento.",
     uvToday: "Índice UV máximo hoje",
+    pollenToday: "Pólen hoje (máximo previsto)",
+    pollenType: (type: string, grains: number) =>
+      `${type.charAt(0).toUpperCase()}${type.slice(1)}: ${grains} grãos/m³`,
+    pollenNone: "Sem pólen relevante no ar.",
+    pollenNotCovered: "Sem previsão de pólen para os Açores.",
     uvAdvice: ". Use proteção solar entre as 11h e as 17h.",
     noForecast: "Sem previsão de momento.",
     airNote:
       "Estimativa de modelo (Copernicus CAMS) para as capitais de distrito, não medição de estação.",
     airNoteDistrict: (capital: string) =>
-      `Qualidade do ar: estimativa de modelo (Copernicus CAMS via Open-Meteo) ${ptCapital("para", capital)}. Índice UV: previsão do IPMA.`,
+      `Qualidade do ar e pólen: estimativa de modelo (Copernicus CAMS via Open-Meteo) ${ptCapital("para", capital)}. Índice UV: previsão do IPMA.`,
   },
   source: {
     source: "Fonte",
@@ -883,6 +912,28 @@ const en: Dictionary = {
     hours: (n) => `${n} h`,
     minutes: (n) => `${n} min`,
   },
+  hotspots: {
+    title: "Satellite detections (last 24 h)",
+    intro:
+      "Heat spots seen by NASA satellites. They are not confirmed wildfires: farm burns, factories and other heat sources also show up.",
+    count: (n) => `${n} ${n === 1 ? "detection" : "detections"}`,
+    latest: (when) => `latest ${when}`,
+    nearFire: "near a Fogos.pt incident",
+    unknownPlace: "Location to be confirmed",
+    none: "No satellite heat detections in the last 24 hours.",
+    down: "Satellite detections are unavailable right now.",
+    islandsUncovered: "Satellite detections do not cover the Azores and Madeira yet.",
+    note: "Source: NASA FIRMS (NOAA-20 and NOAA-21 satellites, VIIRS). Each pass arrives about 3 hours late.",
+  },
+  climate: {
+    title: "Rain and drought",
+    rainTotal: (total, days, wettest, when) =>
+      `In the last ${days} days, ${total} mm of rain fell.` +
+      (wettest && when ? ` The wettest day was ${when}, with ${wettest} mm.` : ""),
+    drought: (month, label, value) =>
+      `Drought index for ${month}: ${label.toLowerCase()} (PDSI ${value}).`,
+    note: "Rain: IPMA estimate from observations, averaged over the municipality. Drought: IPMA's monthly Palmer index (PDSI), at the centre of the municipality; below −1 means drought.",
+  },
   concelho: {
     kicker: (region, district) =>
       region === "continente"
@@ -1156,12 +1207,17 @@ const en: Dictionary = {
       `European index ${eaqi}${pollutant ? `, mainly ${pollutant}` : ""}.`,
     noReading: "No reading right now.",
     uvToday: "Highest UV index today",
+    pollenToday: "Pollen today (forecast peak)",
+    pollenType: (type, grains) =>
+      `${type.charAt(0).toUpperCase()}${type.slice(1)}: ${grains} grains/m³`,
+    pollenNone: "No significant pollen in the air.",
+    pollenNotCovered: "No pollen forecast for the Azores.",
     uvAdvice: ". Use sun protection between 11:00 and 17:00.",
     noForecast: "No forecast right now.",
     airNote:
       "Model estimate (Copernicus CAMS) for the district capitals, not a station measurement.",
     airNoteDistrict: (capital) =>
-      `Air quality: model estimate (Copernicus CAMS via Open-Meteo) for ${capital}. UV index: IPMA forecast.`,
+      `Air quality and pollen: model estimate (Copernicus CAMS via Open-Meteo) for ${capital}. UV index: IPMA forecast.`,
   },
   source: {
     source: "Source",

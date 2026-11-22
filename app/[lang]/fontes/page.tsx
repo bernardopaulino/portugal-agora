@@ -138,6 +138,41 @@ function Portuguese() {
         de estação. Usamos o Índice Europeu de Qualidade do Ar: boa ou razoável, sem destaque;
         moderada, amarelo; fraca, laranja; muito fraca ou pior, vermelho.
       </p>
+      <p>
+        Pólen: também do Copernicus CAMS via Open-Meteo, o máximo previsto para hoje de cada tipo
+        (gramíneas, oliveira, bétula, amieiro, artemísia e ambrósia), em grãos por metro cúbico, na
+        capital de cada distrito. É uma estimativa de modelo e não inclui os Açores.
+      </p>
+
+      <h2 id="chuva-seca">Chuva e seca</h2>
+      <p>
+        Fonte:{" "}
+        <a href="https://www.ipma.pt" rel="noopener">
+          IPMA
+        </a>
+        , só no continente. Chuva: a precipitação de cada dia dos últimos 20 dias em cada concelho,
+        estimada pelo IPMA a partir das observações (média no concelho); consultada a cada 6 horas.
+        Seca: o índice de Palmer (PDSI) mensal do IPMA, no centro de cada concelho; abaixo de −1 há
+        seca (fraca, moderada, severa ou extrema), acima de 1 o solo está mais húmido do que o
+        normal.
+      </p>
+
+      <h2 id="satelite">Deteções de satélite</h2>
+      <p>
+        Fonte:{" "}
+        <a href="https://firms.modaps.eosdis.nasa.gov" rel="noopener">
+          NASA FIRMS
+        </a>{" "}
+        (Fire Information for Resource Management System), dados abertos da NASA: os pontos de calor
+        que os satélites NOAA-20 e NOAA-21 (instrumento VIIRS) detetaram nas últimas 24 horas, em
+        terra, consultados a cada 30 minutos. Cada passagem chega com cerca de 3 horas de atraso.
+      </p>
+      <p>
+        <strong>Não são incêndios confirmados:</strong> também aparecem queimadas, fábricas,
+        refinarias e outras fontes de calor. Por isso estão numa secção à parte e assinalamos as que
+        ficam a menos de 3 km de uma ocorrência do Fogos.pt. As deteções de baixa confiança ficam de
+        fora.
+      </p>
 
       <h2>Mapa e limites administrativos</h2>
       <p>
@@ -330,6 +365,40 @@ function English() {
         It is a <strong>model estimate</strong> for each district capital, not a station
         measurement. We use the European Air Quality Index: good or fair, not highlighted; moderate,
         yellow; poor, orange; very poor or worse, red.
+      </p>
+      <p>
+        Pollen: also from Copernicus CAMS via Open-Meteo, today&apos;s forecast peak for each type
+        (grasses, olive, birch, alder, mugwort and ragweed), in grains per cubic metre, at each
+        district capital. It is a model estimate and does not cover the Azores.
+      </p>
+
+      <h2 id="chuva-seca">Rain and drought</h2>
+      <p>
+        Source:{" "}
+        <a href="https://www.ipma.pt" rel="noopener">
+          IPMA
+        </a>
+        , mainland only. Rain: each day&apos;s rainfall over the last 20 days in each municipality,
+        estimated by IPMA from observations (averaged over the municipality); checked every 6 hours.
+        Drought: IPMA&apos;s monthly Palmer index (PDSI), at the centre of each municipality; below
+        −1 means drought (mild, moderate, severe or extreme), above 1 the soil is wetter than
+        normal.
+      </p>
+
+      <h2 id="satelite">Satellite detections</h2>
+      <p>
+        Source:{" "}
+        <a href="https://firms.modaps.eosdis.nasa.gov" rel="noopener">
+          NASA FIRMS
+        </a>{" "}
+        (Fire Information for Resource Management System), NASA open data: heat spots detected by
+        the NOAA-20 and NOAA-21 satellites (VIIRS instrument) over land in the last 24 hours,
+        checked every 30 minutes. Each pass arrives about 3 hours late.
+      </p>
+      <p>
+        <strong>They are not confirmed wildfires:</strong> farm burns, factories, refineries and
+        other heat sources also show up. That is why they are in a separate section, and we flag the
+        ones within 3 km of a Fogos.pt incident. Low-confidence detections are left out.
       </p>
 
       <h2>Map and administrative boundaries</h2>

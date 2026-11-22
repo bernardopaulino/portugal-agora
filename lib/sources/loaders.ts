@@ -1,11 +1,21 @@
 import "server-only";
 
-import type { z } from "zod";
+import { z } from "zod";
 
 import { env } from "@/lib/env";
 import { fetchJsonIfChanged, SourceError, type Validators } from "@/lib/http/fetch-json";
 
 import { FOGOS_ACTIVE_URL, fogosSchema, normalizeFires } from "./fogos";
+import { firmsSchema, firmsUrls, normalizeHotspots, type Hotspot } from "./nasa-firms";
+import {
+  IPMA_PRECIP_URL,
+  ipmaPdsiSchema,
+  ipmaPdsiUrl,
+  normalizePdsi,
+  normalizePrecip,
+  type ConcelhoRain,
+  type Drought,
+} from "./ipma-climate";
 import {
   ipmaForecastSchema,
   ipmaForecastUrl,
@@ -96,6 +106,7 @@ interface Request<T> {
   schema: z.ZodType<T>;
   timeoutMs?: number;
   headers?: Record<string, string>;
+  format?: "json" | "text";
 }
 
 type Raws<R extends readonly Request<unknown>[]> = {
@@ -297,3 +308,65 @@ export function localForecastSource(globalIdLocal: number): SourceDef<LocalForec
   }
   return def;
 }
+
+/** Chuva dos últimos 20 dias em cada concelho do continente (um CSV, renovado uma vez por dia). */
+export const precipSource = source({
+  id: "ipma-precip",
+  every: 6 * 3600,
+  staleAfterMinutes: 48 * 60,
+  requests: () =>
+    [{ url: IPMA_PRECIP_URL, schema: z.string(), format: "text", timeoutMs: 15_000 }] as const,
+  normalize: ([csv]): ConcelhoRain => normalizePrecip(csv),
+});
+
+const droughtSources = new Map<string, SourceDef<Drought | null>>();
+
+/** Índice de seca (PDSI) mensal de um concelho; só se pede quando alguém abre o concelho. */
+export function droughtSource(dico: string, point: [number, number]): SourceDef<Drought | null> {
+  let def = droughtSources.get(dico);
+  if (!def) {
+    def = source({
+      id: "ipma-pdsi",
+      key: `ipma-pdsi-${dico}`,
+      // Muda uma vez por mês: uma verificação por dia chega.
+      every: 24 * 3600,
+      staleAfterMinutes: 45 * 24 * 60,
+      requests: () =>
+        [{ url: ipmaPdsiUrl(point), schema: ipmaPdsiSchema, timeoutMs: 10_000 }] as const,
+      normalize: ([raw]) => normalizePdsi(raw),
+    });
+    droughtSources.set(dico, def);
+  }
+  return def;
+}
+
+/**
+ * Pontos de calor por satélite (NASA FIRMS), das últimas 24 h. Só se pede
+ * quando alguém abre uma página de incêndios; as passagens chegam com ~3 h.
+ */
+export const hotspotsSource: SourceDef<Hotspot[]> = {
+  id: "nasa-firms",
+  key: "nasa-firms",
+  every: 30 * 60,
+  staleAfterMinutes: 6 * 60,
+  // As deteções com mais de 24 h saem a cada leitura.
+  prune: (data, now) =>
+    data.filter((h) => Date.parse(h.detectedAt) >= now.getTime() - 24 * 3_600_000),
+  async fetch(validators) {
+    const urls = firmsUrls(env().FIRMS_MAP_KEY);
+    const group = source({
+      id: "nasa-firms",
+      every: 30 * 60,
+      staleAfterMinutes: 6 * 60,
+      requests: () =>
+        urls.map((url) => ({
+          url,
+          schema: firmsSchema,
+          format: "text" as const,
+          timeoutMs: 20_000,
+        })),
+      normalize: (files: unknown[]) => normalizeHotspots(files as string[], new Date()),
+    });
+    return group.fetch(validators);
+  },
+};

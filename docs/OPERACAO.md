@@ -6,7 +6,7 @@ Pôr o site em produção na Vercel e as tarefas que o mantêm vivo.
 
 1. Importar o repositório na Vercel (deteta Next.js automaticamente).
 2. Adicionar **Upstash Redis** a partir do Vercel Marketplace (cria `KV_REST_API_URL` e `KV_REST_API_TOKEN`).
-3. Variáveis de ambiente: `NEXT_PUBLIC_SITE_URL`, `CONTACT_EMAIL` e, quando chegar, `FOGOS_API_KEY`.
+3. Variáveis de ambiente: `NEXT_PUBLIC_SITE_URL`, `CONTACT_EMAIL` e, quando chegar, `FOGOS_API_KEY`. Opcional: `FIRMS_MAP_KEY` (chave gratuita da NASA FIRMS), para as deteções de satélite incluírem os Açores e a Madeira.
 4. Em _Settings → Domains_, adicionar `portugalagora.pt` e `www.portugalagora.pt` e seguir as instruções de DNS no registo do domínio. Escolher um como principal (o outro redireciona) e usar **esse mesmo endereço** em `NEXT_PUBLIC_SITE_URL`: é o que aparece nos endereços canónicos, no sitemap e no `robots.txt`.
 5. Confirmar em `https://portugalagora.pt/api/health` e `https://portugalagora.pt/api/health/sources`.
 6. Notificações e histórico: gerar as chaves com `npx web-push generate-vapid-keys` e um segredo longo; na Vercel, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` e `CRON_SECRET` (produção) e um novo deploy; no GitHub, o secret `CRON_SECRET` (o mesmo valor) e a variável `TICK_ENABLED=true`.

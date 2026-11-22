@@ -18,16 +18,20 @@ export function SiteFooter() {
           <p className="max-w-md text-ink-2">{t.footer.about}</p>
           <p className="text-sm text-ink-2">
             {t.footer.data}:{" "}
-            {[attributions.ipma, attributions.fogos, attributions.openMeteo, attributions.dgt].map(
-              (s, i, all) => (
-                <span key={s.url}>
-                  <a href={s.url} rel="noopener">
-                    {s.label.replace(/^Fonte: /, "")}
-                  </a>
-                  {i < all.length - 1 ? ", " : "."}
-                </span>
-              ),
-            )}
+            {[
+              attributions.ipma,
+              attributions.fogos,
+              attributions.openMeteo,
+              attributions.firms,
+              attributions.dgt,
+            ].map((s, i, all) => (
+              <span key={s.url}>
+                <a href={s.url} rel="noopener">
+                  {s.label.replace(/^Fonte: /, "")}
+                </a>
+                {i < all.length - 1 ? ", " : "."}
+              </span>
+            ))}
           </p>
           {t.dataNote ? <p className="max-w-md text-sm text-ink-2">{t.dataNote}</p> : null}
         </div>

@@ -12,6 +12,9 @@ import {
   firesSource,
   forecastSource,
   localForecastSource,
+  droughtSource,
+  hotspotsSource,
+  precipSource,
   observationsSource,
   seaSource,
   uvSource,
@@ -31,6 +34,9 @@ export const sourceNames: Record<SourceId, string> = {
   "ipma-sea": "IPMA",
   fogos: "Fogos.pt",
   "openmeteo-aq": "Open-Meteo",
+  "ipma-precip": "IPMA",
+  "ipma-pdsi": "IPMA",
+  "nasa-firms": "NASA FIRMS",
 };
 
 /*
@@ -225,6 +231,10 @@ export const getUv = (refresh?: RefreshMode) => one(uvSource, refresh);
 export const getAirQuality = (refresh?: RefreshMode) => one(airQualitySource, refresh);
 export const getSea = (refresh?: RefreshMode) => one(seaSource, refresh);
 export const getForecast = (globalIdLocal: number) => one(forecastSource(globalIdLocal));
+export const getPrecip = () => one(precipSource);
+export const getHotspots = () => one(hotspotsSource);
+export const getDrought = (dico: string, point: [number, number]) =>
+  one(droughtSource(dico, point));
 export const getLocalForecast = (globalIdLocal: number) => one(localForecastSource(globalIdLocal));
 
 export async function getFires(refresh?: RefreshMode): Promise<SourceResult<FireEvent[]>> {

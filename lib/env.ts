@@ -12,6 +12,8 @@ const schema = z.object({
   NEXT_PUBLIC_SITE_URL: z.url().default("https://portugalagora.pt"),
   CONTACT_EMAIL: z.email().optional(),
   FOGOS_API_KEY: z.string().min(1).optional(),
+  /** Chave gratuita da NASA FIRMS: com ela, os pontos de calor incluem os Açores e a Madeira. */
+  FIRMS_MAP_KEY: z.string().min(1).optional(),
   KV_REST_API_URL: z.url().optional(),
   KV_REST_API_TOKEN: z.string().min(1).optional(),
   UPSTASH_REDIS_REST_URL: z.url().optional(),

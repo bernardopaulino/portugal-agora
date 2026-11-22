@@ -82,6 +82,21 @@ export function AirAndUv({
           )}
         </dd>
       </div>
+      {air && air.pollen !== undefined ? (
+        <div className="flex flex-col gap-2 border-t border-line pt-3">
+          <dt className="text-base text-ink-2">{t.lists.pollenToday}</dt>
+          <dd className="text-lg">
+            {air.pollen === null
+              ? t.lists.pollenNotCovered
+              : air.pollen.length === 0
+                ? t.lists.pollenNone
+                : air.pollen
+                    .slice(0, 3)
+                    .map((p) => t.lists.pollenType(t.term(p.type), p.grains))
+                    .join(" · ")}
+          </dd>
+        </div>
+      ) : null}
     </dl>
   );
 }
