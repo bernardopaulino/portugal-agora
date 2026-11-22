@@ -32,6 +32,9 @@ export function SiteFooter() {
           {t.dataNote ? <p className="max-w-md text-sm text-ink-2">{t.dataNote}</p> : null}
         </div>
         <nav aria-label={t.footer.links} className="flex flex-col text-base">
+          <Link href={path("/emergencia")} className={footerLink}>
+            {t.footer.emergency}
+          </Link>
           <Link href={path("/fontes")} className={footerLink}>
             {t.footer.sources}
           </Link>

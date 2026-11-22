@@ -44,5 +44,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...page("/fontes", "monthly", 0.4),
     ...page("/privacidade", "yearly", 0.2),
     ...page("/sobre", "yearly", 0.3),
+    ...page("/emergencia", "yearly", 0.5),
   ];
 }

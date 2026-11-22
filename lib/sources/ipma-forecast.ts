@@ -4,6 +4,8 @@ import { z } from "zod";
 
 import { weatherLabel } from "@/data/weather-types";
 
+import { uvLabel } from "./ipma-uv";
+
 export const ipmaForecastUrl = (globalIdLocal: number) =>
   `https://api.ipma.pt/open-data/forecast/meteorology/cities/daily/${globalIdLocal}.json`;
 
@@ -31,6 +33,28 @@ export interface ForecastDay {
   weather: string;
   weatherId: number;
   wind: string;
+  /** Índice UV máximo do dia (só na previsão dos concelhos). */
+  uv?: { index: number; label: string };
+}
+
+/** Uma hora (ou um bloco de 3 h, depois dos primeiros 3 dias) da previsão de um concelho. */
+export interface ForecastHour {
+  /** Início do período, ISO em UTC. */
+  time: string;
+  temp: number;
+  /** null quando o IPMA não a dá (-99). */
+  rainChance: number | null;
+  weather: string;
+  weatherId: number;
+  /** km/h */
+  windKmh: number;
+  windDir: string;
+}
+
+/** A previsão de um concelho: os 5 dias e as horas. */
+export interface LocalForecast {
+  days: ForecastDay[];
+  hours: ForecastHour[];
 }
 
 const windClass: Record<number, string> = {
@@ -89,7 +113,10 @@ export function normalizeForecast(raw: IpmaForecastRaw): ForecastDay[] {
 /*
  * Previsão de um concelho. Os ficheiros "open-data" só têm as capitais de
  * distrito; este (o que o site do IPMA usa) tem os ~420 locais de previsão,
- * com períodos de 1 h, 3 h e 24 h. Só interessam os diários (idPeriodo 24).
+ * com períodos de 1 h (os primeiros ~3 dias), 3 h e 24 h.
+ *
+ * As horas (dataPrev) estão em UTC: o fim das horas é o mesmo nos Açores e no
+ * continente, e os modelos do IPMA correm em UTC. Os dias (T00:00) são datas.
  */
 export const ipmaLocalForecastUrl = (globalIdLocal: number) =>
   `https://api.ipma.pt/public-data/forecast/aggregate/${globalIdLocal}.json`;
@@ -107,6 +134,9 @@ export const ipmaLocalForecastSchema = z.array(
     idTipoTempo: z.number().optional(),
     ddVento: z.string().optional(),
     idFfxVento: z.number().optional(),
+    tMed: z.coerce.number().optional(),
+    ffVento: z.coerce.number().optional(),
+    iUv: z.coerce.number().optional(),
   }),
 );
 
@@ -114,15 +144,34 @@ export type IpmaLocalForecastRaw = z.infer<typeof ipmaLocalForecastSchema>;
 
 const valid = (n: number | undefined) => n !== undefined && n > -90;
 
-export function normalizeLocalForecast(raw: IpmaLocalForecastRaw): ForecastDay[] {
+export function normalizeLocalForecast(raw: IpmaLocalForecastRaw): LocalForecast {
+  return { days: localDays(raw), hours: localHours(raw) };
+}
+
+function localHours(raw: IpmaLocalForecastRaw): ForecastHour[] {
+  return raw
+    .filter((d) => (d.idPeriodo === 1 || d.idPeriodo === 3) && valid(d.tMed))
+    .sort((a, b) => a.dataPrev.localeCompare(b.dataPrev))
+    .map((d) => ({
+      time: `${d.dataPrev}Z`,
+      temp: Math.round(d.tMed!),
+      rainChance: valid(d.probabilidadePrecipita) ? Math.round(d.probabilidadePrecipita!) : null,
+      weather: weatherLabel(d.idTipoTempo ?? 0),
+      weatherId: d.idTipoTempo ?? 0,
+      windKmh: valid(d.ffVento) ? Math.round(d.ffVento!) : 0,
+      windDir: d.ddVento ?? "",
+    }));
+}
+
+function localDays(raw: IpmaLocalForecastRaw): ForecastDay[] {
   return (
     raw
       // O IPMA marca com -99 os valores em falta.
       .filter((d) => d.idPeriodo === 24 && valid(d.tMin) && valid(d.tMax))
       .sort((a, b) => a.dataPrev.localeCompare(b.dataPrev))
       .slice(0, FORECAST_DAYS)
-      .map((d) =>
-        forecastDay({
+      .map((d) => ({
+        ...forecastDay({
           date: d.dataPrev.slice(0, 10),
           tMin: d.tMin!,
           tMax: d.tMax!,
@@ -131,6 +180,7 @@ export function normalizeLocalForecast(raw: IpmaLocalForecastRaw): ForecastDay[]
           windDir: d.ddVento ?? "",
           windClass: d.idFfxVento ?? 0,
         }),
-      )
+        ...(valid(d.iUv) && d.iUv! >= 0 ? { uv: { index: d.iUv!, label: uvLabel(d.iUv!) } } : {}),
+      }))
   );
 }

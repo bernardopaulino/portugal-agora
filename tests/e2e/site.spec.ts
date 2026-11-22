@@ -356,14 +356,38 @@ test("a previsão de um concelho é a do concelho, não a da capital", async ({ 
     [0, 1, 2, 3, 4].map((i) =>
       day(new Date(Date.now() + i * 86_400_000).toISOString().slice(0, 10), max + i),
     );
+  // As próximas horas: de hora a hora a partir de agora (a faixa mostra de 3 em 3).
+  const start = Math.floor(Date.now() / 3_600_000) * 3_600_000;
+  const hours = Array.from({ length: 30 }, (_, i) => ({
+    time: new Date(start + i * 3_600_000).toISOString(),
+    temp: 12 + (i % 5),
+    rainChance: i === 3 ? null : 20,
+    weather: "Céu limpo",
+    weatherId: 1,
+    windKmh: 10,
+    windDir: "N",
+  }));
+  const withUv = days(31).map((d) => ({ ...d, uv: { index: 6.4, label: "Elevado" } }));
   await page.route("**/api/forecast/concelho/1111", (route) =>
-    route.fulfill({ json: { ...forecast, id: "ipma-forecast", data: days(31), place: "Sintra" } }),
+    route.fulfill({
+      json: {
+        ...forecast,
+        id: "ipma-forecast",
+        data: { days: withUv, hours },
+        place: "Sintra",
+      },
+    }),
   );
   await page.goto("/lisboa/sintra");
   await expect(
     page.getByRole("heading", { name: "Previsão para o concelho de Sintra" }),
   ).toBeVisible();
   await expect(page.locator("#previsao-titulo + ol")).toContainText("31°");
+  // As próximas horas, de 3 em 3: 8 colunas.
+  await expect(page.getByRole("heading", { name: "Próximas horas" })).toBeVisible();
+  await expect(page.locator("#horas-titulo + ol > li")).toHaveCount(8);
+  // O UV de hoje é o do concelho (6,4), não o da capital.
+  await expect(page.locator("#ar")).toContainText("6,4");
   await expect(page.getByText(/capital de distrito/)).toHaveCount(0);
 
   // Sem a previsão do concelho, a da capital, e diz-se.
@@ -420,4 +444,88 @@ test("cada idioma partilha a sua imagem", async ({ page, request }) => {
       expect(response.headers()["content-type"]).toBe("image/png");
     }
   }
+});
+
+test("emergência: a página, a ligação na barra e o destaque num dia mau", async ({ page }) => {
+  await page.goto("/emergencia");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Em caso de emergência" }),
+  ).toBeVisible();
+  await expect(page.locator("main a[href='tel:112']").first()).toBeVisible();
+  for (const name of ["Incêndio rural", "Tempo quente", "Sismo"])
+    await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
+  await expectAccessible(page);
+
+  // A barra do 112, em todas as páginas, leva lá.
+  await page.goto("/fontes");
+  await page.getByRole("link", { name: "O que fazer" }).click();
+  await expect(page).toHaveURL(/\/emergencia$/);
+});
+
+test.describe("num dia mau", () => {
+  // O service worker serve o /api/state, e o Playwright não interceta o que ele trata.
+  test.use({ serviceWorkers: "block" });
+
+  test("a barra do 112 fica em destaque e diz porquê", async ({ page }) => {
+    await page.route("**/api/state", async (route) => {
+      const state = await (await route.fetch()).json();
+      await route.fulfill({ json: { ...state, levelKnown: true, level: "red" } });
+    });
+    await page.goto("/");
+    await expect(page.getByText("Hoje há aviso vermelho ou um incêndio importante.")).toBeVisible();
+  });
+});
+
+test("o concelho do “Perto de mim” fica como atalho na página inicial", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("pa:distrito", "lisboa");
+    localStorage.setItem("pa:concelho", "lisboa/sintra");
+  });
+  await page.goto("/");
+  await expect(page.getByText("O seu concelho:")).toBeVisible();
+  await page.getByRole("link", { name: "Sintra" }).first().click();
+  await expect(page).toHaveURL(/\/lisboa\/sintra$/);
+});
+
+test("o último ano dos avisos: calendário no distrito e tabela no país", async ({ page }) => {
+  const order = [
+    "aveiro",
+    "beja",
+    "braga",
+    "braganca",
+    "castelo-branco",
+    "coimbra",
+    "evora",
+    "faro",
+    "guarda",
+    "leiria",
+    "lisboa",
+    "portalegre",
+    "porto",
+    "santarem",
+    "setubal",
+    "viana-do-castelo",
+    "vila-real",
+    "viseu",
+    "acores",
+    "madeira",
+  ];
+  await page.route("**/api/history/days", async (route) => {
+    const real = await (await route.fetch()).json();
+    const levels = (lisboa: string) =>
+      real.order.map((slug: string) => (slug === "lisboa" ? lisboa : "n")).join("");
+    const days = ["o", "y", "y", "n"].map((l, i) => ({
+      d: new Date(Date.now() - (4 - i) * 86_400_000).toISOString().slice(0, 10),
+      l: levels(l),
+      f: 0,
+    }));
+    await route.fulfill({ json: { order: real.order ?? order, days } });
+  });
+  await page.goto("/lisboa/avisos");
+  await expect(page.getByRole("heading", { name: "Último ano" })).toBeVisible();
+  await expect(page.getByText("Dias com aviso: 2 amarelos, 1 laranja, 0 vermelhos.")).toBeVisible();
+  await expect(page.locator("#ano li[title]")).toHaveCount(4);
+  await page.goto("/avisos");
+  const row = page.locator("#ano tr", { hasText: "Lisboa" });
+  await expect(row.locator("td")).toHaveText(["2", "1", "0"]);
 });

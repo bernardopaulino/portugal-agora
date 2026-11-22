@@ -20,7 +20,7 @@ import { useI18n } from "@/lib/i18n/client";
 import { formatWeekday, localDate } from "@/lib/time/format";
 
 /** Tipos de tempo do IPMA → pictograma do boletim. */
-function weatherIcon(id: number): LucideIcon {
+export function weatherIcon(id: number): LucideIcon {
   if (id === 1) return Sun;
   if ([2, 3, 25].includes(id)) return CloudSun;
   if ([7, 10, 13, 15].includes(id)) return CloudDrizzle;

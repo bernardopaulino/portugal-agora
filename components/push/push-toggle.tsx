@@ -24,6 +24,9 @@ type Threshold = (typeof THRESHOLDS)[number];
 interface Choice {
   districts: string[];
   min: Threshold;
+  /** Também incêndios importantes e sismos sentidos. */
+  fires?: boolean;
+  quakes?: boolean;
 }
 
 const noop = () => () => {};
@@ -112,6 +115,8 @@ export function PushToggle({ district }: { district: District }) {
   };
   const on = choice?.districts.includes(district.slug) ?? false;
   const min: Threshold = choice?.min ?? "yellow";
+  const fires = choice?.fires ?? false;
+  const quakes = choice?.quakes ?? false;
   const inPlace = t.inPlace(district);
 
   if (!PUBLIC_KEY || support === null) return null;
@@ -152,6 +157,12 @@ export function PushToggle({ district }: { district: District }) {
   };
 
   const others = (choice?.districts ?? []).filter((s) => s !== district.slug);
+  // Mudar uma opção: com as notificações ligadas, guarda-se já; senão, fica para quando ligar.
+  const change = (patch: Partial<Choice>) => {
+    const next: Choice = { districts: others, min, fires, quakes, ...patch };
+    if (!on) writeStorage(STORAGE_KEY, JSON.stringify(next));
+    else void save({ ...next, districts: [...others, district.slug] });
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -174,21 +185,38 @@ export function PushToggle({ district }: { district: District }) {
                 role="radio"
                 pressed={min === level}
                 disabled={busy}
-                onClick={() => {
-                  if (!on)
-                    writeStorage(STORAGE_KEY, JSON.stringify({ districts: others, min: level }));
-                  else void save({ districts: [...others, district.slug], min: level });
-                }}
+                onClick={() => change({ min: level })}
               >
                 {t.levels[level]}
               </Chip>
             ))}
           </div>
+          <div
+            role="group"
+            aria-label={t.push.extras}
+            className="flex flex-wrap items-center gap-2"
+          >
+            <span className="mr-1 text-base text-ink-2">{t.push.extras}</span>
+            <Chip pressed={fires} disabled={busy} onClick={() => change({ fires: !fires })}>
+              {t.push.extraFires}
+            </Chip>
+            <Chip pressed={quakes} disabled={busy} onClick={() => change({ quakes: !quakes })}>
+              {t.push.extraQuakes}
+            </Chip>
+          </div>
+          <p className="text-sm text-ink-2">{t.push.extrasNote}</p>
           <button
             type="button"
             disabled={busy}
             aria-pressed={on}
-            onClick={() => void save({ districts: on ? others : [...others, district.slug], min })}
+            onClick={() =>
+              void save({
+                districts: on ? others : [...others, district.slug],
+                min,
+                fires,
+                quakes,
+              })
+            }
             className="inline-flex min-h-11 items-center gap-2 self-start rounded-full bg-ink px-5 font-display text-base font-semibold text-bg disabled:opacity-60"
           >
             {on ? (

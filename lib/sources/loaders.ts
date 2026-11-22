@@ -14,6 +14,7 @@ import {
   normalizeForecast,
   normalizeLocalForecast,
   type ForecastDay,
+  type LocalForecast,
 } from "./ipma-forecast";
 import {
   IPMA_OBSERVATIONS_URL,
@@ -272,19 +273,20 @@ export function forecastSource(globalIdLocal: number): SourceDef<ForecastDay[]> 
   return def;
 }
 
-const localForecastSources = new Map<number, SourceDef<ForecastDay[]>>();
+const localForecastSources = new Map<number, SourceDef<LocalForecast>>();
 
 /**
  * Previsão a 5 dias do local de previsão de um concelho (data/forecast-locations.ts).
  * Chave própria: o globalIdLocal de uma capital é o mesmo do seu concelho, mas
  * o ficheiro (e o ETag) é outro.
  */
-export function localForecastSource(globalIdLocal: number): SourceDef<ForecastDay[]> {
+export function localForecastSource(globalIdLocal: number): SourceDef<LocalForecast> {
   let def = localForecastSources.get(globalIdLocal);
   if (!def) {
     def = source({
       id: "ipma-forecast",
-      key: `ipma-forecast-local-${globalIdLocal}`,
+      // v2: dias e horas (a v1 eram só os dias).
+      key: `ipma-forecast-local-v2-${globalIdLocal}`,
       every: 3600,
       staleAfterMinutes: 360,
       requests: () =>

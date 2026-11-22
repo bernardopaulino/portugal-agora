@@ -54,7 +54,7 @@ describe("normalizeForecast", () => {
 });
 
 describe("normalizeLocalForecast", () => {
-  const days = normalizeLocalForecast(ipmaLocalForecastSchema.parse(localForecastRaw));
+  const { days, hours } = normalizeLocalForecast(ipmaLocalForecastSchema.parse(localForecastRaw));
   it("fica só com os 5 primeiros dias, por ordem, sem os períodos de horas", () => {
     expect(days).toHaveLength(5);
     expect(days.map((d) => d.date)).toEqual([...days.map((d) => d.date)].sort());
@@ -63,6 +63,16 @@ describe("normalizeLocalForecast", () => {
   it("arredonda as temperaturas e traduz o vento", () => {
     expect(Number.isInteger(days[0]!.min)).toBe(true);
     expect(days[0]!.wind).toMatch(/^Vento (fraco|moderado|forte|muito forte) de /);
+  });
+  it("leva o UV máximo de cada dia, com a classe", () => {
+    expect(days[0]!.uv).toMatchObject({ index: expect.any(Number), label: expect.any(String) });
+  });
+  it("as horas vêm por ordem, em UTC, e sem a chuva quando o IPMA não a dá", () => {
+    expect(hours.length).toBeGreaterThan(0);
+    expect(hours.map((h) => h.time)).toEqual([...hours.map((h) => h.time)].sort());
+    expect(hours[0]!.time).toMatch(/Z$/);
+    expect(hours.every((h) => h.rainChance === null || h.rainChance >= 0)).toBe(true);
+    expect(hours.some((h) => h.rainChance === null)).toBe(true);
   });
   it("ignora valores em falta (-99)", () => {
     const raw = ipmaLocalForecastSchema.parse([
@@ -76,7 +86,7 @@ describe("normalizeLocalForecast", () => {
         idTipoTempo: 1,
       },
     ]);
-    expect(normalizeLocalForecast(raw)).toMatchObject([
+    expect(normalizeLocalForecast(raw).days).toMatchObject([
       { date: "2026-01-02", min: 8, max: 16, rainChance: 0 },
     ]);
   });

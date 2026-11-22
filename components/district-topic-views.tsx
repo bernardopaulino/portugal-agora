@@ -10,6 +10,7 @@ import { AirAndUv } from "./cards/air-uv";
 import { FeedLink } from "./cards/feed-link";
 import { FireList } from "./cards/fire-list";
 import { WarningsHistorySection } from "./history/history-sections";
+import { DistrictYearSection } from "./history/year-history";
 import { PushSection } from "./push/push-toggle";
 import { QuakeList } from "./cards/quake-list";
 import { RiskTable } from "./cards/risk-table";
@@ -55,6 +56,7 @@ export function DistrictWarningsView({ district }: Props) {
         <FeedLink topic="avisos" district={district} />
       </Section>
       <WarningsHistorySection slugs={[district.slug]} />
+      <DistrictYearSection slug={district.slug} />
       <PushSection district={district} />
     </TopicLayout>
   );

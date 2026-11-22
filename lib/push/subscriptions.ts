@@ -11,8 +11,8 @@ import { locales } from "@/lib/i18n/locales";
 /*
  * Subscrições de notificações: num hash do Redis, uma entrada por browser
  * (a chave é o hash do endpoint). Guarda-se só o que é preciso para enviar:
- * o endpoint e as chaves que o browser deu, os distritos, o limiar e o
- * idioma. Nada que identifique a pessoa.
+ * o endpoint e as chaves que o browser deu, os distritos, o limiar, se quer
+ * incêndios e sismos, e o idioma. Nada que identifique a pessoa.
  */
 
 const KEY = "push:subs";
@@ -53,6 +53,9 @@ export const subscriptionSchema = z.object({
   districts: z.array(z.enum(slugs)).min(1).max(slugs.length),
   min: z.enum(["yellow", "orange", "red"]),
   locale: z.enum(locales),
+  /** Também incêndios importantes e sismos sentidos (subscrições antigas: não). */
+  fires: z.boolean().optional(),
+  quakes: z.boolean().optional(),
 });
 
 export type StoredSubscription = z.infer<typeof subscriptionSchema> & { createdAt: string };

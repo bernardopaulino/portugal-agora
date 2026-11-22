@@ -18,6 +18,8 @@ import { cn } from "@/lib/utils";
 import { startNavigationFeedback } from "./navigation-progress";
 
 export const MY_DISTRICT_KEY = "pa:distrito";
+/** "lisboa/sintra": o concelho encontrado da última vez (atalho na página inicial). */
+export const MY_CONCELHO_KEY = "pa:concelho";
 
 type Status = "idle" | "locating" | "error";
 
@@ -64,6 +66,7 @@ export function NearMeButton({ className }: { className?: string }) {
           );
           const concelho = feature ? concelhoForDico(feature.properties.dico) : undefined;
           writeStorage(MY_DISTRICT_KEY, slug);
+          writeStorage(MY_CONCELHO_KEY, concelho ? `${slug}/${concelho.slug}` : "");
           setStatus("idle");
           const href = path(concelho ? `/${slug}/${concelho.slug}` : `/${slug}`);
           startNavigationFeedback(href);

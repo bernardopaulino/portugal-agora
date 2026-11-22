@@ -33,6 +33,7 @@ const NATIONAL = new Set([
   "/fontes",
   "/privacidade",
   "/sobre",
+  "/emergencia",
   "/avisos/rss",
   "/incendios/rss",
   "/sismos/rss",

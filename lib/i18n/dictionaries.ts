@@ -109,6 +109,8 @@ const pt = {
     offline: "Sem ligação à internet. Está a ver os últimos dados guardados.",
   },
   emergency: {
+    badDay: "Hoje há aviso vermelho ou um incêndio importante.",
+    whatToDo: "O que fazer",
     before: "Em emergência, ligue",
     after: ". Este site é informativo e não substitui as autoridades.",
   },
@@ -117,6 +119,7 @@ const pt = {
       "Informação oficial reunida num só sítio. Não é uma fonte oficial nem substitui a Proteção Civil. Em emergência, ligue 112.",
     data: "Dados",
     links: "Rodapé",
+    emergency: "Em caso de emergência",
     sources: "Fontes e como lemos os dados",
     privacy: "Privacidade",
     project: "Sobre o projeto",
@@ -172,6 +175,17 @@ const pt = {
     title: (name: string, level: string) => `${name}: aviso ${level}`,
     /** Os termos do IPMA pedem que a fonte seja sempre referida, também nas notificações. */
     source: "Fonte: IPMA.",
+    fireTitle: (place: string) => `Incêndio importante: ${place}`,
+    fireBody: (status: string, operatives: number, inPlace: string) =>
+      `${status.charAt(0).toUpperCase()}${status.slice(1)}, ${plural(operatives, "operacional", "operacionais")}, ${inPlace}.`,
+    fireSource: "Fonte: Fogos.pt (ANEPC).",
+    quakeTitle: (magnitude: string) => `Sismo sentido, magnitude ${magnitude}`,
+    quakeBody: (place: string, time: string) => `${place}, às ${time}.`,
+    extras: "Também",
+    extraFires: "Incêndios importantes",
+    extraQuakes: "Sismos sentidos",
+    extrasNote:
+      "Incêndios que a ANEPC assinala como importantes ou com 50 ou mais operacionais, e sismos sentidos no distrito. Uma notificação por ocorrência.",
     testTitle: "Portugal Agora: notificação de teste",
     testBody: (inPlace: string) =>
       `As notificações estão a funcionar. Quando o IPMA subir um aviso ${inPlace}, recebe uma assim.`,
@@ -193,7 +207,7 @@ const pt = {
       "Este browser não suporta notificações. No iPhone e no iPad, adicione primeiro o site ao ecrã principal.",
     error: "Não foi possível guardar a escolha. Tente de novo daqui a pouco.",
     privacy:
-      "Guardamos só o endereço técnico de notificação deste browser, os distritos escolhidos e o nível. Ao desativar, apagamos tudo.",
+      "Guardamos só o endereço técnico de notificação deste browser, os distritos escolhidos, o nível e se quer incêndios e sismos. Ao desativar, apagamos tudo.",
   },
   /** Histórico dos últimos 7 dias (avisos e incêndios). */
   history: {
@@ -207,6 +221,14 @@ const pt = {
     calm: "sem aviso",
     noData: "sem dados",
     during: (level: string, time: string) => `${level} durante ${time}`,
+    yearHeading: "Último ano",
+    yearDistrict: "Distrito",
+    yearCounts: (yellow: number, orange: number, red: number) =>
+      `Dias com aviso: ${plural(yellow, "amarelo", "amarelos")}, ${plural(orange, "laranja", "laranja")}, ${plural(red, "vermelho", "vermelhos")}.`,
+    yearAria: (yellow: number, orange: number, red: number, known: number) =>
+      `Calendário dos avisos: em ${plural(known, "dia", "dias")} com dados, ${yellow} com aviso amarelo, ${orange} laranja e ${red} vermelho, como nível mais alto do dia.`,
+    yearNote: (since: string, days: number) =>
+      `Cada quadrado é um dia, com o aviso mais alto desse dia. Registado desde ${since} (${plural(days, "dia", "dias")}).`,
     firesHeading: "Incêndios ativos",
     firesSummary: (now: number, max: number, when: string) =>
       `Agora ${now}; no período, o máximo foi ${max} (${when}).`,
@@ -240,6 +262,8 @@ const pt = {
     weatherTitle: "Tempo agora",
     stationDistance: (km: number) => `A estação fica a ${km} km do centro do concelho.`,
     forecastTitle: (name: string) => `Previsão para o concelho de ${name}`,
+    hoursTitle: "Próximas horas",
+    hoursNote: "Temperatura e probabilidade de chuva de 3 em 3 horas. Fonte: IPMA.",
     forecastPlace: (place: string) =>
       `Previsão do IPMA para ${place}, o local de previsão mais próximo do concelho.`,
     forecastNote: (capital: string) =>
@@ -579,6 +603,8 @@ const pt = {
   },
   /** A página inicial imersiva: o país em 3D e um painel por tema, ao longo do scroll. */
   home: {
+    myConcelho: "O seu concelho:",
+    myDistrict: "O seu distrito:",
     kicker: "Boletim nacional · ao vivo",
     scroll: "Desça para percorrer o país",
     step: (i: number, n: number) => `${String(i).padStart(2, "0")} / ${String(n).padStart(2, "0")}`,
@@ -670,6 +696,9 @@ const pt = {
     privacyTitle: "Privacidade",
     privacyDescription:
       "O Portugal Agora não recolhe dados pessoais: não há contas, publicidade nem cookies, e a localização nunca sai do seu dispositivo.",
+    emergencyTitle: "Em caso de emergência",
+    emergencyDescription:
+      "Os contactos (112, SNS 24) e o que fazer em incêndios, calor, chuva forte, vento, agitação marítima, frio e sismos.",
     aboutTitle: "Sobre o projeto",
     aboutDescription:
       "Um projeto pessoal, sem fins lucrativos e de código aberto, que junta num só sítio os avisos e os sismos do IPMA, os incêndios do Fogos.pt e a qualidade do ar.",
@@ -734,6 +763,8 @@ const en: Dictionary = {
     offline: "No internet connection. You are seeing the last saved data.",
   },
   emergency: {
+    badDay: "There is a red warning or a major wildfire today.",
+    whatToDo: "What to do",
     before: "In an emergency, call",
     after: ". This site is for information only and does not replace the authorities.",
   },
@@ -742,6 +773,7 @@ const en: Dictionary = {
       "Official information gathered in one place. It is not an official source and does not replace Civil Protection. In an emergency, call 112.",
     data: "Data",
     links: "Footer",
+    emergency: "In an emergency",
     sources: "Sources and how we read the data",
     privacy: "Privacy",
     project: "About the project",
@@ -787,6 +819,17 @@ const en: Dictionary = {
   push: {
     title: (name, level) => `${name}: ${level} warning`,
     source: "Source: IPMA.",
+    fireTitle: (place) => `Major wildfire: ${place}`,
+    fireBody: (status, operatives, inPlace) =>
+      `${status.charAt(0).toUpperCase()}${status.slice(1)}, ${plural(operatives, "firefighter", "firefighters")}, ${inPlace}.`,
+    fireSource: "Source: Fogos.pt (ANEPC).",
+    quakeTitle: (magnitude) => `Earthquake felt, magnitude ${magnitude}`,
+    quakeBody: (place, time) => `${place}, at ${time}.`,
+    extras: "Also",
+    extraFires: "Major wildfires",
+    extraQuakes: "Felt earthquakes",
+    extrasNote:
+      "Wildfires that ANEPC flags as important or with 50 or more firefighters, and earthquakes felt in the district. One notification per incident.",
     testTitle: "Portugal Agora: test notification",
     testBody: (inPlace) =>
       `Notifications are working. When IPMA raises a warning ${inPlace}, you will get one like this.`,
@@ -807,10 +850,18 @@ const en: Dictionary = {
       "This browser does not support notifications. On iPhone and iPad, add the site to the Home Screen first.",
     error: "Could not save your choice. Please try again shortly.",
     privacy:
-      "We only store this browser’s technical notification address, the chosen districts and the level. Turning it off deletes everything.",
+      "We only store this browser’s technical notification address, the chosen districts, the level and whether you want wildfires and earthquakes. Turning it off deletes everything.",
   },
   history: {
     heading: "Last 7 days",
+    yearHeading: "Last year",
+    yearDistrict: "District",
+    yearCounts: (yellow, orange, red) =>
+      `Days with a warning: ${yellow} yellow, ${orange} orange, ${red} red.`,
+    yearAria: (yellow, orange, red, known) =>
+      `Warning calendar: of ${plural(known, "day", "days")} with data, ${yellow} with a yellow warning, ${orange} orange and ${red} red, as the day's highest level.`,
+    yearNote: (since, days) =>
+      `Each square is a day, with that day's highest warning. Recorded since ${since} (${plural(days, "day", "days")}).`,
     headingDay: "Last 24 hours",
     ranges: { day: "24 h", week: "7 days" },
     range: "Period",
@@ -849,6 +900,8 @@ const en: Dictionary = {
     weatherTitle: "Weather now",
     stationDistance: (km) => `The station is ${km} km from the centre of the municipality.`,
     forecastTitle: (name) => `Forecast for ${name}`,
+    hoursTitle: "Next hours",
+    hoursNote: "Temperature and chance of rain every 3 hours. Source: IPMA.",
     forecastPlace: (place) =>
       `IPMA forecast for ${place}, the closest forecast location to the municipality.`,
     forecastNote: (capital) =>
@@ -1178,6 +1231,8 @@ const en: Dictionary = {
     boundaries: "Boundaries",
   },
   home: {
+    myConcelho: "Your municipality:",
+    myDistrict: "Your district:",
     kicker: "National bulletin · live",
     scroll: "Scroll to travel the country",
     step: (i, n) => `${String(i).padStart(2, "0")} / ${String(n).padStart(2, "0")}`,
@@ -1263,6 +1318,9 @@ const en: Dictionary = {
     privacyTitle: "Privacy",
     privacyDescription:
       "Portugal Agora collects no personal data: there are no accounts, ads or cookies, and your location never leaves your device.",
+    emergencyTitle: "In an emergency",
+    emergencyDescription:
+      "Who to call (112, SNS 24) and what to do in wildfires, heat, heavy rain, wind, rough seas, cold and earthquakes.",
     aboutTitle: "About the project",
     aboutDescription:
       "A personal, non-profit, open-source project that brings IPMA warnings and earthquakes, Fogos.pt wildfires and air quality together in one place.",

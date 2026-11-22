@@ -8,11 +8,12 @@ import { distanceKm } from "@/lib/geo/geometry";
 import { useLiveState } from "@/lib/hooks/live-state";
 import { useWeather } from "@/lib/hooks/weather";
 import { useI18n } from "@/lib/i18n/client";
-import type { ForecastDay } from "@/lib/sources/ipma-forecast";
+import type { ForecastDay, LocalForecast } from "@/lib/sources/ipma-forecast";
 import type { StationObservation } from "@/lib/sources/ipma-observations";
 import type { SourceResult } from "@/lib/sources/types";
 
 import { ForecastStrip } from "./boletim/forecast-strip";
+import { HourlyStrip } from "./boletim/hourly-strip";
 import { ObservationCard, SeaCard } from "./boletim/now-and-sea";
 import { PageHead } from "./boletim/page-head";
 import { AirAndUv } from "./cards/air-uv";
@@ -44,9 +45,9 @@ const SEA_RADIUS_KM = 40;
 /** Concelhos vizinhos na tabela do risco. */
 const RISK_NEIGHBOURS = 4;
 
-type Forecast = SourceResult<ForecastDay[]> & { place?: string };
+type OwnForecast = SourceResult<LocalForecast> & { place?: string };
 
-const forecastFetcher = async (url: string): Promise<Forecast> => {
+const fetcher = async <T,>(url: string): Promise<T> => {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json();
@@ -60,16 +61,18 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
   // A previsão do próprio concelho; a da capital de distrito só se essa falhar.
   const { data: own, error: ownError } = useSWR(
     `/api/forecast/concelho/${concelho.dico}`,
-    forecastFetcher,
+    fetcher<OwnForecast>,
     forecastOptions,
   );
   const ownFailed = ownError !== undefined || (own !== undefined && !own.data);
   const { data: capitalForecast } = useSWR(
     ownFailed ? `/api/forecast/${district.globalIdLocal}` : null,
-    forecastFetcher,
+    fetcher<SourceResult<ForecastDay[]>>,
     forecastOptions,
   );
-  const forecast = own?.data ? own : ownFailed ? capitalForecast : undefined;
+  const ownData = own?.data ?? null;
+  // Os dias: os do concelho ou, se falhar, os da capital.
+  const days = ownData?.days ?? (ownFailed ? capitalForecast?.data : null) ?? null;
   const name = t.concelhoName(concelho.dico, concelho.name);
   const inPlace = t.inPlace(district);
 
@@ -145,7 +148,11 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
     .sort((a, b) => a.km - b.km)[0]?.spot;
 
   const air = state.airQuality.data?.find((a) => a.district === district.slug);
-  const uv = state.uv.data?.filter((u) => u.district === district.slug);
+  // O UV do próprio concelho (na sua previsão); senão, o da capital de distrito.
+  const ownUv = ownData?.days.flatMap((d) =>
+    d.uv ? [{ district: district.slug, date: d.date, index: d.uv.index, label: d.uv.label }] : [],
+  );
+  const uv = ownUv?.length ? ownUv : state.uv.data?.filter((u) => u.district === district.slug);
 
   const showFires = firesCovered && state.fires.data !== null && activeFires.length > 0;
   const showQuakes = state.earthquakes.data !== null && quakes.length > 0;
@@ -265,25 +272,30 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
           />
         ) : null}
 
-        {forecast?.data ? (
-          <div className="flex flex-col gap-2 lg:col-span-2">
-            <ForecastStrip
-              days={forecast.data}
-              reference={reference}
-              region={district.region}
-              title={
-                forecast === own
-                  ? t.concelho.forecastTitle(name)
-                  : t.stage.forecastFor(t.capitalName(district))
-              }
-            />
-            {forecast !== own ? (
-              <p className="text-sm text-ink-2">
-                {t.concelho.forecastNote(t.capitalName(district))}
-              </p>
-            ) : own.place && own.place.toLowerCase() !== concelho.name.toLowerCase() ? (
-              <p className="text-sm text-ink-2">{t.concelho.forecastPlace(own.place)}</p>
+        {days ? (
+          <div className="flex flex-col gap-6 lg:col-span-2">
+            {ownData && ownData.hours.length > 0 ? (
+              <HourlyStrip hours={ownData.hours} now={reference} region={district.region} />
             ) : null}
+            <div className="flex flex-col gap-2">
+              <ForecastStrip
+                days={days}
+                reference={reference}
+                region={district.region}
+                title={
+                  ownData
+                    ? t.concelho.forecastTitle(name)
+                    : t.stage.forecastFor(t.capitalName(district))
+                }
+              />
+              {!ownData ? (
+                <p className="text-sm text-ink-2">
+                  {t.concelho.forecastNote(t.capitalName(district))}
+                </p>
+              ) : own?.place && own.place.toLowerCase() !== concelho.name.toLowerCase() ? (
+                <p className="text-sm text-ink-2">{t.concelho.forecastPlace(own.place)}</p>
+              ) : null}
+            </div>
           </div>
         ) : null}
       </div>

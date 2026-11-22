@@ -17,6 +17,7 @@ import { QuakeList } from "./cards/quake-list";
 import { WarningGroups } from "./cards/warning-groups";
 import { FeedLink } from "./cards/feed-link";
 import { FiresHistorySection, WarningsHistorySection } from "./history/history-sections";
+import { NationalYearSection } from "./history/year-history";
 import type { LayerId } from "./map/layers";
 import { MapPanel } from "./map/map-panel";
 import { EmptyState, Section } from "./status/section";
@@ -172,6 +173,7 @@ export function WarningsView() {
         <FeedLink topic="avisos" />
       </Section>
       <WarningsHistorySection slugs={HISTORY_ORDER} linkDistricts />
+      <NationalYearSection slugs={HISTORY_ORDER} />
     </TopicLayout>
   );
 }

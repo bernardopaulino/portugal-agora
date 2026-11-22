@@ -8,9 +8,16 @@ import {
   timeByLevel,
   type HistoryPoint,
 } from "@/lib/history/points";
-import { levelsOf, notificationsFor, rises } from "@/lib/push/changes";
+import {
+  eventNotificationsFor,
+  freshEvents,
+  levelsOf,
+  notableEvents,
+  notificationsFor,
+  rises,
+} from "@/lib/push/changes";
 import { aggregate } from "@/lib/state/aggregate";
-import type { FireEvent, SourceResult, WarningEvent } from "@/lib/sources/types";
+import type { EarthquakeEvent, FireEvent, SourceResult, WarningEvent } from "@/lib/sources/types";
 
 const now = new Date("2026-10-04T09:00:00.000Z");
 const ok = <T>(id: SourceResult<T>["id"], data: T): SourceResult<T> => ({
@@ -139,5 +146,79 @@ describe("notificações", () => {
     ).toEqual([]);
     const en = notificationsFor({ districts: ["porto"], min: "yellow", locale: "en" }, changes, s);
     expect(en[0]).toMatchObject({ title: "Porto: yellow warning", url: "/en/porto/avisos" });
+  });
+});
+
+describe("notificações de incêndios e sismos", () => {
+  const bigFire = (id: string, patch: Partial<FireEvent> = {}) =>
+    ({
+      kind: "fire",
+      id,
+      active: true,
+      severity: "orange",
+      status: "Em curso",
+      statusCode: 5,
+      operatives: 80,
+      place: { district: "viseu", region: "continente", label: "Tondela, Campo de Besteiros" },
+      ...patch,
+    }) as unknown as FireEvent;
+  const quake = (id: string, felt: boolean) =>
+    ({
+      kind: "earthquake",
+      id,
+      severity: "none",
+      magnitude: 3.4,
+      depthKm: 10,
+      felt,
+      occurredAt: "2026-10-04T08:40:00.000Z",
+      place: { district: "lisboa", region: "continente", label: "Oeste de Cascais" },
+    }) as unknown as EarthquakeEvent;
+  const withEvents = (fires: FireEvent[], quakes: EarthquakeEvent[]) => {
+    const s = state([], fires);
+    return { ...s, earthquakes: ok("ipma-seismic", quakes) };
+  };
+
+  it("só os incêndios importantes ou grandes e os sismos sentidos contam", () => {
+    const s = withEvents(
+      [
+        bigFire("grande"),
+        bigFire("pequeno", { operatives: 12 }),
+        bigFire("importante", { operatives: 5, severity: "red" }),
+        bigFire("extinto", { active: false }),
+      ],
+      [quake("sentido", true), quake("nao-sentido", false)],
+    );
+    expect(notableEvents(s).map((e) => e.id)).toEqual(["grande", "importante", "sentido"]);
+  });
+
+  it("na primeira vez não notifica o que já lá estava; depois, só o que é novo", () => {
+    const a = { id: "a", district: "viseu", event: bigFire("a") };
+    const b = { id: "b", district: "viseu", event: bigFire("b") };
+    const first = freshEvents(null, [a]);
+    expect(first.fresh).toEqual([]);
+    expect(first.seen).toEqual(["a"]);
+    const second = freshEvents(first.seen, [a, b]);
+    expect(second.fresh.map((e) => e.id)).toEqual(["b"]);
+    expect(second.seen).toEqual(["b", "a"]);
+    // Um incêndio que sai e volta à lista não notifica outra vez.
+    expect(freshEvents(second.seen, [a]).fresh).toEqual([]);
+  });
+
+  it("respeita os distritos e as escolhas de cada pessoa", () => {
+    const events = notableEvents(withEvents([bigFire("f")], [quake("q", true)]));
+    const base = { min: "yellow" as const, locale: "pt" as const };
+    expect(eventNotificationsFor({ ...base, districts: ["viseu", "lisboa"] }, events)).toEqual([]);
+    const both = eventNotificationsFor(
+      { ...base, districts: ["viseu", "lisboa"], fires: true, quakes: true },
+      events,
+    );
+    expect(both.map((p) => p.url)).toEqual(["/viseu/incendios", "/lisboa/sismos"]);
+    expect(both[0]!.title).toBe("Incêndio importante: Tondela, Campo de Besteiros");
+    expect(both[0]!.body).toBe("Em curso, 80 operacionais, em Viseu. Fonte: Fogos.pt (ANEPC).");
+    expect(both[1]!.title).toBe("Sismo sentido, magnitude 3,4");
+    expect(both[1]!.body).toContain("Fonte: IPMA.");
+    expect(
+      eventNotificationsFor({ ...base, districts: ["porto"], fires: true, quakes: true }, events),
+    ).toEqual([]);
   });
 });

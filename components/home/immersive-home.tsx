@@ -27,6 +27,8 @@ import {
 import { capitalize, formatDayTime, formatNumber } from "@/lib/time/format";
 import { cn } from "@/lib/utils";
 
+import { MyPlace } from "./my-place";
+
 import { BulletinMap } from "../boletim/bulletin-map";
 import { startNavigationFeedback } from "../layout/navigation-progress";
 import { DistrictIndex } from "../boletim/district-index";
@@ -181,6 +183,7 @@ export function ImmersiveHome() {
               {live ? countryHeadline(live.levelKnown, live.districts, t) : t.meta.homeKicker}
             </h1>
             <BulletinStamp iso={live?.generatedAt} />
+            <MyPlace state={live ?? null} />
             {live ? (
               <TopicList topics={topics} hrefFor={(id) => path(topicPage[id])} compact />
             ) : null}
