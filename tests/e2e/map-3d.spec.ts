@@ -105,11 +105,10 @@ test("sismos em profundidade: entrada, ver no mapa e voltar ao 2D", async ({ pag
   const errors = consoleErrors(page);
   await withTestQuakes(page);
   await page.goto("/sismos");
-  const row = page.locator("li", { hasText: "A oeste de Cascais" });
+  // Pelo id: os dados reais do IPMA também podem ter um sismo "a oeste de Cascais".
+  const row = page.locator("#sismo-teste-cascais");
   await expect(row).toBeVisible();
-  await expect(page.locator("li", { hasText: "A norte de Loulé" })).toContainText(
-    "profundidade não indicada",
-  );
+  await expect(page.locator("#sismo-teste-loule")).toContainText("profundidade não indicada");
 
   const scene = depthScene(page);
   await expect(scene.locator("canvas")).toBeVisible();
@@ -422,10 +421,7 @@ test.describe("com reduzir movimento", () => {
     await withTestQuakes(page);
     await page.goto("/sismos");
     await expect(depthScene(page)).toHaveAttribute("data-camera-duration", "0");
-    await page
-      .locator("li", { hasText: "A oeste de Cascais" })
-      .getByRole("button", { name: "Ver no mapa" })
-      .click();
+    await page.locator("#sismo-teste-cascais").getByRole("button", { name: "Ver no mapa" }).click();
     await expect(depthScene(page)).toHaveAttribute("data-camera-duration", "0");
 
     await page.goto("/risco");
