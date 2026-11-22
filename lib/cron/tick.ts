@@ -15,7 +15,7 @@ import { getState } from "@/lib/state/get-state";
  * O tick: verifica as fontes em atraso, envia as notificações se o nível de
  * algum distrito subiu e, no máximo de 9 em 9 min, junta um ponto ao
  * histórico. Corre de três maneiras:
- * - por um agendador externo de 2 em 2 min (Upstash QStash ou cron-job.org,
+ * - por um agendador externo de 4 em 4 min (Upstash QStash ou cron-job.org,
  *   ver docs/OPERACAO.md), em /api/cron/tick com o segredo: mantém os dados
  *   frescos e as notificações a tempo mesmo com o site fechado;
  * - pelo GitHub Actions, de 10 em 10 min (reforço; o agendamento do GitHub atrasa);
