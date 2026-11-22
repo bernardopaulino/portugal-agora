@@ -7,6 +7,7 @@ import { appendHistory } from "@/lib/history/store";
 import { levelsOf, notificationsFor, rises } from "@/lib/push/changes";
 import { sendAll } from "@/lib/push/send";
 import { allSubscriptions } from "@/lib/push/subscriptions";
+import { getObservationsAndStations, getSea } from "@/lib/sources/registry";
 import type { Severity } from "@/lib/sources/types";
 import type { CountryState } from "@/lib/state/aggregate";
 import { getState } from "@/lib/state/get-state";
@@ -60,7 +61,12 @@ async function notifyRises(state: CountryState): Promise<TickResult["push"]> {
 
 export async function runTick(): Promise<TickResult> {
   // Verifica primeiro as fontes em atraso: o tick não tem ninguém à espera.
-  const state = await getState("await");
+  // Observações e mar não entram no estado, mas também têm de estar frescos com o site fechado.
+  const [state] = await Promise.all([
+    getState("await"),
+    getObservationsAndStations("await"),
+    getSea("await"),
+  ]);
   const push = await notifyRises(state);
   const recorded =
     (await claim(TICK_LOCK_KEY, TICK_LOCK_SECONDS)) && (await appendHistory(pointFromState(state)));
