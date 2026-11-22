@@ -166,6 +166,7 @@ function Rig({
   radius,
   focusPoint,
   onMove,
+  onArrive,
 }: {
   /** Região (e distrito) da cena: a entrada da câmara toca uma vez por cada. */
   entryKey: string;
@@ -175,7 +176,10 @@ function Rig({
   /** Raio da esfera que contém o bloco: dá a distância inicial e os limites do zoom. */
   radius: number;
   focusPoint: THREE.Vector3 | null;
+  /** Começou uma viagem da câmara (0 = salto, sem animação). */
   onMove: (duration: number) => void;
+  /** A viagem chegou ao fim (para os testes: uma viagem cortada nunca chega). */
+  onArrive: () => void;
 }) {
   // A câmara lê-se do estado na altura (get), não no render: é um objeto do three que se altera.
   const get = useThree((s) => s.get);
@@ -235,6 +239,7 @@ function Rig({
     if (duration <= 0) {
       view.current = goal;
       apply();
+      onArrive();
       return;
     }
     const start = performance.now();
@@ -249,6 +254,7 @@ function Rig({
       };
       apply();
       frame.current = k < 1 ? requestAnimationFrame(step) : null;
+      if (k >= 1) onArrive();
     };
     frame.current = requestAnimationFrame(step);
   };
@@ -346,11 +352,17 @@ function Rig({
         animateTo(homeView(), duration);
       },
     };
-    return () => {
+  });
+  // Só ao desmontar: este corre a cada render, e um render a meio de uma viagem
+  // (chegam os contornos dos distritos, o rato passa por um sismo) não a pode cortar.
+  useEffect(
+    () => () => {
       stop();
       apiRef.current = null;
-    };
-  });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   return null;
 }
@@ -829,7 +841,12 @@ export default function QuakeDepth({
   };
 
   const onMove = (duration: number) => {
-    if (wrap.current) wrap.current.dataset.cameraDuration = String(duration);
+    if (!wrap.current) return;
+    wrap.current.dataset.cameraDuration = String(duration);
+    wrap.current.dataset.cameraArrived = "false";
+  };
+  const onArrive = () => {
+    if (wrap.current) wrap.current.dataset.cameraArrived = "true";
   };
 
   const focusDistrict = focus ? getDistrict(focus) : undefined;
@@ -881,6 +898,7 @@ export default function QuakeDepth({
               radius={radius}
               focusPoint={focusPoint}
               onMove={onMove}
+              onArrive={onArrive}
             />
             <LabelAnchors labels={labels} depths={grid} halfW={halfW} halfD={halfD} />
             <mesh rotation-x={-Math.PI / 2} renderOrder={1}>

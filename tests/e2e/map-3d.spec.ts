@@ -104,6 +104,12 @@ test("os mapas com vista 3D abrem nela; avisos e qualidade do ar ficam em 2D", a
 test("sismos em profundidade: entrada, ver no mapa e voltar ao 2D", async ({ page }) => {
   const errors = consoleErrors(page);
   await withTestQuakes(page);
+  // Os contornos dos distritos chegam a meio da entrada da câmara: o render que
+  // isso provoca não pode cortar a viagem (cortava, e a câmara ficava a meio).
+  await page.route("**/geo/distritos.json", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 700));
+    await route.continue();
+  });
   await page.goto("/sismos");
   // Pelo id: os dados reais do IPMA também podem ter um sismo "a oeste de Cascais".
   const row = page.locator("#sismo-teste-cascais");
@@ -114,6 +120,7 @@ test("sismos em profundidade: entrada, ver no mapa e voltar ao 2D", async ({ pag
   await expect(scene.locator("canvas")).toBeVisible();
   // A entrada: a câmara desce de cima durante 1,8 s.
   await expect(scene).toHaveAttribute("data-camera-duration", "1800");
+  await expect(scene).toHaveAttribute("data-camera-arrived", "true", { timeout: 5000 });
   await expect(scene).toHaveAttribute("aria-label", /\d+ sismos?; o mais profundo a \d+ km\./);
   await expect(legend(page)).toContainText("Profundidade exagerada 3×.");
   await expect(legend(page)).toContainText("ficam à superfície, com contorno tracejado");
@@ -129,6 +136,7 @@ test("sismos em profundidade: entrada, ver no mapa e voltar ao 2D", async ({ pag
   const panel = page.locator("#mapa").getByText("a 24 km de profundidade");
   await expect(panel).toBeVisible();
   await expect(scene).toHaveAttribute("data-camera-duration", "600");
+  await expect(scene).toHaveAttribute("data-camera-arrived", "true", { timeout: 5000 });
 
   // O teclado roda e aproxima, sem sair da página.
   await scene.focus();
