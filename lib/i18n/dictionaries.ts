@@ -100,6 +100,9 @@ const pt = {
     geoOutside: "Parece estar fora de Portugal. Escolha o distrito na lista.",
     geoFailed: "Não foi possível identificar o distrito. Escolha-o na lista.",
     geoDenied: "Sem acesso à localização. Pode escolher o distrito na lista.",
+    geoApprox: (km: number) =>
+      `Este dispositivo só sabe a localização aproximada (cerca de ${km} km). Em que concelho está?`,
+    geoCancel: "Fechar",
     theme: "Tema",
     themeNames: { system: "automático", light: "claro", dark: "escuro" },
     themeButton: (current: string) => `Tema: ${current}. Mudar tema`,
@@ -754,6 +757,9 @@ const en: Dictionary = {
     geoOutside: "You seem to be outside Portugal. Choose a district from the list.",
     geoFailed: "We couldn't work out your district. Choose it from the list.",
     geoDenied: "No access to your location. You can choose the district from the list.",
+    geoApprox: (km) =>
+      `This device only knows your approximate location (about ${km} km). Which municipality are you in?`,
+    geoCancel: "Close",
     theme: "Theme",
     themeNames: { system: "automatic", light: "light", dark: "dark" },
     themeButton: (current: string) => `Theme: ${current}. Change theme`,

@@ -529,3 +529,30 @@ test("o último ano dos avisos: calendário no distrito e tabela no país", asyn
   const row = page.locator("#ano tr", { hasText: "Lisboa" });
   await expect(row.locator("td")).toHaveText(["2", "1", "0"]);
 });
+
+test.describe("Perto de mim em Oeiras", () => {
+  test.use({ permissions: ["geolocation"] });
+
+  test("com GPS, vai direto para Oeiras", async ({ page, context }) => {
+    await context.setGeolocation({ latitude: 38.6915, longitude: -9.3105, accuracy: 20 });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Perto de mim" }).click();
+    await expect(page).toHaveURL(/\/lisboa\/oeiras$/);
+  });
+
+  test("com a posição aproximada, pergunta o concelho em vez de adivinhar", async ({
+    page,
+    context,
+  }) => {
+    // O browser de um computador: posição pelo Wi-Fi ou IP, com quilómetros de erro.
+    await context.setGeolocation({ latitude: 38.6915, longitude: -9.3105, accuracy: 8000 });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Perto de mim" }).click();
+    await expect(page.getByText(/só sabe a localização aproximada/)).toBeVisible();
+    const choices = page.getByRole("status").getByRole("button");
+    await expect(choices.first()).toHaveText("Oeiras");
+    await expect(page.getByRole("status").getByRole("button", { name: "Sintra" })).toBeVisible();
+    await choices.first().click();
+    await expect(page).toHaveURL(/\/lisboa\/oeiras$/);
+  });
+});
