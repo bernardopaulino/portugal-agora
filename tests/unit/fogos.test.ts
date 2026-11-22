@@ -22,6 +22,15 @@ describe("normalizeFires", () => {
     expect(aveiro?.coordinates).toEqual([-8.557347, 40.60797]);
   });
 
+  it("guarda o código DICO do concelho (liga o incêndio à página do concelho)", () => {
+    const aveiro = fires.find((f) => f.id === "fogo-20261328520");
+    expect(aveiro?.dico).toBe("0105");
+    const bad = normalizeFires(
+      fogosSchema.parse({ ...raw, data: [{ ...raw.data[0], dico: "dddd" }] }),
+    );
+    expect(bad[0]?.dico).toBeUndefined();
+  });
+
   it("converte a hora de início (epoch) para ISO", () => {
     const aveiro = fires.find((f) => f.id === "fogo-20261328520");
     expect(aveiro?.startedAt).toBe(new Date(1789731000 * 1000).toISOString());
