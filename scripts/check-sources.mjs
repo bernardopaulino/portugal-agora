@@ -45,12 +45,19 @@ async function github(path, init = {}) {
 
 function describe(r) {
   if (r.error) return `O site não respondeu: ${r.error}`;
-  return r.bad
-    .map(
-      (s) =>
-        `- **${s.id}**: ${s.health} (estado ${s.status}, dados com ${s.ageMinutes ?? "?"} min; máximo ${s.maxAgeMinutes} min)`,
-    )
-    .join("\n");
+  const lines = r.bad.map(
+    (s) =>
+      `- **${s.id}**: ${s.health} (estado ${s.status}, dados com ${s.ageMinutes ?? "?"} min; máximo ${s.maxAgeMinutes} min)`,
+  );
+  // Fontes que responderam bem da última vez mas não são verificadas há muito:
+  // ninguém está a chamar o tick (o agendador externo de 2 em 2 min parou).
+  if (r.bad.length > 0 && r.bad.every((s) => s.health === "stale" && s.status === "ok")) {
+    lines.push(
+      "",
+      "Todas responderam bem da última vez: o mais provável é o agendador externo do tick (/api/cron/tick, de 2 em 2 min) não estar a correr. Ver docs/OPERACAO.md.",
+    );
+  }
+  return lines.join("\n");
 }
 
 let result = await report();
