@@ -16,10 +16,13 @@ export function HourlyStrip({
   hours,
   now,
   region,
+  card = false,
 }: {
   hours: ForecastHour[];
   now: Date;
   region: Region;
+  /** Num cartão de meia largura: 4 colunas em 2 linhas, com o título dentro do vidro. */
+  card?: boolean;
 }) {
   const { t } = useI18n();
   // A partir da hora em curso; depois, de 3 em 3 horas.
@@ -43,11 +46,20 @@ export function HourlyStrip({
   if (shown.length < 2) return null;
 
   return (
-    <section aria-labelledby="horas-titulo" className="flex flex-col gap-3">
+    <section
+      aria-labelledby="horas-titulo"
+      className={card ? "flex flex-col gap-4 rounded-2xl p-5 glass sm:p-6" : "flex flex-col gap-3"}
+    >
       <h2 id="horas-titulo" className="font-display text-2xl font-bold">
         {t.concelho.hoursTitle}
       </h2>
-      <ol className="grid grid-cols-4 overflow-hidden rounded-2xl glass sm:grid-cols-8">
+      <ol
+        className={
+          card
+            ? "grid grid-cols-4 border-y border-stage-line"
+            : "grid grid-cols-4 overflow-hidden rounded-2xl glass sm:grid-cols-8"
+        }
+      >
         {shown.map((h, i) => {
           const Icon = weatherIcon(h.weatherId);
           return (
@@ -56,8 +68,12 @@ export function HourlyStrip({
               className={
                 "flex min-w-0 flex-col items-center gap-1 px-0.5 py-3 text-center" +
                 (i % 4 > 0 ? " border-l border-stage-line" : "") +
-                (i >= 4 ? " border-t border-stage-line sm:border-t-0" : "") +
-                (i === 4 ? " sm:border-l" : "")
+                (i >= 4
+                  ? card
+                    ? " border-t border-stage-line"
+                    : " border-t border-stage-line sm:border-t-0"
+                  : "") +
+                (i === 4 && !card ? " sm:border-l" : "")
               }
             >
               <span className="font-display text-sm font-semibold">

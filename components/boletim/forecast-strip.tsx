@@ -51,11 +51,21 @@ export function ForecastStrip({
   const today = localDate(reference.toISOString(), region);
   const tomorrow = localDate(new Date(reference.getTime() + 86_400_000).toISOString(), region);
   const name = (date: string) =>
-    date === today
-      ? t.stage.today
-      : date === tomorrow
-        ? t.stage.tomorrow
-        : formatWeekday(date, locale);
+    date === today ? (
+      t.stage.today
+    ) : date === tomorrow ? (
+      t.stage.tomorrow.length > 6 ? (
+        // "Tomorrow" não cabe em colunas estreitas: aí fica o dia abreviado ("Tue").
+        <>
+          <span className="max-[399px]:hidden">{t.stage.tomorrow}</span>
+          <span className="min-[400px]:hidden">{formatWeekday(date, locale)}</span>
+        </>
+      ) : (
+        t.stage.tomorrow
+      )
+    ) : (
+      formatWeekday(date, locale)
+    );
 
   return (
     <section aria-labelledby="previsao-titulo" className="flex flex-col gap-3">
@@ -74,12 +84,17 @@ export function ForecastStrip({
                 (i > 0 ? " border-l border-stage-line" : "")
               }
             >
-              <span className="font-display text-sm font-semibold sm:text-lg">{name(d.date)}</span>
+              <span className="font-display text-xs font-semibold min-[360px]:text-sm sm:text-lg">
+                {name(d.date)}
+              </span>
               <Icon aria-hidden className="size-8 text-stage-accent sm:size-10" strokeWidth={1.8} />
               <span className="sr-only">{t.term(d.weather)}.</span>
-              <span className="font-display text-2xl leading-none font-bold sm:text-3xl">
+              <span className="font-display text-xl leading-none font-bold min-[360px]:text-2xl sm:text-3xl">
                 {d.max}°
-                <span className="text-lg font-semibold text-stage-ink-2 sm:text-xl"> {d.min}°</span>
+                <span className="text-base font-semibold text-stage-ink-2 min-[360px]:text-lg sm:text-xl">
+                  {" "}
+                  {d.min}°
+                </span>
               </span>
               <span className="text-sm text-stage-ink-2">
                 <span className="sr-only">{t.stage.rainChance}</span>

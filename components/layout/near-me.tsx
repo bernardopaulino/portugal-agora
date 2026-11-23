@@ -4,7 +4,7 @@ import { LocateFixed } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import type { Concelho } from "@/data/concelhos";
+import { getConcelho, type Concelho } from "@/data/concelhos";
 import { districtAt, type ConcelhoFeature, type DistrictFeature } from "@/lib/geo/geometry";
 import { ACCURATE_ENOUGH_M, concelhoCandidates } from "@/lib/geo/near-me";
 import { writeStorage } from "@/lib/hooks/external";
@@ -16,6 +16,25 @@ import { startNavigationFeedback } from "./navigation-progress";
 export const MY_DISTRICT_KEY = "pa:distrito";
 /** "lisboa/sintra": o concelho encontrado da última vez (atalho na página inicial). */
 export const MY_CONCELHO_KEY = "pa:concelho";
+/**
+ * "lisboa/oeiras": o concelho que a pessoa escolheu ou confirmou. A posição
+ * de um computador pode cair no concelho do lado; depois de corrigida uma
+ * vez, ganha à posição sempre que fique a poucos km.
+ */
+export const CHOSEN_CONCELHO_KEY = "pa:concelho-escolhido";
+/** Na sessão: o concelho encontrado e os vizinhos, para a página perguntar "É aqui?". */
+export const NEAR_CHECK_KEY = "pa:perto";
+/** Os vizinhos que a página oferece contam até esta distância (m). */
+const NEAR_CHECK_RADIUS_M = 3000;
+
+function readChosen(): Concelho | undefined {
+  try {
+    const [d, c] = (localStorage.getItem(CHOSEN_CONCELHO_KEY) ?? "").split("/");
+    return d && c ? getConcelho(d, c) : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 type Status = "idle" | "locating" | "error" | "choose";
 
@@ -47,9 +66,22 @@ export function NearMeButton({ className }: { className?: string }) {
   const [message, setMessage] = useState("");
   const [choices, setChoices] = useState<Concelho[]>([]);
 
-  const go = (district: string, concelho?: Concelho) => {
+  const go = (
+    district: string,
+    concelho?: Concelho,
+    { chosen = false, alternatives = [] }: { chosen?: boolean; alternatives?: Concelho[] } = {},
+  ) => {
     writeStorage(MY_DISTRICT_KEY, district);
     writeStorage(MY_CONCELHO_KEY, concelho ? `${district}/${concelho.slug}` : "");
+    if (chosen && concelho) writeStorage(CHOSEN_CONCELHO_KEY, `${district}/${concelho.slug}`);
+    try {
+      if (concelho && alternatives.length > 0)
+        sessionStorage.setItem(
+          NEAR_CHECK_KEY,
+          JSON.stringify({ dico: concelho.dico, alternatives: alternatives.map((c) => c.dico) }),
+        );
+      else sessionStorage.removeItem(NEAR_CHECK_KEY);
+    } catch {}
     setStatus("idle");
     setMessage("");
     setChoices([]);
@@ -92,10 +124,22 @@ export function NearMeButton({ className }: { className?: string }) {
         setMessage(t.header.geoOutside);
         return;
       }
-      const candidates = concelhoCandidates(point, found.coords.accuracy, concelhoGeo.features);
-      if (found.coords.accuracy <= ACCURATE_ENOUGH_M || candidates.length <= 1) {
+      const accuracy = found.coords.accuracy;
+      const candidates = concelhoCandidates(point, accuracy, concelhoGeo.features);
+      // Os concelhos a poucos km: para a escolha guardada e para a página perguntar "É aqui?".
+      const nearby = concelhoCandidates(
+        point,
+        Math.max(accuracy, NEAR_CHECK_RADIUS_M),
+        concelhoGeo.features,
+      );
+      const chosen = readChosen();
+      if (chosen && nearby.some((c) => c.dico === chosen.dico)) {
+        go(chosen.district, chosen);
+        return;
+      }
+      if (accuracy <= ACCURATE_ENOUGH_M || candidates.length <= 1) {
         const here = candidates[0]?.district === slug ? candidates[0] : undefined;
-        go(slug, here);
+        go(slug, here, { alternatives: nearby.filter((c) => c.dico !== here?.dico).slice(0, 5) });
         return;
       }
       // Posição aproximada: a pessoa escolhe (o mais provável primeiro).
@@ -147,7 +191,7 @@ export function NearMeButton({ className }: { className?: string }) {
                     <li key={c.dico}>
                       <button
                         type="button"
-                        onClick={() => go(c.district, c)}
+                        onClick={() => go(c.district, c, { chosen: true })}
                         className="min-h-11 w-full rounded-md px-3 text-left text-base font-semibold hover:bg-ink/10"
                       >
                         {t.concelhoName(c.dico, c.name)}

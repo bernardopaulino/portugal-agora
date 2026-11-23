@@ -42,7 +42,7 @@ export function BulletinStamp({ iso }: { iso?: string }) {
   return (
     <p className="font-mono text-[0.8rem] leading-relaxed tracking-[0.08em] text-stage-ink-2 uppercase">
       <time dateTime={iso} className="text-stage-ink">
-        <span className="whitespace-nowrap max-sm:block">
+        <span className="max-sm:block min-[360px]:whitespace-nowrap">
           <span
             aria-hidden
             className="mr-2 inline-block size-2 rounded-full bg-accent align-middle shadow-[0_0_12px_var(--accent)]"

@@ -111,7 +111,7 @@ export function DistrictStage({
 
       <section
         aria-labelledby="boletim-titulo"
-        className="pointer-events-none relative z-10 mx-auto grid max-w-7xl gap-6 px-4 pt-2 pb-8 sm:px-6 lg:min-h-[calc(100svh-8rem)] lg:grid-cols-12 lg:items-center lg:pt-10"
+        className="pointer-events-none relative z-10 mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-6 px-4 pt-2 pb-8 sm:px-6 lg:min-h-[calc(100svh-8rem)] lg:grid-cols-12 lg:items-center lg:pt-10"
       >
         {/* Telemóveis e tablets: o espaço do distrito, entre o cabeçalho e o painel (como na página inicial). */}
         <div

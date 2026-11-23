@@ -144,7 +144,7 @@ export function ImmersiveHome() {
         <section
           data-scene="hero"
           aria-labelledby="boletim-titulo"
-          className="mx-auto grid max-w-7xl gap-6 px-4 pt-2 pb-10 sm:px-6 lg:min-h-[calc(100svh-8rem)] lg:grid-cols-12 lg:items-center lg:pt-10"
+          className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-6 px-4 pt-2 pb-10 sm:px-6 lg:min-h-[calc(100svh-8rem)] lg:grid-cols-12 lg:items-center lg:pt-10"
         >
           {/*
            * Telemóveis e tablets: o espaço do país, entre o cabeçalho e o painel.

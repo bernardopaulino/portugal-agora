@@ -10,7 +10,10 @@ import { useWeather } from "@/lib/hooks/weather";
 import { useI18n } from "@/lib/i18n/client";
 import type { ForecastDay, LocalForecast } from "@/lib/sources/ipma-forecast";
 import type { StationObservation } from "@/lib/sources/ipma-observations";
-import type { SourceResult } from "@/lib/sources/types";
+import { fireRiskLabels } from "@/lib/sources/labels";
+import { maxSeverity, type SourceResult } from "@/lib/sources/types";
+import { riskLevel, warningTypes } from "@/lib/state/bulletin";
+import { formatNumber } from "@/lib/time/format";
 
 import { ForecastStrip } from "./boletim/forecast-strip";
 import { HourlyStrip } from "./boletim/hourly-strip";
@@ -23,6 +26,8 @@ import { QuakeList } from "./cards/quake-list";
 import { RiskTable } from "./cards/risk-table";
 import { WarningGroups } from "./cards/warning-groups";
 import { ConcelhoMap } from "./concelho-map";
+import { ConcelhoSummary, type SummaryTile } from "./concelho-summary";
+import { NearMeCheck } from "./layout/near-me-check";
 import { EmptyState, Section } from "./status/section";
 
 /*
@@ -31,10 +36,11 @@ import { EmptyState, Section } from "./status/section";
  * em cache na CDN), para as ~600 páginas dos concelhos não contarem para o
  * limite de "ISR writes" da Vercel.
  *
- * Primeiro o que interessa a quem mora lá: o mapa e o "agora" (o que está
- * calmo numa só linha, o tempo, o ar). As caixas de incêndios e sismos só
- * aparecem quando há alguma coisa; incluem o que está perto, nos concelhos
- * vizinhos, porque um incêndio na fronteira também importa.
+ * Por ordem: um resumo num relance (um mosaico por tema) ao lado do mapa;
+ * o tempo (agora e o ar, as próximas horas, os próximos dias); os avisos e o
+ * risco de incêndio; os incêndios e sismos perto, só quando há alguma coisa
+ * (incluem os concelhos vizinhos: um incêndio na fronteira também importa);
+ * no fim a chuva, a seca e o mar. Cada linha tem dois cartões da mesma altura.
  */
 
 /** Incêndios nos concelhos vizinhos até esta distância do centro do concelho. */
@@ -55,7 +61,7 @@ const fetcher = async <T,>(url: string): Promise<T> => {
 };
 
 export function ConcelhoView({ concelho, district }: { concelho: Concelho; district: District }) {
-  const { t, path } = useI18n();
+  const { t, path, locale } = useI18n();
   const state = useLiveState();
   const weather = useWeather();
   const forecastOptions = { revalidateOnFocus: false, refreshInterval: 60 * 60_000 };
@@ -157,149 +163,221 @@ export function ConcelhoView({ concelho, district }: { concelho: Concelho; distr
 
   const showFires = firesCovered && state.fires.data !== null && activeFires.length > 0;
   const showQuakes = state.earthquakes.data !== null && quakes.length > 0;
-  const firesCalm = firesCovered && state.fires.data !== null && !showFires;
-  const quakesCalm = state.earthquakes.data !== null && !showQuakes;
-  const calm =
-    firesCalm && quakesCalm
-      ? t.concelho.calmBoth(FIRE_RADIUS_KM, QUAKE_RADIUS_KM)
-      : firesCalm
-        ? t.concelho.calmFires(FIRE_RADIUS_KM)
-        : quakesCalm
-          ? t.concelho.calmQuakes(QUAKE_RADIUS_KM)
-          : null;
+
+  // O resumo: um mosaico por tema, cada um a apontar para a sua secção.
+  const level = state.levelKnown ? (state.districts[district.slug]?.level ?? "none") : "unknown";
+  const riskToday = risk?.today.byDico[concelho.dico];
+  const riskTomorrow = risk?.tomorrow.byDico[concelho.dico];
+  const today = days?.[0];
+  const tiles: SummaryTile[] = [
+    {
+      id: "avisos",
+      label: t.concelho.summaryWarnings,
+      level,
+      detail:
+        warnings.length > 0 ? warningTypes(warnings, t) : state.levelKnown ? inPlace : undefined,
+      href: "#avisos",
+    },
+    {
+      id: "risco",
+      label: t.concelho.summaryRisk,
+      ...(riskToday
+        ? {
+            level: riskLevel(riskToday),
+            levelLabel: t.term(fireRiskLabels[riskToday] ?? ""),
+            detail: riskTomorrow
+              ? t.concelho.summaryTomorrow(t.term(fireRiskLabels[riskTomorrow] ?? ""))
+              : undefined,
+          }
+        : {
+            value: "—",
+            detail:
+              district.region !== "continente" ? t.concelho.summaryMainlandOnly : t.empty.riskDown,
+          }),
+      href: "#risco",
+    },
+    {
+      id: "tempo",
+      label: t.observed.heading,
+      value: station ? `${formatNumber(station.observation.temperature, 0, locale)} °C` : "—",
+      detail: today ? `${t.term(today.weather)} · ${today.max}° / ${today.min}°` : undefined,
+      href: "#tempo",
+    },
+    {
+      id: "ar",
+      label: t.concelho.summaryAir,
+      ...(air
+        ? { level: air.severity, levelLabel: t.term(air.label) }
+        : { value: "—", detail: t.lists.noReading }),
+      href: "#ar",
+    },
+    {
+      id: "incendios",
+      label: t.concelho.summaryFires(FIRE_RADIUS_KM),
+      ...(!firesCovered
+        ? { value: "—", detail: t.concelho.firesNotCovered }
+        : state.fires.data === null
+          ? { value: "—", detail: t.concelho.summaryUnavailable }
+          : activeFires.length > 0
+            ? {
+                level: maxSeverity(activeFires.map((f) => f.severity)),
+                levelLabel: String(activeFires.length),
+                detail: t.concelho.summaryFiresActive(activeFires.length),
+              }
+            : { value: t.concelho.summaryNone }),
+      href: showFires ? "#incendios" : undefined,
+    },
+    {
+      id: "sismos",
+      label: t.concelho.summaryQuakes(QUAKE_RADIUS_KM),
+      ...(state.earthquakes.data === null
+        ? { value: "—", detail: t.concelho.summaryUnavailable }
+        : quakes.length > 0
+          ? {
+              value: String(quakes.length),
+              detail: t.concelho.summaryQuakesMax(
+                quakes.length,
+                formatNumber(Math.max(...quakes.map((q) => q.magnitude)), 1, locale),
+              ),
+            }
+          : { value: t.concelho.summaryNone, detail: t.concelho.summaryLast7 }),
+      href: showQuakes ? "#sismos" : undefined,
+    },
+  ];
+
+  /** Uma linha de dois cartões da mesma altura; um cartão sozinho ocupa a linha. */
+  const row = "grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2 lg:[&>*:only-child]:col-span-2";
 
   return (
     <>
       {head}
-      <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)] gap-8 px-4 pt-8 sm:px-6 lg:grid-cols-2 lg:items-start">
-        <Section id="mapa" title={t.concelho.mapTitle}>
-          <ConcelhoMap concelho={concelho} district={district} fires={fires} quakes={quakes} />
-        </Section>
-
-        <div className="flex flex-col gap-8">
-          <Section id="agora" title={t.concelho.nowTitle} size="md">
-            {calm ? <p className="text-base">{calm}</p> : null}
-            {!firesCovered ? (
-              <p className="text-base text-ink-2">{t.concelho.firesNotCovered}</p>
-            ) : state.fires.data === null ? (
-              // Fogos.pt em baixo (ou sem chave): diz-se, em vez de calar os incêndios.
-              <p className="text-base text-ink-2">
-                {t.empty.firesDown}{" "}
-                <a href="https://fogos.pt" rel="noopener">
-                  fogos.pt
-                </a>
-                .
-              </p>
-            ) : null}
-            {state.earthquakes.data === null ? (
-              <p className="text-base text-ink-2">{t.empty.quakesDown}</p>
-            ) : null}
-            {station && weather ? (
-              <div className="flex flex-col gap-2">
-                <ObservationCard
-                  observation={station.observation}
-                  result={weather.stations}
-                  district={district}
-                  inPanel
-                />
-                {station.km >= 5 ? (
-                  <p className="text-sm text-ink-2">
-                    {t.concelho.stationDistance(Math.round(station.km))}
-                  </p>
-                ) : null}
-              </div>
-            ) : null}
+      <NearMeCheck concelho={concelho} />
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 pt-8 sm:px-6 lg:gap-8">
+        {/* 1. Num relance: o resumo e o mapa. */}
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-8">
+          <ConcelhoSummary tiles={tiles} />
+          <Section id="mapa" title={t.concelho.mapTitle} size="md">
+            <div className="lg:[&_svg]:max-h-[14rem]">
+              <ConcelhoMap concelho={concelho} district={district} fires={fires} quakes={quakes} />
+            </div>
           </Section>
+        </div>
 
+        {/* 2. O tempo: agora, as próximas horas e os próximos dias. */}
+        <div id="tempo" className={`${row} scroll-mt-28`}>
+          {station && weather ? (
+            <ObservationCard
+              observation={station.observation}
+              result={weather.stations}
+              district={district}
+              note={
+                station.km >= 5 ? t.concelho.stationDistance(Math.round(station.km)) : undefined
+              }
+            />
+          ) : null}
+          {ownData && ownData.hours.length > 0 ? (
+            <HourlyStrip hours={ownData.hours} now={reference} region={district.region} card />
+          ) : null}
+        </div>
+        {days ? (
+          <div className="flex flex-col gap-2">
+            <ForecastStrip
+              days={days}
+              reference={reference}
+              region={district.region}
+              title={
+                ownData
+                  ? t.concelho.forecastTitle(name)
+                  : t.stage.forecastFor(t.capitalName(district))
+              }
+            />
+            {!ownData ? (
+              <p className="text-sm text-ink-2">
+                {t.concelho.forecastNote(t.capitalName(district))}
+              </p>
+            ) : own?.place && own.place.toLowerCase() !== concelho.name.toLowerCase() ? (
+              <p className="text-sm text-ink-2">{t.concelho.forecastPlace(own.place)}</p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {/* 3. Avisos e riscos. */}
+        <div className={row}>
+          <Section id="avisos" title={t.concelho.warningsTitle} result={state.warnings} size="md">
+            <p className="text-base text-ink-2">{t.concelho.warningsNote(inPlace)}</p>
+            {state.warnings.data ? (
+              <WarningGroups
+                warnings={warnings}
+                reference={reference}
+                emptyText={t.concelho.warningsNone(inPlace)}
+                showPlaces={district.region === "acores"}
+              />
+            ) : (
+              <EmptyState>{t.empty.warningsDown}</EmptyState>
+            )}
+          </Section>
+          <Section id="risco" title={t.concelho.riskTitle} result={state.fireRisk} size="md">
+            {district.region !== "continente" ? (
+              <EmptyState>{t.concelho.riskMainlandOnly}</EmptyState>
+            ) : riskRows.length > 0 ? (
+              <>
+                <RiskTable rows={riskRows} current={concelho.dico} />
+                <p className="text-sm text-ink-2">{t.concelho.riskNeighbours}</p>
+              </>
+            ) : (
+              <EmptyState>{t.empty.riskDown}</EmptyState>
+            )}
+          </Section>
+        </div>
+        {showFires || showQuakes ? (
+          <div className={row}>
+            {showFires ? (
+              <Section
+                id="incendios"
+                title={t.concelho.firesNearTitle(FIRE_RADIUS_KM)}
+                result={state.fires}
+                size="md"
+              >
+                <FireList fires={fires} reference={reference} />
+              </Section>
+            ) : null}
+            {showQuakes ? (
+              <Section
+                id="sismos"
+                title={t.concelho.quakesTitle(QUAKE_RADIUS_KM)}
+                result={state.earthquakes}
+                size="md"
+              >
+                <QuakeList quakes={quakes} reference={reference} initial={12} />
+              </Section>
+            ) : null}
+          </div>
+        ) : null}
+
+        {/* 4. O ambiente: o ar, o UV e o pólen; a chuva e a seca; o mar. */}
+        <div className={row}>
           <Section id="ar" title={t.concelho.airTitle} result={state.airQuality} size="md">
             <AirAndUv air={air} uv={uv} generatedAt={state.generatedAt} region={district.region} />
             <p className="text-sm text-ink-2">{t.lists.airNoteDistrict(t.capitalName(district))}</p>
           </Section>
-
-          {district.region === "continente" ? <RainAndDrought dico={concelho.dico} /> : null}
-        </div>
-
-        <Section id="avisos" title={t.concelho.warningsTitle} result={state.warnings}>
-          <p className="text-base text-ink-2">{t.concelho.warningsNote(inPlace)}</p>
-          {state.warnings.data ? (
-            <WarningGroups
-              warnings={warnings}
+          {district.region === "continente" ? (
+            <RainAndDrought dico={concelho.dico} />
+          ) : seaSpot && weather ? (
+            <SeaCard
+              spots={[seaSpot]}
+              result={weather.sea}
               reference={reference}
-              emptyText={t.concelho.warningsNone(inPlace)}
-              showPlaces={district.region === "acores"}
+              region={district.region}
             />
-          ) : (
-            <EmptyState>{t.empty.warningsDown}</EmptyState>
-          )}
-        </Section>
-
-        <Section id="risco" title={t.concelho.riskTitle} result={state.fireRisk}>
-          {district.region !== "continente" ? (
-            <EmptyState>{t.concelho.riskMainlandOnly}</EmptyState>
-          ) : riskRows.length > 0 ? (
-            <>
-              <RiskTable rows={riskRows} current={concelho.dico} />
-              <p className="text-sm text-ink-2">{t.concelho.riskNeighbours}</p>
-            </>
-          ) : (
-            <EmptyState>{t.empty.riskDown}</EmptyState>
-          )}
-        </Section>
-
-        {showFires ? (
-          <Section
-            id="incendios"
-            title={t.concelho.firesNearTitle(FIRE_RADIUS_KM)}
-            result={state.fires}
-          >
-            <FireList fires={fires} reference={reference} />
-          </Section>
-        ) : null}
-
-        {showQuakes ? (
-          <Section
-            id="sismos"
-            title={t.concelho.quakesTitle(QUAKE_RADIUS_KM)}
-            result={state.earthquakes}
-          >
-            <QuakeList quakes={quakes} reference={reference} initial={12} />
-          </Section>
-        ) : null}
-
-        {seaSpot && weather ? (
+          ) : null}
+        </div>
+        {district.region === "continente" && seaSpot && weather ? (
           <SeaCard
             spots={[seaSpot]}
             result={weather.sea}
             reference={reference}
             region={district.region}
           />
-        ) : null}
-
-        {days ? (
-          <div className="flex flex-col gap-6 lg:col-span-2">
-            {ownData && ownData.hours.length > 0 ? (
-              <HourlyStrip hours={ownData.hours} now={reference} region={district.region} />
-            ) : null}
-            <div className="flex flex-col gap-2">
-              <ForecastStrip
-                days={days}
-                reference={reference}
-                region={district.region}
-                title={
-                  ownData
-                    ? t.concelho.forecastTitle(name)
-                    : t.stage.forecastFor(t.capitalName(district))
-                }
-              />
-              {!ownData ? (
-                <p className="text-sm text-ink-2">
-                  {t.concelho.forecastNote(t.capitalName(district))}
-                </p>
-              ) : own?.place && own.place.toLowerCase() !== concelho.name.toLowerCase() ? (
-                <p className="text-sm text-ink-2">{t.concelho.forecastPlace(own.place)}</p>
-              ) : null}
-            </div>
-          </div>
         ) : null}
       </div>
     </>

@@ -30,10 +30,13 @@ export function ObservationCard({
   result,
   district,
   inPanel = false,
+  note,
 }: {
   observation: StationObservation;
   result: SourceResult<unknown>;
   district: District;
+  /** Uma linha por baixo dos valores (ex.: a distância da estação ao concelho). */
+  note?: string;
   /** Já dentro de um painel (página do concelho): sem vidro próprio, para não estreitar o texto. */
   inPanel?: boolean;
 }) {
@@ -94,6 +97,7 @@ export function ObservationCard({
           </div>
         ))}
       </dl>
+      {note ? <p className="text-sm text-stage-ink-2">{note}</p> : null}
       <SourceLine result={result} />
     </section>
   );

@@ -324,17 +324,20 @@ test("página de um concelho: dados ao abrir, sem dados no HTML", async ({ page,
   expect(html).not.toContain("generatedAt");
   await page.goto("/lisboa/sintra");
   await expect(page.getByRole("heading", { level: 1, name: "Sintra" })).toBeVisible();
-  for (const name of ["No mapa", "Agora", "Avisos meteorológicos", "Risco de incêndio"])
+  for (const name of ["Num relance", "No mapa", "Avisos meteorológicos", "Risco de incêndio"])
     await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
+  // O resumo: um mosaico por tema, cada um a levar à sua secção.
+  const tiles = page.locator("#resumo-titulo + ul > li");
+  await expect(tiles).toHaveCount(6);
+  await tiles.filter({ hasText: "Risco de incêndio hoje" }).getByRole("link").click();
+  await expect(page).toHaveURL(/#risco$/);
   // O mapa: os concelhos do distrito, cada um com ligação (Sintra realçado, sem ligação).
   const map = page.getByRole("group", { name: /Mapa dos concelhos de Lisboa/ });
   await expect(map.getByRole("link").first()).toBeVisible();
-  // Incêndios: uma caixa quando há algum; senão, uma linha em "Agora" (calmo, ou
-  // a fonte indisponível, como no CI, que não tem a chave do Fogos.pt).
-  const fires = page.getByRole("heading", { name: /Incêndios no concelho e até 15 km/ });
-  const calm = page.getByText(/Sem incêndios em curso no concelho/);
-  const down = page.getByText(/Informação sobre incêndios indisponível/);
-  await expect(fires.or(calm).or(down).first()).toBeVisible();
+  // Incêndios: no resumo, "Nenhum", quantos, ou "Dados indisponíveis" (no CI não há
+  // chave do Fogos.pt); quando há algum, também a caixa com a lista.
+  const firesTile = tiles.filter({ hasText: "Incêndios até 15 km" });
+  await expect(firesTile).toContainText(/Nenhum|ocorrência|Dados indisponíveis/);
   // A tabela do risco compara com os concelhos mais próximos.
   await expect(page.locator("#risco tbody tr")).toHaveCount(5);
   await expectAccessible(page);
@@ -631,5 +634,30 @@ test.describe("dados novos: chuva, seca, pólen e satélite", () => {
     await expect(page.locator("#satelite li")).toHaveCount(1);
     await page.goto("/acores/incendios");
     await expect(page.locator("#satelite")).toContainText("ainda não incluem os Açores");
+  });
+});
+
+test.describe("Perto de mim: confirmar o concelho", () => {
+  test.use({ permissions: ["geolocation"] });
+
+  test("a página pergunta “É aqui?” e a correção fica para a próxima vez", async ({
+    page,
+    context,
+  }) => {
+    // Um computador cuja posição (Wi-Fi) cai em Sintra, a 2 km de Oeiras.
+    await context.setGeolocation({ latitude: 38.7535, longitude: -9.274, accuracy: 150 });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Perto de mim" }).click();
+    await expect(page).toHaveURL(/\/lisboa\/sintra$/);
+    const check = page.getByRole("region", { name: "Confirmar o concelho" });
+    await expect(check).toContainText("está em Sintra. É aqui?");
+    await check.getByRole("button", { name: "Oeiras" }).click();
+    await expect(page).toHaveURL(/\/lisboa\/oeiras$/);
+
+    // Da próxima vez, com a mesma posição, vai direto para Oeiras, sem perguntar.
+    await page.goto("/");
+    await page.getByRole("button", { name: "Perto de mim" }).click();
+    await expect(page).toHaveURL(/\/lisboa\/oeiras$/);
+    await expect(page.getByRole("region", { name: "Confirmar o concelho" })).toHaveCount(0);
   });
 });
