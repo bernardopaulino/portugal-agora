@@ -346,7 +346,8 @@ export function droughtSource(dico: string, point: [number, number]): SourceDef<
  */
 export const hotspotsSource: SourceDef<Hotspot[]> = {
   id: "nasa-firms",
-  key: "nasa-firms",
+  // v2: 2 dias da API com chave (a v1 ficou vazia logo a seguir à meia-noite UTC).
+  key: "nasa-firms-v2",
   every: 30 * 60,
   staleAfterMinutes: 6 * 60,
   // As deteções com mais de 24 h saem a cada leitura.

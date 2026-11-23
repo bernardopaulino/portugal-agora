@@ -27,7 +27,8 @@ export function firmsUrls(mapKey?: string): string[] {
   if (mapKey)
     return ["VIIRS_NOAA20_NRT", "VIIRS_NOAA21_NRT"].map(
       (product) =>
-        `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${mapKey}/${product}/${PORTUGAL_BBOX}/1`,
+        // 2 dias: "1" é só o dia UTC corrente (vazio logo a seguir à meia-noite); o corte das 24 h é feito aqui.
+        `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${mapKey}/${product}/${PORTUGAL_BBOX}/2`,
     );
   const base = "https://firms.modaps.eosdis.nasa.gov/data/active_fire";
   return [
@@ -63,6 +64,7 @@ function concelhoAt(point: [number, number]) {
 export function normalizeHotspots(files: string[], now: Date): Hotspot[] {
   const since = now.getTime() - 24 * 3_600_000;
   const out = new Map<string, Hotspot>();
+  let validFiles = 0;
   for (const csv of files) {
     const [header, ...lines] = csv.trim().split(/\r?\n/);
     const cols = (header ?? "").split(",");
@@ -77,6 +79,7 @@ export function normalizeHotspots(files: string[], now: Date): Hotspot[] {
       "frp",
     ].map(col);
     if ([iLat, iLon, iDate, iTime].some((i) => i! < 0)) continue;
+    validFiles++;
     for (const line of lines) {
       const c = line.split(",");
       const lat = Number(c[iLat!]);
@@ -106,5 +109,9 @@ export function normalizeHotspots(files: string[], now: Date): Hotspot[] {
       });
     }
   }
+  // Uma chave inválida responde com texto ("Invalid MAP_KEY."), não com CSV: é uma falha,
+  // não "zero deteções".
+  if (files.length > 0 && validFiles === 0)
+    throw new Error(`Resposta inesperada da NASA FIRMS: ${(files[0] ?? "").trim().slice(0, 80)}`);
   return [...out.values()].sort((a, b) => b.detectedAt.localeCompare(a.detectedAt));
 }

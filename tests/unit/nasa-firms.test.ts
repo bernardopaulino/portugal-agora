@@ -44,7 +44,12 @@ describe("pontos de calor (NASA FIRMS)", () => {
   it("sem chave, os ficheiros públicos; com chave, a API com Portugal inteiro", () => {
     expect(firmsUrls()[0]).toContain("Europe_24h.csv");
     expect(firmsUrls("abc")[0]).toContain(
-      "/api/area/csv/abc/VIIRS_NOAA20_NRT/-31.6,32.3,-6.1,42.2/1",
+      "/api/area/csv/abc/VIIRS_NOAA20_NRT/-31.6,32.3,-6.1,42.2/2",
     );
+  });
+
+  it("uma resposta que não é CSV (chave inválida) é uma falha, não zero deteções", () => {
+    expect(() => normalizeHotspots(["Invalid MAP_KEY."], now)).toThrow(/Invalid MAP_KEY/);
+    expect(normalizeHotspots([header], now)).toEqual([]);
   });
 });
